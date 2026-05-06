@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff, Lock, User } from "lucide-react";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
@@ -79,7 +80,7 @@ export function LoginForm() {
         </label>
         <div className="relative">
           <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-zinc-400">
-            <UserIcon />
+            <User size={20} aria-hidden="true" />
           </span>
           <input
             id="email"
@@ -90,7 +91,7 @@ export function LoginForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter your email"
-            className="h-12 w-full rounded-xl border border-zinc-200 bg-white pl-12 pr-4 text-[15px] text-zinc-900 placeholder:text-zinc-400 outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/20"
+            className="h-12 w-full rounded-xl border border-zinc-200 bg-white pl-12 pr-4 text-[15px] text-zinc-900 placeholder:text-zinc-400 outline-none transition focus:border-brand focus:ring-2 focus:ring-(--brand)/20"
           />
         </div>
       </div>
@@ -104,7 +105,7 @@ export function LoginForm() {
         </label>
         <div className="relative">
           <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-zinc-400">
-            <LockIcon />
+            <Lock size={20} aria-hidden="true" />
           </span>
           <input
             id="password"
@@ -115,7 +116,7 @@ export function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Enter your password"
-            className="h-12 w-full rounded-xl border border-zinc-200 bg-white pl-12 pr-12 text-[15px] text-zinc-900 placeholder:text-zinc-400 outline-none transition focus:border-[var(--brand)] focus:ring-2 focus:ring-[var(--brand)]/20"
+            className="h-12 w-full rounded-xl border border-zinc-200 bg-white pl-12 pr-12 text-[15px] text-zinc-900 placeholder:text-zinc-400 outline-none transition focus:border-brand focus:ring-2 focus:ring-(--brand)/20"
           />
           <button
             type="button"
@@ -123,7 +124,7 @@ export function LoginForm() {
             aria-label={showPassword ? "Hide password" : "Show password"}
             className="absolute inset-y-0 right-3 flex items-center px-2 text-zinc-400 hover:text-zinc-600"
           >
-            {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
         </div>
       </div>
@@ -134,13 +135,13 @@ export function LoginForm() {
             type="checkbox"
             checked={remember}
             onChange={(e) => setRemember(e.target.checked)}
-            className="h-4 w-4 rounded border-zinc-300 accent-[var(--brand)]"
+            className="h-4 w-4 rounded border-zinc-300 accent-brand"
           />
           Remember me
         </label>
         <Link
           href="/forgot-password"
-          className="text-sm font-semibold text-[var(--brand)] hover:underline"
+          className="text-sm font-semibold text-brand hover:underline"
         >
           Forgot Password?
         </Link>
@@ -158,7 +159,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={submitting}
-        className="h-12 w-full rounded-xl bg-[var(--brand)] text-base font-semibold text-white transition hover:bg-[var(--brand-700)] disabled:cursor-not-allowed disabled:opacity-70"
+        className="h-12 w-full rounded-xl bg-brand text-base font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-70"
       >
         {submitting ? "Signing in..." : "Sign In"}
       </button>
@@ -167,7 +168,7 @@ export function LoginForm() {
         New to IPL Sistem?{" "}
         <Link
           href="/register"
-          className="font-semibold text-[var(--brand)] hover:underline"
+          className="font-semibold text-brand hover:underline"
         >
           Create an Account
         </Link>
@@ -176,80 +177,3 @@ export function LoginForm() {
   );
 }
 
-function UserIcon() {
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
-    </svg>
-  );
-}
-
-function LockIcon() {
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-    </svg>
-  );
-}
-
-function EyeIcon() {
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  );
-}
-
-function EyeOffIcon() {
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-6.5 0-10-7-10-7a18.83 18.83 0 0 1 4.22-5.31" />
-      <path d="M9.9 4.24A10.6 10.6 0 0 1 12 4c6.5 0 10 7 10 7a18.42 18.42 0 0 1-2.06 3.05" />
-      <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
-      <path d="M2 2l20 20" />
-    </svg>
-  );
-}
