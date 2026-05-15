@@ -2,11 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
-import { Button, Card } from "../ui";
-import { api, ApiError } from "../api";
-import type { Paged, UnitType, UnitTypePayload } from "./types";
-import { idr, formatEffective } from "./format";
-import { Field, Modal, inputClass } from "./modal";
+import { Button, Card } from "@/components/ui";
+import { api, ApiError } from "@/lib/api";
+import { idr, formatEffective } from "@/lib/format";
+import { Field, Modal, inputClass } from "@/components/modal";
+import type { Paged } from "@/lib/types";
+import type { UnitType, UnitTypePayload } from "./types";
 import { CSVTools } from "./csv-import";
 
 const emptyForm: UnitTypePayload = {

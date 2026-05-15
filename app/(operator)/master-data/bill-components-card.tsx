@@ -2,11 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
-import { Button, Card, Toggle } from "../ui";
-import { api, ApiError } from "../api";
-import type { BillComponent, BillComponentPayload, Paged } from "./types";
-import { idr } from "./format";
-import { Field, Modal, inputClass } from "./modal";
+import { Button, Card, Toggle } from "@/components/ui";
+import { api, ApiError } from "@/lib/api";
+import { idr } from "@/lib/format";
+import { Field, Modal, inputClass } from "@/components/modal";
+import type { Paged } from "@/lib/types";
+import type { BillComponent, BillComponentPayload } from "./types";
 
 const emptyForm: BillComponentPayload = {
   name: "",

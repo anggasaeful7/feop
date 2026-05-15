@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   Bell,
   Building2,
@@ -16,7 +16,9 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
-import { useAuthUser } from "./use-auth";
+import { useAuthUser } from "@/hooks/use-auth";
+import { useLogout } from "@/hooks/use-logout";
+import { initials } from "@/lib/format";
 
 type NavItem = {
   href: string;
@@ -38,16 +40,8 @@ const NAV: NavItem[] = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const router = useRouter();
   const user = useAuthUser();
-
-  function handleLogout() {
-    window.localStorage.removeItem("ipl_access_token");
-    window.localStorage.removeItem("ipl_user");
-    window.sessionStorage.removeItem("ipl_access_token");
-    window.sessionStorage.removeItem("ipl_user");
-    router.push("/login");
-  }
+  const logout = useLogout();
 
   return (
     <aside className="flex w-64 shrink-0 flex-col border-r border-zinc-200/60 bg-cream-50">
@@ -118,7 +112,7 @@ export function Sidebar() {
           </div>
         </div>
         <button
-          onClick={handleLogout}
+          onClick={logout}
           aria-label="Logout"
           title="Logout"
           className="text-zinc-400 hover:text-zinc-700"
@@ -128,13 +122,4 @@ export function Sidebar() {
       </div>
     </aside>
   );
-}
-
-function initials(name: string) {
-  return name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((p) => p[0])
-    .join("")
-    .toUpperCase();
 }

@@ -10,7 +10,7 @@ import {
   Search,
   Send,
 } from "lucide-react";
-import { Badge, Button, Card, PageHeader } from "../../ui";
+import { Badge, Button, Card, PageHeader } from "@/components/ui";
 
 type Status = "belum" | "lunas" | "lewat" | "pending";
 type Row = {

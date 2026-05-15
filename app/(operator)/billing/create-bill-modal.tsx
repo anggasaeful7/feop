@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "../ui";
-import { api, ApiError } from "../api";
-import { Field, Modal, inputClass } from "../master-data/modal";
-import type { Paged, Unit } from "../master-data/types";
+import { Button } from "@/components/ui";
+import { api, ApiError } from "@/lib/api";
+import { Field, Modal, inputClass } from "@/components/modal";
+import type { Paged } from "@/lib/types";
+import type { Unit } from "../master-data/types";
 import type { BillKind, ResidentBill, ResidentBillCreatePayload } from "./types";
 
 function defaultMonthlyPeriod() {

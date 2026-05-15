@@ -1,9 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { api, ApiError } from "../api";
-import type { Paged } from "./types";
+import { api, ApiError } from "@/lib/api";
+import type { Paged } from "@/lib/types";
 
+// Generic paged-list loader with refresh + manual error reset.
+// Returns `items === null` until the first response arrives.
 export function useList<T>(path: string) {
   const [items, setItems] = useState<T[] | null>(null);
   const [error, setError] = useState<string | null>(null);

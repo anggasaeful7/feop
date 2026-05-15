@@ -1,5 +1,5 @@
 import { AlertTriangle, Check, X } from "lucide-react";
-import { Badge, Button, Card, PageHeader } from "../../../../ui";
+import { Badge, Button, Card, PageHeader } from "@/components/ui";
 
 export default async function VerifikasiPage({
   params,

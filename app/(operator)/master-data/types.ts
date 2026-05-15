@@ -24,13 +24,6 @@ export type BillComponent = {
   updated_at: string;
 };
 
-export type Paged<T> = {
-  items: T[];
-  total: number;
-  page: number;
-  per_page: number;
-};
-
 export type UnitTypePayload = {
   code: string;
   name: string;

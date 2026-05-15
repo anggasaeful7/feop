@@ -60,9 +60,3 @@ export type BookingPayload = {
   proof_url: string | null;
 };
 
-export type Paged<T> = {
-  items: T[];
-  total: number;
-  page: number;
-  per_page: number;
-};

@@ -8,7 +8,7 @@ import {
   Plus,
   type LucideIcon,
 } from "lucide-react";
-import { Badge, Card, PageHeader, Button, Stat } from "../ui";
+import { Badge, Card, PageHeader, Button, Stat } from "@/components/ui";
 import { PaymentStatusChart, TrendBarChart } from "./charts";
 
 const trend = [

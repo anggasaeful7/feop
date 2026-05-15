@@ -2,10 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Save } from "lucide-react";
-import { Badge, Button, Card, PageHeader } from "../ui";
-import { api, ApiError } from "../api";
-import { idr } from "../master-data/format";
-import { Field, inputClass } from "../master-data/modal";
+import { Badge, Button, Card, PageHeader } from "@/components/ui";
+import { api, ApiError } from "@/lib/api";
+import { idr } from "@/lib/format";
+import { Field, inputClass } from "@/components/modal";
 import type { WorkspaceFee, WorkspaceFeePayload } from "./types";
 
 const PREVIEW_AMOUNTS = [50_000, 150_000, 350_000, 500_000];

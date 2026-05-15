@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Pencil, Send } from "lucide-react";
-import { Button, Card, PageHeader, Toggle } from "../ui";
+import { Button, Card, PageHeader, Toggle } from "@/components/ui";
 
 const initialReminders = [
   {

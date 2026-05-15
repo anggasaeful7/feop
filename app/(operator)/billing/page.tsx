@@ -2,10 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { CheckCircle2, FileText, Plus, Trash2 } from "lucide-react";
-import { Badge, Button, Card, PageHeader } from "../ui";
-import { api, ApiError } from "../api";
-import { idr } from "../master-data/format";
-import type { Paged } from "../master-data/types";
+import { Badge, Button, Card, PageHeader } from "@/components/ui";
+import { api, ApiError } from "@/lib/api";
+import { idr } from "@/lib/format";
+import type { Paged } from "@/lib/types";
 import { CreateBillModal } from "./create-bill-modal";
 import { PayBillModal } from "./pay-bill-modal";
 import type {

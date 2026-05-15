@@ -2,9 +2,9 @@
 
 import { useRef, useState } from "react";
 import { Download, Upload } from "lucide-react";
-import { Button } from "../ui";
-import { ApiError, downloadCSV, uploadCSV } from "../api";
-import { Modal } from "./modal";
+import { Button } from "@/components/ui";
+import { ApiError, downloadCSV, uploadCSV } from "@/lib/api";
+import { Modal } from "@/components/modal";
 
 export type ImportSummary = {
   imported: number;

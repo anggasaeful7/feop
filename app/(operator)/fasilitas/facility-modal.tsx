@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
-import { Button } from "../ui";
-import { ApiError } from "../api";
-import { Field, Modal, inputClass } from "../master-data/modal";
+import { Button } from "@/components/ui";
+import { ApiError } from "@/lib/api";
+import { Field, Modal, inputClass } from "@/components/modal";
 import type { FacilityPayload, PricingMode } from "./types";
 
 export function FacilityFormModal({

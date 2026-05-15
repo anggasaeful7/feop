@@ -10,10 +10,11 @@ import {
   Receipt,
   X,
 } from "lucide-react";
-import { Badge, Button, Card, PageHeader } from "../ui";
-import { api, ApiError } from "../api";
-import type { Booking, BookingPayload, BookingStatus, Facility, FacilityPayload, Paged } from "./types";
-import { idr, idrShort, formatBookingWindow } from "./format";
+import { Badge, Button, Card, PageHeader } from "@/components/ui";
+import { api, ApiError } from "@/lib/api";
+import { idr, idrShort, formatBookingWindow } from "@/lib/format";
+import type { Paged } from "@/lib/types";
+import type { Booking, BookingPayload, BookingStatus, Facility, FacilityPayload } from "./types";
 import { FacilityFormModal } from "./facility-modal";
 import { BookingFormModal } from "./booking-modal";
 

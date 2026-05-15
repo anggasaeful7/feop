@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Upload } from "lucide-react";
-import { Button } from "../ui";
-import { ApiError, API_URL, authHeaders } from "../api";
-import { idr } from "../master-data/format";
-import { Field, Modal, inputClass } from "../master-data/modal";
+import { Button } from "@/components/ui";
+import { ApiError, API_URL, authHeaders } from "@/lib/api";
+import { idr } from "@/lib/format";
+import { Field, Modal, inputClass } from "@/components/modal";
 import type { PaymentQuote, ResidentBill } from "./types";
 
 const MAX_PROOF_BYTES = 8 * 1024 * 1024;

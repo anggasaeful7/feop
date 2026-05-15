@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Download, MoreVertical, Trash2, UploadCloud, X } from "lucide-react";
-import { ApiError, API_URL, authHeaders, api } from "../api";
-import { Badge, Button, Card, PageHeader } from "../ui";
+import { ApiError, API_URL, authHeaders, api } from "@/lib/api";
+import { Badge, Button, Card, PageHeader } from "@/components/ui";
 
 type ReportKind = "monthly" | "yearly";
 type ReportStatus = "draft" | "published";

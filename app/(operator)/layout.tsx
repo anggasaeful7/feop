@@ -2,8 +2,8 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Sidebar } from "./sidebar";
-import { useAccessToken } from "./use-auth";
+import { Sidebar } from "@/components/sidebar";
+import { useAccessToken } from "@/hooks/use-auth";
 
 export default function OperatorLayout({
   children,

@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "../ui";
-import { api, ApiError } from "../api";
-import { Field, Modal, inputClass } from "../master-data/modal";
-import type { Paged } from "../master-data/types";
+import { Button } from "@/components/ui";
+import { api, ApiError } from "@/lib/api";
+import { Field, Modal, inputClass } from "@/components/modal";
+import { localToISOWithOffset, isoToLocal } from "@/lib/format";
+import type { Paged } from "@/lib/types";
 import type { Unit } from "../master-data/types";
 import type { BookingPayload, Facility } from "./types";
-import { localToISOWithOffset, isoToLocal } from "./format";
 
 type FormState = {
   facility_id: string;

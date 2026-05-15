@@ -4,28 +4,9 @@ import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Lock, User } from "lucide-react";
-
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
-
-type ApiError = {
-  error: { code: string; message: string; details?: Record<string, unknown> };
-};
-
-type LoginSuccess = {
-  data: {
-    access_token: string;
-    token_type: string;
-    expires_in: number;
-    user: {
-      id: string;
-      email: string;
-      full_name: string;
-      role: string;
-      workspace_id?: string;
-    };
-  };
-};
+import { api, ApiError } from "@/lib/api";
+import { writeAuth } from "@/lib/auth-storage";
+import type { LoginResponse } from "@/lib/types";
 
 export function LoginForm() {
   const router = useRouter();
@@ -42,28 +23,18 @@ export function LoginForm() {
     setSubmitting(true);
 
     try {
-      const res = await fetch(`${API_URL}/api/v1/auth/login`, {
+      const out = await api<LoginResponse>("/api/v1/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
-        credentials: "include",
       });
-
-      if (!res.ok) {
-        const body = (await res.json().catch(() => null)) as ApiError | null;
-        setErrorMsg(
-          body?.error?.message ?? "Login failed. Please check your credentials.",
-        );
-        return;
-      }
-
-      const body = (await res.json()) as LoginSuccess;
-      const storage = remember ? window.localStorage : window.sessionStorage;
-      storage.setItem("ipl_access_token", body.data.access_token);
-      storage.setItem("ipl_user", JSON.stringify(body.data.user));
+      writeAuth(out.access_token, out.user, remember);
       router.push("/dashboard");
-    } catch {
-      setErrorMsg("Cannot reach the server. Please try again.");
+    } catch (e) {
+      if (e instanceof ApiError) {
+        setErrorMsg(e.message);
+      } else {
+        setErrorMsg("Cannot reach the server. Please try again.");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -176,4 +147,3 @@ export function LoginForm() {
     </form>
   );
 }
-

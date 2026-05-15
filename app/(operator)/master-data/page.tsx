@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { PageHeader } from "../ui";
+import { PageHeader } from "@/components/ui";
 import { UnitsCard } from "./units-card";
 import { PersonsCard } from "./persons-card";
 import { UnitTypesCard } from "./unit-types-card";

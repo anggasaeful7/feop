@@ -2,19 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
-import { Badge, Button, Card } from "../ui";
-import { api, ApiError } from "../api";
+import { Badge, Button, Card } from "@/components/ui";
+import { api, ApiError } from "@/lib/api";
+import { Field, Modal, inputClass } from "@/components/modal";
+import { useList } from "@/hooks/use-list";
+import type { Paged } from "@/lib/types";
 import type {
   BillPayer,
-  Paged,
   Person,
   Unit,
   UnitPayload,
   UnitStatus,
   UnitType,
 } from "./types";
-import { Field, Modal, inputClass } from "./modal";
-import { useList } from "./use-resource";
 import { CSVTools } from "./csv-import";
 
 const STATUS_LABEL: Record<UnitStatus, string> = {
