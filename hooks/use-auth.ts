@@ -2,7 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 import { AUTH_KEYS, readToken, readUser } from "@/lib/auth-storage";
-import type { AuthUser } from "@/lib/types";
+import type { AuthUser } from "@/types";
 
 // `useSyncExternalStore` is the canonical React 19 way to subscribe to
 // non-React stores (here, the storage area shared across tabs via the
