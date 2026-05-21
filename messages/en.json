@@ -1,0 +1,35 @@
+{
+  "HomePage": {
+    "title": "Welcome"
+  },
+  "Dashboard": {
+    "header": {
+      "eyebrow": "Mawar Cluster · April 2026",
+      "title": "Dashboard",
+      "subtitle": "Summary of dues, residents, and communal treasury",
+      "createBill": "Create Bill"
+    },
+    "stats": {
+      "billed": "TOTAL BILLED",
+      "collected": "COLLECTED",
+      "outstanding": "OUTSTANDING",
+      "activeResidents": "ACTIVE RESIDENTS"
+    },
+    "charts": {
+      "billingTrend": "6-Month Billing Trend",
+      "billed": "Billed",
+      "collected": "Collected",
+      "paymentStatus": "Payment Status",
+      "paid": "Paid",
+      "pending": "Pending",
+      "overdue": "Overdue"
+    },
+    "recentActivity": {
+      "title": "Recent Activity",
+      "viewAll": "View all →"
+    },
+    "attention": {
+      "title": "Needs Attention"
+    }
+  }
+}

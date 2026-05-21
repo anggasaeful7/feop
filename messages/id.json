@@ -1,0 +1,35 @@
+{
+  "HomePage": {
+    "title": "Selamat Datang"
+  },
+  "Dashboard": {
+    "header": {
+      "eyebrow": "Cluster Mawar · April 2026",
+      "title": "Dashboard",
+      "subtitle": "Ringkasan iuran, penghuni, dan kas komunal",
+      "createBill": "Buat Tagihan"
+    },
+    "stats": {
+      "billed": "TOTAL TERTAGIH",
+      "collected": "TERKUMPUL",
+      "outstanding": "OUTSTANDING",
+      "activeResidents": "PENGHUNI AKTIF"
+    },
+    "charts": {
+      "billingTrend": "Tren Penagihan 6 Bulan",
+      "billed": "Tertagih",
+      "collected": "Terkumpul",
+      "paymentStatus": "Status Pembayaran",
+      "paid": "Lunas",
+      "pending": "Pending",
+      "overdue": "Lewat"
+    },
+    "recentActivity": {
+      "title": "Aktivitas Terbaru",
+      "viewAll": "Lihat semua →"
+    },
+    "attention": {
+      "title": "Yang Perlu Diperhatikan"
+    }
+  }
+}
