@@ -1,138 +1,216 @@
 "use client";
 
-import { useState } from "react";
-import { Trash2 } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
+
 import { Button } from "@/components/ui";
-import { Field, Modal, inputClass } from "@/components/ui/modal";
-import { ApiError } from "@/lib/axios";
-import type { UnitTypePayload } from "@/types/master-data";
+import { Modal } from "@/components/ui/modal";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+
+import type { UnitType } from "@/types/master-data";
+import { unitTypeSchema, type UnitTypeFormValues } from "@/lib/validations/unit-type";
+import { useCreateUnitType, useUpdateUnitType } from "@/hooks/api/use-unit-type";
 
 export function UnitTypeFormModal({
   title,
   initial,
   onClose,
-  onSubmit,
-  onDelete,
 }: {
   title: string;
-  initial: UnitTypePayload;
+  initial?: UnitType | null;
   onClose: () => void;
-  onSubmit: (p: UnitTypePayload) => Promise<void>;
-  onDelete?: () => Promise<void>;
 }) {
-  const [form, setForm] = useState<UnitTypePayload>(initial);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const isEditing = !!initial;
 
-  const set = <K extends keyof UnitTypePayload>(k: K, v: UnitTypePayload[K]) =>
-    setForm((f) => ({ ...f, [k]: v }));
+  const form = useForm<UnitTypeFormValues>({
+    resolver: zodResolver(unitTypeSchema),
+    defaultValues: {
+      code: initial?.code || "",
+      name: initial?.name || "",
+      area_sqm: initial?.area_sqm || 0,
+      unit_count: initial?.unit_count || 0,
+      monthly_tariff: initial?.monthly_tariff || 0,
+      effective_from: initial?.effective_from || new Date().toISOString().slice(0, 10),
+    },
+  });
 
-  async function handleSubmit() {
-    setSubmitting(true);
-    setError(null);
-    try {
-      await onSubmit(form);
-    } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Gagal menyimpan");
-    } finally {
-      setSubmitting(false);
+  const createMut = useCreateUnitType();
+  const updateMut = useUpdateUnitType(initial?.id || "");
+
+  const isPending = createMut.isPending || updateMut.isPending;
+
+  function onSubmit(values: UnitTypeFormValues) {
+    if (isEditing) {
+      updateMut.mutate(values, {
+        onSuccess: () => {
+          onClose();
+        },
+      });
+    } else {
+      createMut.mutate(values, {
+        onSuccess: () => {
+          onClose();
+        },
+      });
     }
   }
 
   return (
     <Modal
       open
-      title={title}
+      title={
+        <div className="flex items-center justify-between w-full pr-8">
+          <span className="text-2xl font-bold italic">{title}</span>
+        </div>
+      }
       onClose={onClose}
       footer={
         <>
-          {onDelete && (
-            <Button
-              variant="danger"
-              onClick={async () => {
-                setSubmitting(true);
-                try {
-                  await onDelete();
-                } catch (e) {
-                  setError(e instanceof ApiError ? e.message : "Gagal hapus");
-                } finally {
-                  setSubmitting(false);
-                }
-              }}
-              disabled={submitting}
-            >
-              <Trash2 size={14} /> Hapus
-            </Button>
-          )}
-          <Button variant="secondary" onClick={onClose} disabled={submitting}>
-            Batal
+          <Button variant="danger" onClick={onClose} disabled={isPending}>
+            ✕ Batal
           </Button>
-          <Button onClick={handleSubmit} disabled={submitting}>
-            {submitting ? "Menyimpan…" : "Simpan"}
+          <Button onClick={form.handleSubmit(onSubmit)} disabled={isPending}>
+            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            ✓ {isEditing ? "Simpan Perubahan" : "Tambahkan Tipe Unit"}
           </Button>
         </>
       }
     >
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="Kode">
-          <input
-            className={inputClass}
-            placeholder="Tipe 36"
-            value={form.code}
-            onChange={(e) => set("code", e.target.value)}
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4 mt-2">
+          <FormField
+            control={form.control}
+            name="code"
+            render={({ field }) => (
+              <FormItem className="col-span-2 sm:col-span-1">
+                <FormLabel>Kode</FormLabel>
+                <FormControl>
+                  <Input placeholder="Tipe 36" {...field} className="rounded-xl italic bg-transparent" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </Field>
-        <Field label="Nama">
-          <input
-            className={inputClass}
-            placeholder="Tipe 36"
-            value={form.name}
-            onChange={(e) => set("name", e.target.value)}
+
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem className="col-span-2 sm:col-span-1">
+                <FormLabel>Nama</FormLabel>
+                <FormControl>
+                  <Input placeholder="Tipe 36" {...field} className="rounded-xl italic bg-transparent" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </Field>
-        <Field label="Luas (m²)">
-          <input
-            type="number"
-            min={0}
-            step="0.01"
-            className={inputClass}
-            value={form.area_sqm}
-            onChange={(e) => set("area_sqm", Number(e.target.value))}
+
+          <FormField
+            control={form.control}
+            name="area_sqm"
+            render={({ field }) => (
+              <FormItem className="col-span-2 sm:col-span-1">
+                <FormLabel>Luas (m²)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    placeholder="Luas"
+                    {...field}
+                    value={field.value === null ? "" : field.value}
+                    onChange={e => {
+                      const val = e.target.value;
+                      field.onChange(val === "" ? null : Number(val));
+                    }}
+                    className="rounded-xl italic bg-transparent"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </Field>
-        <Field label="Jumlah Unit">
-          <input
-            type="number"
-            min={0}
-            className={inputClass}
-            value={form.unit_count}
-            onChange={(e) => set("unit_count", Number(e.target.value))}
+
+          <FormField
+            control={form.control}
+            name="unit_count"
+            render={({ field }) => (
+              <FormItem className="col-span-2 sm:col-span-1">
+                <FormLabel>Jumlah Unit</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    min={0}
+                    placeholder="Jumlah Unit"
+                    {...field}
+                    value={field.value === null ? "" : field.value}
+                    onChange={e => {
+                      const val = e.target.value;
+                      field.onChange(val === "" ? null : Number(val));
+                    }}
+                    className="rounded-xl italic bg-transparent"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </Field>
-        <Field label="Tarif Bulanan (Rp)">
-          <input
-            type="number"
-            min={0}
-            step="1000"
-            className={inputClass}
-            value={form.monthly_tariff}
-            onChange={(e) => set("monthly_tariff", Number(e.target.value))}
+
+          <FormField
+            control={form.control}
+            name="monthly_tariff"
+            render={({ field }) => (
+              <FormItem className="col-span-2 sm:col-span-1 hidden">
+                <FormLabel>Tarif Bulanan (Rp)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    min={0}
+                    step="1000"
+                    placeholder="Tarif Bulanan"
+                    {...field}
+                    value={field.value === null ? "" : field.value}
+                    onChange={e => {
+                      const val = e.target.value;
+                      field.onChange(val === "" ? null : Number(val));
+                    }}
+                    className="rounded-xl italic bg-transparent"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </Field>
-        <Field label="Berlaku Sejak">
-          <input
-            type="date"
-            className={inputClass}
-            value={form.effective_from}
-            onChange={(e) => set("effective_from", e.target.value)}
+
+          <FormField
+            control={form.control}
+            name="effective_from"
+            render={({ field }) => (
+              <FormItem className="col-span-2 sm:col-span-1">
+                <FormLabel>Berlaku Sejak</FormLabel>
+                <FormControl>
+                  <Input
+                    type="date"
+                    {...field}
+                    className="rounded-xl italic bg-transparent"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </Field>
-      </div>
-      {error && (
-        <div className="mt-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
-          {error}
-        </div>
-      )}
+        </form>
+      </Form>
     </Modal>
   );
 }
