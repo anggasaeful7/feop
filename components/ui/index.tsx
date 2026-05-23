@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 export function PageHeader({
   eyebrow,
@@ -38,7 +39,7 @@ export function Card({
 }) {
   return (
     <div
-      className={`rounded-2xl border border-zinc-200/70 bg-white p-6 ${className}`}
+      className={cn("rounded-2xl border border-zinc-200/70 bg-[#FFFDF7] p-6", className)}
     >
       {children}
     </div>
@@ -70,16 +71,16 @@ export function Button({
     md: "h-10 px-5 text-sm",
   };
   const variants: Record<ButtonVariant, string> = {
-    primary: "bg-brand text-white hover:bg-brand-700",
+    primary: "bg-[#4F7A52] text-white hover:opacity-90",
     secondary:
       "border border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-50",
     ghost: "text-zinc-700 hover:bg-zinc-100",
-    danger: "bg-rose-700 text-white hover:bg-rose-800",
+    danger: "bg-[#A83A2E] text-white hover:opacity-90",
     warning: "bg-amber-600 text-white hover:bg-amber-700",
   };
   return (
     <button
-      className={`${base} ${sizes[size]} ${variants[variant]} ${className}`}
+      className={cn(base, sizes[size], variants[variant], className)}
       {...rest}
     >
       {children}
@@ -132,9 +133,8 @@ export function Stat({
 }) {
   return (
     <div
-      className={`rounded-xl border border-zinc-200/70 px-5 py-4 ${
-        tone === "highlight" ? "bg-emerald-50/60" : "bg-white"
-      }`}
+      className={`rounded-xl border border-zinc-200/70 px-5 py-4 ${tone === "highlight" ? "bg-emerald-50/60" : "bg-white"
+        }`}
     >
       <div className="text-[11px] font-semibold tracking-wider text-zinc-500">
         {label}
@@ -163,14 +163,12 @@ export function Toggle({
       aria-checked={checked}
       aria-label={ariaLabel}
       onClick={() => onChange(!checked)}
-      className={`relative h-6 w-11 rounded-full transition ${
-        checked ? "bg-brand" : "bg-zinc-300"
-      }`}
+      className={`relative h-6 w-11 rounded-full transition ${checked ? "bg-brand" : "bg-zinc-300"
+        }`}
     >
       <span
-        className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition ${
-          checked ? "left-[22px]" : "left-0.5"
-        }`}
+        className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition ${checked ? "left-[22px]" : "left-0.5"
+          }`}
       />
     </button>
   );
@@ -186,3 +184,5 @@ export function ErrorBanner({ children }: { children: ReactNode }) {
     </div>
   );
 }
+
+export * from "./data-table";

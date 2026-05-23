@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export function Modal({
   open,
@@ -26,7 +27,7 @@ export function Modal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className={`w-full rounded-2xl bg-white p-6 shadow-xl ${className}`}>
+      <div className={cn("w-full rounded-2xl bg-[#FFFDF7] p-6 shadow-xl", className)}>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-bold text-zinc-900 w-full flex-1">{title}</h2>
           <button

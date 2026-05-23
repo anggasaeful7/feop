@@ -1,152 +1,190 @@
 "use client";
 
-import { useState } from "react";
-import { Trash2 } from "lucide-react";
-import { Button } from "@/components/ui";
-import { Field, Modal, inputClass } from "@/components/ui/modal";
-import { ApiError } from "@/lib/axios";
-import type { BillComponentPayload } from "@/types/master-data";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
+
+import { Button, Toggle } from "@/components/ui";
+import { Modal } from "@/components/ui/modal";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+
+import type { BillComponent } from "@/types/master-data";
+import { billComponentSchema, type BillComponentFormValues } from "@/lib/validations/bill-component";
+import { useCreateBillComponent, useUpdateBillComponent } from "@/hooks/api/use-bill-component";
 
 export function BillComponentFormModal({
   title,
   initial,
   onClose,
-  onSubmit,
-  onDelete,
 }: {
   title: string;
-  initial: BillComponentPayload;
+  initial?: BillComponent | null;
   onClose: () => void;
-  onSubmit: (p: BillComponentPayload) => Promise<void>;
-  onDelete?: () => Promise<void>;
 }) {
-  const [form, setForm] = useState<BillComponentPayload>(initial);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const isEditing = !!initial;
 
-  const set = <K extends keyof BillComponentPayload>(
-    k: K,
-    v: BillComponentPayload[K],
-  ) => setForm((f) => ({ ...f, [k]: v }));
+  const form = useForm<BillComponentFormValues>({
+    resolver: zodResolver(billComponentSchema),
+    defaultValues: {
+      name: initial?.name || "",
+      amount: initial?.amount || null,
+      description: initial?.description || "",
+      is_variable: initial?.is_variable ?? false,
+      is_active: initial?.is_active ?? true,
+      sort_order: initial?.sort_order ?? 0,
+    },
+  });
 
-  async function handleSubmit() {
-    setSubmitting(true);
-    setError(null);
-    try {
-      const payload: BillComponentPayload = {
-        ...form,
-        description:
-          typeof form.description === "string" && form.description.trim() === ""
-            ? null
-            : form.description,
-        amount: form.is_variable ? null : Number(form.amount ?? 0),
-      };
-      await onSubmit(payload);
-    } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Gagal menyimpan");
-    } finally {
-      setSubmitting(false);
+  const createMut = useCreateBillComponent();
+  const updateMut = useUpdateBillComponent(initial?.id || "");
+
+  const isPending = createMut.isPending || updateMut.isPending;
+
+  function onSubmit(values: BillComponentFormValues) {
+    const payload = {
+      ...values,
+      amount: values.amount === null || values.amount === undefined ? 0 : values.amount,
+    };
+
+    if (isEditing) {
+      updateMut.mutate(payload, {
+        onSuccess: () => {
+          onClose();
+        },
+      });
+    } else {
+      createMut.mutate(payload, {
+        onSuccess: () => {
+          onClose();
+        },
+      });
     }
   }
 
   return (
     <Modal
       open
-      title={title}
+      title={
+        <div className="flex items-center justify-between w-full pr-8">
+          <span className="text-2xl font-bold italic">{title}</span>
+        </div>
+      }
       onClose={onClose}
       footer={
         <>
-          {onDelete && (
-            <Button
-              variant="danger"
-              onClick={async () => {
-                setSubmitting(true);
-                try {
-                  await onDelete();
-                } catch (e) {
-                  setError(e instanceof ApiError ? e.message : "Gagal hapus");
-                } finally {
-                  setSubmitting(false);
-                }
-              }}
-              disabled={submitting}
-            >
-              <Trash2 size={14} /> Hapus
-            </Button>
-          )}
-          <Button variant="secondary" onClick={onClose} disabled={submitting}>
-            Batal
+          <Button variant="danger" onClick={onClose} disabled={isPending}>
+            ✕ Batal
           </Button>
-          <Button onClick={handleSubmit} disabled={submitting}>
-            {submitting ? "Menyimpan…" : "Simpan"}
+          <Button onClick={form.handleSubmit(onSubmit)} disabled={isPending}>
+            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            ✓ {isEditing ? "Simpan Perubahan" : "Tambahkan Komponen"}
           </Button>
         </>
       }
     >
-      <div className="space-y-3">
-        <Field label="Nama">
-          <input
-            className={inputClass}
-            placeholder="Kebersihan"
-            value={form.name}
-            onChange={(e) => set("name", e.target.value)}
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4 mt-2">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem className="col-span-2 sm:col-span-1">
+                <FormLabel>Nama</FormLabel>
+                <FormControl>
+                  <Input placeholder="Nama Komponen" {...field} className="rounded-xl italic bg-transparent" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </Field>
-        <Field label="Deskripsi">
-          <input
-            className={inputClass}
-            placeholder="Iuran kebersihan bulanan"
-            value={form.description ?? ""}
-            onChange={(e) => set("description", e.target.value)}
+
+          <FormField
+            control={form.control}
+            name="amount"
+            render={({ field }) => (
+              <FormItem className="col-span-2 sm:col-span-1">
+                <FormLabel>Harga</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Harga"
+                    {...field}
+                    value={field.value === null ? "" : field.value}
+                    onChange={e => {
+                      const val = e.target.value;
+                      field.onChange(val === "" ? null : Number(val));
+                    }}
+                    className="rounded-xl italic bg-transparent"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </Field>
-        <label className="flex items-center gap-2 text-sm text-zinc-700">
-          <input
-            type="checkbox"
-            checked={form.is_variable}
-            onChange={(e) => set("is_variable", e.target.checked)}
-            className="h-4 w-4 rounded border-zinc-300 accent-brand"
-          />
-          Nominal variabel per tipe (mengikuti tarif IPL)
-        </label>
-        {!form.is_variable && (
-          <Field label="Nominal (Rp)">
-            <input
-              type="number"
-              min={0}
-              step="1000"
-              className={inputClass}
-              value={form.amount ?? 0}
-              onChange={(e) => set("amount", Number(e.target.value))}
+
+          <div className="col-span-2">
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Deskripsi</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Deskripsi"
+                      {...field}
+                      value={field.value ?? ""}
+                      className="h-28 py-3 rounded-xl italic resize-none bg-transparent"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </Field>
-        )}
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Urutan Tampil">
-            <input
-              type="number"
-              min={0}
-              className={inputClass}
-              value={form.sort_order}
-              onChange={(e) => set("sort_order", Number(e.target.value))}
+          </div>
+
+          <div className="col-span-1 flex items-center space-x-4">
+            <FormField
+              control={form.control}
+              name="is_active"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between space-y-0 rounded-lg border border-zinc-200/70 p-3 flex-1">
+                  <FormLabel>
+                    Status Aktif
+                  </FormLabel>
+                  <FormControl>
+                    <Toggle checked={field.value} onChange={field.onChange} />
+                  </FormControl>
+                </FormItem>
+              )}
             />
-          </Field>
-          <label className="flex items-end gap-2 pb-2 text-sm text-zinc-700">
-            <input
-              type="checkbox"
-              checked={form.is_active}
-              onChange={(e) => set("is_active", e.target.checked)}
-              className="h-4 w-4 rounded border-zinc-300 accent-brand"
+
+            <FormField
+              control={form.control}
+              name="is_variable"
+              render={({ field }) => (
+                <FormItem className="flex-row items-center justify-between space-y-0 rounded-lg border border-zinc-200/70 p-3 flex-1 hidden">
+                  <FormLabel>
+                    Nilai Variabel
+                  </FormLabel>
+                  <FormControl>
+                    <Toggle checked={field.value} onChange={field.onChange} />
+                  </FormControl>
+                </FormItem>
+              )}
             />
-            Aktifkan komponen
-          </label>
-        </div>
-      </div>
-      {error && (
-        <div className="mt-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
-          {error}
-        </div>
-      )}
+          </div>
+        </form>
+      </Form>
     </Modal>
   );
 }

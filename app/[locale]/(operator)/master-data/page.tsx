@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/ui";
 import { UnitsCard } from "./components/cards/units-card";
 import { PersonsCard } from "./components/cards/persons-card";
 import { UnitTypesCard } from "./components/cards/unit-types-card";
-import { BillingComponentsCard } from "./components/cards/billing-components-card";
+import { BillComponentCard } from "./components/cards/bill-component-card";
 
 const TABS = ["Unit", "Pemilik", "Penghuni", "Tarif IPL", "Komponen Tagihan"] as const;
 type Tab = (typeof TABS)[number];
@@ -18,7 +18,7 @@ export default function MasterDataPage() {
       <PageHeader
         eyebrow="Admin · Konfigurasi"
         title="Master Data"
-        subtitle="Unit, pemilik, penghuni, dan tarif IPL"
+        subtitle="Layanan dasar dan fasilitas"
       />
 
       <div className="mb-4 flex items-center gap-2">
@@ -44,7 +44,7 @@ export default function MasterDataPage() {
           <UnitTypesCard />
         </div>
       )}
-      {tab === "Komponen Tagihan" && <BillingComponentsCard />}
+      {tab === "Komponen Tagihan" && <BillComponentCard />}
     </>
   );
 }
