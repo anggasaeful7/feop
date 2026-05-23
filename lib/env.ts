@@ -13,7 +13,7 @@ function read(name: string, value: string | undefined, fallback: string): string
 }
 
 export const env = {
-  apiUrl: read("NEXT_PUBLIC_API_URL", process.env.NEXT_PUBLIC_API_URL, "http://localhost:8080"),
+  apiUrl: read("NEXT_PUBLIC_API_URL", process.env.NEXT_PUBLIC_API_URL, ""),
   appName: read("NEXT_PUBLIC_APP_NAME", process.env.NEXT_PUBLIC_APP_NAME, "IPL Sistem"),
   appEnv: read("NEXT_PUBLIC_APP_ENV", process.env.NEXT_PUBLIC_APP_ENV, "development"),
 } as const;

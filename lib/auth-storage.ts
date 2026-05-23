@@ -1,6 +1,6 @@
 "use client";
 
-import type { AuthUser } from "./types";
+import type { AuthUser } from "@/types";
 
 export const AUTH_KEYS = {
   token: "ipl_access_token",
@@ -20,16 +20,27 @@ export function readToken(): string | null {
   return null;
 }
 
+let cachedUserRaw: string | null = null;
+let cachedUserParsed: AuthUser | null = null;
+
 export function readUser(): AuthUser | null {
   for (const s of storages()) {
     const raw = s.getItem(AUTH_KEYS.user);
     if (!raw) continue;
+    if (raw === cachedUserRaw) {
+      return cachedUserParsed;
+    }
     try {
-      return JSON.parse(raw) as AuthUser;
+      const parsed = JSON.parse(raw) as AuthUser;
+      cachedUserRaw = raw;
+      cachedUserParsed = parsed;
+      return parsed;
     } catch {
       return null;
     }
   }
+  cachedUserRaw = null;
+  cachedUserParsed = null;
   return null;
 }
 
