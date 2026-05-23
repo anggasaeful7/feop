@@ -1,22 +1,21 @@
 "use client";
 
-import { useState } from "react";
-import { Pencil, Plus } from "lucide-react";
-import { Badge, Button, Card } from "@/components/ui";
+import { useState, useMemo } from "react";
+import { Pencil, Plus, Trash2, Loader2 } from "lucide-react";
+import { Badge, Button, DataTable } from "@/components/ui";
+import { ColumnDef } from "@tanstack/react-table";
 import {
   useUnits,
-  useCreateUnit,
-  useUpdateUnit,
   useDeleteUnit,
 } from "@/hooks/api/use-unit";
 import type {
   BillPayer,
   Unit,
-  UnitPayload,
   UnitStatus,
 } from "@/types/master-data";
 import { CSVTools } from "../csv-import";
 import { UnitFormModal } from "../modals/unit-form-modal";
+import { useDebounce } from "@/hooks/use-debounce";
 
 const STATUS_LABEL: Record<UnitStatus, string> = {
   occupied: "Terhuni",
@@ -35,181 +34,187 @@ const PAYER_LABEL: Record<BillPayer, string> = {
   resident: "Penghuni",
 };
 
-function emptyForm(): UnitPayload {
-  return {
-    unit_type_id: "",
-    code: "",
-    block: "",
-    floor: null,
-    status: "vacant",
-    bill_payer: "resident",
-    owner_id: null,
-    resident_id: null,
-    notes: "",
-  };
-}
-
 export function UnitsCard() {
-  const { data, error, isPending, refetch } = useUnits({ per_page: 200 });
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 500);
+  const [page, setPage] = useState(1);
+  const perPage = 10;
+
+  const { data, error, isLoading, refetch } = useUnits({
+    search: debouncedSearch,
+    page,
+    per_page: perPage,
+  });
   const items = data?.items || [];
+  const total = data?.total || 0;
 
   const [editing, setEditing] = useState<Unit | null>(null);
   const [creating, setCreating] = useState(false);
 
-  const createUnit = useCreateUnit();
-  const updateUnit = useUpdateUnit(editing?.id || "");
   const deleteUnit = useDeleteUnit();
 
-  return (
-    <Card>
-      <div className="mb-4 flex items-center justify-between">
-        <div>
-          <h3 className="text-xl font-bold text-zinc-900">Daftar Unit</h3>
-          <p className="text-xs italic text-zinc-500">
-            Pemilik, penghuni, dan siapa yang menanggung iuran tiap unit.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <CSVTools
-            resourceLabel="Unit"
-            templatePath="/api/v1/master/units/csv-template"
-            importPath="/api/v1/master/units/import"
-            templateFilename="units-template.csv"
-            onAfterImport={() => { refetch(); }}
-          />
-          <Button size="sm" onClick={() => setCreating(true)}>
-            <Plus size={14} /> Tambah Unit
-          </Button>
-        </div>
-      </div>
+  const columns: ColumnDef<Unit>[] = useMemo(() => [
+    {
+      header: "Kode",
+      accessorKey: "code",
+      cell: ({ row }) => {
+        const u = row.original;
+        return (
+          <>
+            <div className="font-bold text-zinc-900">{u.code}</div>
+            {u.block && (
+              <div className="text-xs italic text-zinc-500">
+                Blok {u.block}
+                {u.floor != null ? ` · Lt ${u.floor}` : ""}
+              </div>
+            )}
+          </>
+        );
+      },
+    },
+    {
+      header: "Tipe",
+      accessorKey: "unit_type_code",
+      cell: ({ row }) => <span className="text-zinc-700">{row.original.unit_type_code}</span>,
+    },
+    {
+      header: "Pemilik",
+      accessorKey: "owner_name",
+      cell: ({ row }) => (
+        <span className="text-zinc-700">
+          {row.original.owner_name ?? <span className="italic text-zinc-400">-</span>}
+        </span>
+      ),
+    },
+    {
+      header: "Penghuni",
+      accessorKey: "resident_name",
+      cell: ({ row }) => {
+        const u = row.original;
+        const ownerIsResident = u.owner_id != null && u.owner_id === u.resident_id;
+        return (
+          <span className="text-zinc-700">
+            {u.resident_name ?? <span className="italic text-zinc-400">-</span>}
+            {ownerIsResident && (
+              <span className="ml-2 text-xs italic text-zinc-500">
+                (= pemilik)
+              </span>
+            )}
+          </span>
+        );
+      },
+    },
+    {
+      header: "Bayar Iuran",
+      accessorKey: "bill_payer",
+      cell: ({ row }) => {
+        const u = row.original;
+        return (
+          <Badge tone={u.bill_payer === "owner" ? "info" : "success"}>
+            {PAYER_LABEL[u.bill_payer]}
+          </Badge>
+        );
+      },
+    },
+    {
+      header: "Status",
+      accessorKey: "status",
+      cell: ({ row }) => {
+        const u = row.original;
+        return (
+          <Badge tone={STATUS_TONE[u.status]}>
+            {STATUS_LABEL[u.status]}
+          </Badge>
+        );
+      },
+    },
+    {
+      id: "actions",
+      header: "",
+      cell: ({ row }) => {
+        const u = row.original;
+        return (
+          <div className="flex justify-end gap-2 text-zinc-400">
+            <button
+              onClick={() => setEditing(u)}
+              className="text-zinc-400 hover:text-zinc-700 transition"
+              aria-label="Edit"
+            >
+              <Pencil size={16} />
+            </button>
+            <button
+              onClick={() => {
+                if (confirm(`Hapus unit ${u.code}?`)) {
+                  deleteUnit.mutate(u.id);
+                }
+              }}
+              className="text-rose-400 hover:text-rose-600 transition"
+              disabled={deleteUnit.isPending}
+            >
+              {deleteUnit.isPending && deleteUnit.variables === u.id ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Trash2 size={16} />
+              )}
+            </button>
+          </div>
+        );
+      },
+    },
+  ], [deleteUnit]);
 
+  return (
+    <>
       {error && (
         <div className="mb-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
           {error.message || "Gagal memuat data"}
         </div>
       )}
 
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
-            <th className="px-2 py-3 text-left">Kode</th>
-            <th className="px-2 py-3 text-left">Tipe</th>
-            <th className="px-2 py-3 text-left">Pemilik</th>
-            <th className="px-2 py-3 text-left">Penghuni</th>
-            <th className="px-2 py-3 text-left">Bayar Iuran</th>
-            <th className="px-2 py-3 text-left">Status</th>
-            <th className="px-2 py-3" />
-          </tr>
-        </thead>
-        <tbody>
-          {isPending && (
-            <tr>
-              <td colSpan={7} className="px-2 py-6 text-center text-zinc-400">
-                Memuat…
-              </td>
-            </tr>
-          )}
-          {!isPending && items.length === 0 && (
-            <tr>
-              <td colSpan={7} className="px-2 py-6 text-center text-zinc-400">
-                Belum ada unit. Buat tipe unit di tab “Tarif IPL”, lalu klik
-                “Tambah Unit”.
-              </td>
-            </tr>
-          )}
-          {items.map((u) => {
-            const ownerIsResident =
-              u.owner_id != null && u.owner_id === u.resident_id;
-            return (
-              <tr key={u.id} className="border-t border-zinc-200/70">
-                <td className="px-2 py-4">
-                  <div className="font-bold text-zinc-900">{u.code}</div>
-                  {u.block && (
-                    <div className="text-xs italic text-zinc-500">
-                      Blok {u.block}
-                      {u.floor != null ? ` · Lt ${u.floor}` : ""}
-                    </div>
-                  )}
-                </td>
-                <td className="px-2 py-4 text-zinc-700">{u.unit_type_code}</td>
-                <td className="px-2 py-4 text-zinc-700">
-                  {u.owner_name ?? <span className="italic text-zinc-400">-</span>}
-                </td>
-                <td className="px-2 py-4 text-zinc-700">
-                  {u.resident_name ?? (
-                    <span className="italic text-zinc-400">-</span>
-                  )}
-                  {ownerIsResident && (
-                    <span className="ml-2 text-xs italic text-zinc-500">
-                      (= pemilik)
-                    </span>
-                  )}
-                </td>
-                <td className="px-2 py-4">
-                  <Badge tone={u.bill_payer === "owner" ? "info" : "success"}>
-                    {PAYER_LABEL[u.bill_payer]}
-                  </Badge>
-                </td>
-                <td className="px-2 py-4">
-                  <Badge tone={STATUS_TONE[u.status]}>
-                    {STATUS_LABEL[u.status]}
-                  </Badge>
-                </td>
-                <td className="px-2 py-4 text-right">
-                  <button
-                    onClick={() => setEditing(u)}
-                    className="text-zinc-400 hover:text-zinc-700"
-                    aria-label="Edit"
-                  >
-                    <Pencil size={14} />
-                  </button>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      <DataTable
+        title="Daftar Unit"
+        data={items}
+        columns={columns}
+        isLoading={isLoading}
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Cari Unit"
+        total={total}
+        page={page}
+        perPage={perPage}
+        onPageChange={setPage}
+        emptyMessage="Belum ada unit. Buat tipe unit di tab “Tarif IPL”, lalu klik “Tambah Unit”."
+        actions={
+          <div className="flex items-center gap-2">
+            <CSVTools
+              resourceLabel="Unit"
+              templatePath="/api/v1/master/units/csv-template"
+              importPath="/api/v1/master/units/import"
+              templateFilename="units-template.csv"
+              onAfterImport={() => { refetch(); }}
+            />
+            <Button size="sm" onClick={() => setCreating(true)} className="font-bold italic">
+              <Plus size={16} className="mr-1" /> Tambah Unit
+            </Button>
+          </div>
+        }
+      />
 
       {creating && (
         <UnitFormModal
           title="Tambah Unit"
-          initial={emptyForm()}
           onClose={() => setCreating(false)}
-          onSubmit={async (payload) => {
-            await createUnit.mutateAsync(payload);
-            setCreating(false);
-          }}
         />
       )}
 
       {editing && (
         <UnitFormModal
           title={`Edit ${editing.code}`}
-          initial={{
-            unit_type_id: editing.unit_type_id,
-            code: editing.code,
-            block: editing.block ?? "",
-            floor: editing.floor ?? null,
-            status: editing.status,
-            bill_payer: editing.bill_payer,
-            owner_id: editing.owner_id ?? null,
-            resident_id: editing.resident_id ?? null,
-            notes: editing.notes ?? "",
-          }}
+          initial={editing}
           onClose={() => setEditing(null)}
-          onDelete={async () => {
-            if (!confirm(`Hapus unit ${editing.code}?`)) return;
-            await deleteUnit.mutateAsync(editing.id);
-            setEditing(null);
-          }}
-          onSubmit={async (payload) => {
-            await updateUnit.mutateAsync(payload);
-            setEditing(null);
-          }}
         />
       )}
-    </Card>
+    </>
   );
 }
-
 
