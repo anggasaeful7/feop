@@ -33,8 +33,8 @@ export const BillComponentService = {
     });
   },
 
-  assignComponents: async (unitId: string, payload: { component_ids: string[] }) => {
-    return api(`/api/v1/master/units/${unitId}/bill-components`, {
+  assignComponents: async (payload: { component_ids: string[], unit_ids: string[] }) => {
+    return api(`/api/v1/master/units/bill-components/assign`, {
       method: "POST",
       body: JSON.stringify(payload),
     });

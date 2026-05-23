@@ -18,7 +18,7 @@ export default function MasterDataPage() {
       <PageHeader
         eyebrow="Admin · Konfigurasi"
         title="Master Data"
-        subtitle="Unit, pemilik, penghuni, dan tarif IPL"
+        subtitle="Layanan dasar dan fasilitas"
       />
 
       <div className="mb-4 flex items-center gap-2">

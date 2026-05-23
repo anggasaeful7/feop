@@ -69,13 +69,8 @@ export function useAssignBillComponents() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (payload: { component_ids: string[]; unit_ids: string[] }) => {
-      const { component_ids, unit_ids } = payload;
-      await Promise.all(
-        unit_ids.map((unitId) =>
-          BillComponentService.assignComponents(unitId, { component_ids })
-        )
-      );
+    mutationFn: (payload: { component_ids: string[]; unit_ids: string[] }) => {
+      return BillComponentService.assignComponents(payload);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: billComponentQK.all });

@@ -1,14 +1,44 @@
 "use client";
 
-import { useState } from "react";
-import { Button } from "@/components/ui";
-import { Modal, inputClass } from "@/components/ui/modal";
-import { dummyComponents, dummyUnits } from "../dummy-data";
+import { useState, useMemo } from "react";
+import { Button, DataTable } from "@/components/ui";
+import { Modal } from "@/components/ui/modal";
+import { useBillComponents, useAssignBillComponents } from "@/hooks/api/use-bill-component";
+import { useUnits } from "@/hooks/api/use-unit";
+import { useDebounce } from "@/hooks/use-debounce";
+import { Loader2 } from "lucide-react";
+import { ColumnDef } from "@tanstack/react-table";
+import type { BillComponent, Unit } from "@/types/master-data";
 
 export function AssignComponentModal({ onClose }: { onClose: () => void }) {
-  const [selectedComponents, setSelectedComponents] = useState<Set<string>>(new Set(["1", "2", "3", "4", "5"]));
-  const [selectedUnits, setSelectedUnits] = useState<Set<string>>(new Set(["1", "2", "3"]));
+  const [selectedComponents, setSelectedComponents] = useState<Set<string>>(new Set());
+  const [selectedUnits, setSelectedUnits] = useState<Set<string>>(new Set());
   const [searchUnit, setSearchUnit] = useState("");
+  const debouncedSearchUnit = useDebounce(searchUnit, 500);
+
+  const [componentsPage, setComponentsPage] = useState(1);
+  const [unitsPage, setUnitsPage] = useState(1);
+
+  const { data: componentsData, isFetching: isFetchingComponents } = useBillComponents({ per_page: 10, page: componentsPage });
+  const { data: unitsData, isFetching: isFetchingUnits } = useUnits({ search: debouncedSearchUnit, per_page: 10, page: unitsPage });
+  const assignMutation = useAssignBillComponents();
+
+  const components = useMemo(() => componentsData?.items || [], [componentsData?.items]);
+  const units = useMemo(() => unitsData?.items || [], [unitsData?.items]);
+
+  const handleSave = () => {
+    assignMutation.mutate(
+      {
+        component_ids: Array.from(selectedComponents),
+        unit_ids: Array.from(selectedUnits),
+      },
+      {
+        onSuccess: () => {
+          onClose();
+        },
+      }
+    );
+  };
 
   const toggleComponent = (id: string) => {
     const next = new Set(selectedComponents);
@@ -24,6 +54,109 @@ export function AssignComponentModal({ onClose }: { onClose: () => void }) {
     setSelectedUnits(next);
   };
 
+  const componentsColumns: ColumnDef<BillComponent>[] = useMemo(() => {
+    const isAllPageSelected = components.length > 0 && components.every(c => selectedComponents.has(c.id));
+    return [
+      {
+        id: "select",
+        header: () => (
+          <div
+            className={`w-4 h-4 rounded flex items-center justify-center text-white cursor-pointer ${isAllPageSelected
+              ? 'bg-brand-700'
+              : 'border border-zinc-400 bg-white'
+              }`}
+            onClick={() => {
+              const next = new Set(selectedComponents);
+              if (isAllPageSelected) {
+                components.forEach(c => next.delete(c.id));
+              } else {
+                components.forEach(c => next.add(c.id));
+              }
+              setSelectedComponents(next);
+            }}
+          >
+            {isAllPageSelected && <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+          </div>
+        ),
+      cell: ({ row }) => {
+        const isSelected = selectedComponents.has(row.original.id);
+        return (
+          <div
+            className={`w-4 h-4 rounded flex items-center justify-center text-white ${isSelected ? 'bg-brand-700' : 'border border-zinc-300 bg-white'
+              }`}
+          >
+            {isSelected && <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "name",
+      header: "Nama",
+      cell: ({ row }) => <span className="font-bold">{row.original.name}</span>,
+    },
+    {
+      accessorKey: "description",
+      header: "Desc",
+      cell: ({ row }) => <span className="text-zinc-500">{row.original.description || "-"}</span>,
+    }
+  ];
+  }, [components, selectedComponents]);
+
+  const unitsColumns: ColumnDef<Unit>[] = useMemo(() => {
+    const isAllPageSelected = units.length > 0 && units.every(u => selectedUnits.has(u.id));
+    return [
+      {
+        id: "select",
+        header: () => (
+          <div
+            className={`w-4 h-4 rounded flex items-center justify-center text-white cursor-pointer ${isAllPageSelected
+              ? 'bg-brand-700'
+              : 'border border-zinc-400 bg-white'
+              }`}
+            onClick={() => {
+              const next = new Set(selectedUnits);
+              if (isAllPageSelected) {
+                units.forEach(u => next.delete(u.id));
+              } else {
+                units.forEach(u => next.add(u.id));
+              }
+              setSelectedUnits(next);
+            }}
+          >
+            {isAllPageSelected && <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+          </div>
+        ),
+      cell: ({ row }) => {
+        const isSelected = selectedUnits.has(row.original.id);
+        return (
+          <div
+            className={`w-4 h-4 rounded flex items-center justify-center text-white ${isSelected ? 'bg-brand-700' : 'border border-zinc-300 bg-white'
+              }`}
+          >
+            {isSelected && <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "code",
+      header: "Unit",
+      cell: ({ row }) => <span className="font-bold">{row.original.code}</span>,
+    },
+    {
+      id: "penghuni",
+      header: "Penghuni",
+      cell: ({ row }) => <span className="text-zinc-500">{row.original.resident_name || row.original.owner_name || "-"}</span>,
+    },
+    {
+      id: "komponen",
+      header: "Komponen Aktif",
+      cell: () => <span className="text-zinc-500 truncate max-w-[100px]">-</span>,
+    }
+  ];
+  }, [units, selectedUnits]);
+
   return (
     <Modal
       open
@@ -38,15 +171,15 @@ export function AssignComponentModal({ onClose }: { onClose: () => void }) {
       footer={
         <div className="w-full flex items-center justify-between">
           <div className="text-xs text-zinc-500 flex flex-col gap-1 font-bold">
-            <div>{selectedComponents.size} dari 20 Komponen dipilih</div>
-            <div>{selectedUnits.size} dari 120 Unit dipilih</div>
+            <div>{selectedComponents.size} dari {componentsData?.total || 0} Komponen dipilih</div>
+            <div>{selectedUnits.size} dari {unitsData?.total || 0} Unit dipilih</div>
           </div>
           <div className="flex gap-2">
-            <Button variant="danger" onClick={onClose} className="rounded-full px-6">
+            <Button variant="danger" onClick={onClose} className="rounded-full px-6" disabled={assignMutation.isPending}>
               ✕ Batal
             </Button>
-            <Button onClick={onClose} className="rounded-full px-6">
-              ✓ Simpan Perubahan
+            <Button onClick={handleSave} className="rounded-full px-6" disabled={assignMutation.isPending || selectedComponents.size === 0 || selectedUnits.size === 0}>
+              {assignMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : "✓ "} Simpan Perubahan
             </Button>
           </div>
         </div>
@@ -54,107 +187,41 @@ export function AssignComponentModal({ onClose }: { onClose: () => void }) {
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2 h-[450px]">
         {/* Left Table: Komponen Tagihan */}
-        <div className="border border-zinc-200 rounded-xl flex flex-col overflow-hidden bg-white">
-          <div className="p-4 border-b border-zinc-100">
-            <h4 className="text-lg font-bold italic">Komponen Tagihan</h4>
-          </div>
-          <div className="flex-1 overflow-auto">
-            <table className="w-full text-xs">
-              <thead className="sticky top-0 bg-[#EFECE5] text-zinc-500 font-semibold z-10">
-                <tr>
-                  <th className="px-3 py-2 text-left w-10">
-                    <div className="w-4 h-4 rounded bg-brand-700 flex items-center justify-center text-white">
-                      <svg width="10" height="10" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                    </div>
-                  </th>
-                  <th className="px-2 py-2 text-left">Nama</th>
-                  <th className="px-2 py-2 text-left">Desc</th>
-                </tr>
-              </thead>
-              <tbody>
-                {dummyComponents.map(c => (
-                  <tr key={c.id} className="border-b border-zinc-100 hover:bg-zinc-50 cursor-pointer" onClick={() => toggleComponent(c.id)}>
-                    <td className="px-3 py-3">
-                      <div className={`w-4 h-4 rounded flex items-center justify-center text-white ${selectedComponents.has(c.id) ? 'bg-brand-700' : 'border border-zinc-300'}`}>
-                        {selectedComponents.has(c.id) && <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>}
-                      </div>
-                    </td>
-                    <td className="px-2 py-3 font-bold">{c.name}</td>
-                    <td className="px-2 py-3 text-zinc-500">{c.description}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="p-3 border-t border-zinc-100 flex justify-between items-center text-[10px] text-zinc-400">
-            <div>Showing 1-5 of 120</div>
-            <div className="flex items-center gap-1 font-medium">
-              <button className="px-1">‹</button>
-              <button className="w-5 h-5 rounded bg-zinc-800 text-white flex items-center justify-center">1</button>
-              <button className="w-5 h-5 rounded hover:bg-zinc-100 flex items-center justify-center text-zinc-700">2</button>
-              <button className="w-5 h-5 rounded hover:bg-zinc-100 flex items-center justify-center text-zinc-700">3</button>
-              <span>...</span>
-              <button className="w-5 h-5 rounded hover:bg-zinc-100 flex items-center justify-center text-zinc-700">14</button>
-              <button className="px-1">›</button>
-            </div>
-          </div>
+        <div className="flex flex-col h-full overflow-hidden [&_.overflow-x-auto]:max-h-[300px]">
+          <DataTable
+            title="Komponen Tagihan"
+            data={components}
+            columns={componentsColumns}
+            total={componentsData?.total || 0}
+            onRowClick={(row) => toggleComponent(row.id)}
+            size="sm"
+            page={componentsPage}
+            perPage={10}
+            onPageChange={setComponentsPage}
+            isLoading={isFetchingComponents}
+          />
         </div>
 
         {/* Right Table: Unit */}
-        <div className="border border-zinc-200 rounded-xl flex flex-col overflow-hidden bg-white">
-          <div className="p-4 border-b border-zinc-100">
-            <h4 className="text-lg font-bold italic mb-2">Unit</h4>
-            <div className="text-xs text-zinc-400 mb-1">Search</div>
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search"
-                className={`${inputClass} rounded-lg text-sm`}
-                value={searchUnit}
-                onChange={(e) => setSearchUnit(e.target.value)}
-              />
-            </div>
-          </div>
-          <div className="flex-1 overflow-auto">
-            <table className="w-full text-xs">
-              <thead className="sticky top-0 bg-[#EFECE5] text-zinc-500 font-semibold z-10">
-                <tr>
-                  <th className="px-3 py-2 text-left w-10">
-                    <div className="w-4 h-4 rounded border border-zinc-400 bg-white"></div>
-                  </th>
-                  <th className="px-2 py-2 text-left">Unit</th>
-                  <th className="px-2 py-2 text-left">Penguni</th>
-                  <th className="px-2 py-2 text-left">Komponen Aktif</th>
-                </tr>
-              </thead>
-              <tbody>
-                {dummyUnits.map(u => (
-                  <tr key={u.id} className="border-b border-zinc-100 hover:bg-zinc-50 cursor-pointer" onClick={() => toggleUnit(u.id)}>
-                    <td className="px-3 py-3">
-                      <div className={`w-4 h-4 rounded flex items-center justify-center text-white ${selectedUnits.has(u.id) ? 'bg-brand-700' : 'border border-zinc-300'}`}>
-                        {selectedUnits.has(u.id) && <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>}
-                      </div>
-                    </td>
-                    <td className="px-2 py-3 font-bold">{u.code}</td>
-                    <td className="px-2 py-3 text-zinc-500">{u.residentName}</td>
-                    <td className="px-2 py-3 text-zinc-500 truncate max-w-[100px]" title={u.activeComponents}>{u.activeComponents}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="p-3 border-t border-zinc-100 flex justify-between items-center text-[10px] text-zinc-400">
-            <div>Showing 1-5 of 120</div>
-            <div className="flex items-center gap-1 font-medium">
-              <button className="px-1">‹</button>
-              <button className="w-5 h-5 rounded bg-zinc-800 text-white flex items-center justify-center">1</button>
-              <button className="w-5 h-5 rounded hover:bg-zinc-100 flex items-center justify-center text-zinc-700">2</button>
-              <button className="w-5 h-5 rounded hover:bg-zinc-100 flex items-center justify-center text-zinc-700">3</button>
-              <span>...</span>
-              <button className="w-5 h-5 rounded hover:bg-zinc-100 flex items-center justify-center text-zinc-700">14</button>
-              <button className="px-1">›</button>
-            </div>
-          </div>
+        <div className="flex flex-col h-full overflow-hidden [&_.overflow-x-auto]:max-h-[300px]">
+          <DataTable
+            title="Unit"
+            data={units}
+            columns={unitsColumns}
+            total={unitsData?.total || 0}
+            search={searchUnit}
+            onSearchChange={(val) => {
+              setSearchUnit(val);
+              setUnitsPage(1);
+            }}
+            searchPlaceholder="Search"
+            onRowClick={(row) => toggleUnit(row.id)}
+            size="sm"
+            page={unitsPage}
+            perPage={10}
+            onPageChange={setUnitsPage}
+            isLoading={isFetchingUnits}
+          />
         </div>
       </div>
     </Modal>

@@ -1,9 +1,25 @@
 "use client";
 
-import { useState } from "react";
-import { Button } from "@/components/ui";
-import { Field, Modal, inputClass } from "@/components/ui/modal";
-import type { BillingComponent } from "@/types/billing-dummy";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
+
+import { Button, Toggle } from "@/components/ui";
+import { Modal } from "@/components/ui/modal";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+
+import type { BillComponent } from "@/types/master-data";
+import { billComponentSchema, type BillComponentFormValues } from "@/lib/validations/bill-component";
+import { useCreateBillComponent, useUpdateBillComponent } from "@/hooks/api/use-bill-component";
 
 export function ComponentFormModal({
   title,
@@ -11,12 +27,43 @@ export function ComponentFormModal({
   onClose,
 }: {
   title: string;
-  initial?: BillingComponent;
+  initial?: BillComponent | null;
   onClose: () => void;
 }) {
-  const [form, setForm] = useState(
-    initial || { name: "", price: "", description: "", isPaid: true }
-  );
+  const isEditing = !!initial;
+
+  const form = useForm<BillComponentFormValues>({
+    resolver: zodResolver(billComponentSchema),
+    defaultValues: {
+      name: initial?.name || "",
+      amount: initial?.amount || null,
+      description: initial?.description || "",
+      is_variable: initial?.is_variable ?? false,
+      is_active: initial?.is_active ?? true,
+      sort_order: initial?.sort_order ?? 0,
+    },
+  });
+
+  const createMut = useCreateBillComponent();
+  const updateMut = useUpdateBillComponent(initial?.id || "");
+
+  const isPending = createMut.isPending || updateMut.isPending;
+
+  function onSubmit(values: BillComponentFormValues) {
+    if (isEditing) {
+      updateMut.mutate(values, {
+        onSuccess: () => {
+          onClose();
+        },
+      });
+    } else {
+      createMut.mutate(values, {
+        onSuccess: () => {
+          onClose();
+        },
+      });
+    }
+  }
 
   return (
     <Modal
@@ -24,56 +71,112 @@ export function ComponentFormModal({
       title={
         <div className="flex items-center justify-between w-full pr-8">
           <span className="text-2xl font-bold italic">{title}</span>
-          <div className="flex items-center gap-2 text-sm font-medium text-zinc-500 not-italic">
-            Komponen Berbayar
-            <div className={`w-10 h-5 rounded-full relative cursor-pointer transition-colors ${form.isPaid ? 'bg-brand-700' : 'bg-zinc-300'}`} onClick={() => setForm({ ...form, isPaid: !form.isPaid })}>
-              <div className={`w-4 h-4 rounded-full bg-white absolute top-0.5 transition-transform ${form.isPaid ? 'left-[22px]' : 'left-0.5'}`}></div>
-            </div>
-          </div>
         </div>
       }
       onClose={onClose}
       footer={
         <>
-          <Button variant="danger" onClick={onClose} className="rounded-full px-6">
+          <Button variant="danger" onClick={onClose} disabled={isPending}>
             ✕ Batal
           </Button>
-          <Button onClick={onClose} className="rounded-full px-6">
-            ✓ {initial ? "Simpan Perubahan" : "Tambahkan Komponen"}
+          <Button onClick={form.handleSubmit(onSubmit)} disabled={isPending}>
+            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            ✓ {isEditing ? "Simpan Perubahan" : "Tambahkan Komponen"}
           </Button>
         </>
       }
     >
-      <div className="grid grid-cols-2 gap-4 mt-2">
-        <Field label="Nama">
-          <input
-            className={`${inputClass} rounded-lg italic`}
-            placeholder="Nama Komponen"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4 mt-2">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem className="col-span-2 sm:col-span-1">
+                <FormLabel>Nama</FormLabel>
+                <FormControl>
+                  <Input placeholder="Nama Komponen" {...field} className="rounded-xl italic bg-transparent" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </Field>
-        <Field label="Harga">
-          <input
-            type="number"
-            className={`${inputClass} rounded-lg italic`}
-            placeholder="Harga"
-            value={form.price ?? ""}
-            onChange={(e) => setForm({ ...form, price: e.target.value })}
-            disabled={!form.isPaid}
+
+          <FormField
+            control={form.control}
+            name="amount"
+            render={({ field }) => (
+              <FormItem className="col-span-2 sm:col-span-1">
+                <FormLabel>Harga</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Harga"
+                    {...field}
+                    value={field.value ?? ""}
+                    onChange={e => field.onChange(e.target.value ? Number(e.target.value) : null)}
+                    className="rounded-xl italic bg-transparent"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </Field>
-        <div className="col-span-2">
-          <Field label="Harga" hint=" ">
-            <textarea
-              className={`${inputClass} h-24 py-2 rounded-lg italic resize-none`}
-              placeholder="Harga"
-              value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
+
+          <div className="col-span-2">
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Deskripsi</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Deskripsi"
+                      {...field}
+                      value={field.value ?? ""}
+                      className="h-28 py-3 rounded-xl italic resize-none bg-transparent"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </Field>
-        </div>
-      </div>
+          </div>
+
+          <div className="col-span-2 flex items-center space-x-4">
+            <FormField
+              control={form.control}
+              name="is_active"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between space-y-0 rounded-lg border border-zinc-200/70 p-3 flex-1">
+                  <FormLabel>
+                    Status Aktif
+                  </FormLabel>
+                  <FormControl>
+                    <Toggle checked={field.value} onChange={field.onChange} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="is_variable"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between space-y-0 rounded-lg border border-zinc-200/70 p-3 flex-1">
+                  <FormLabel>
+                    Nilai Variabel
+                  </FormLabel>
+                  <FormControl>
+                    <Toggle checked={field.value} onChange={field.onChange} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </div>
+        </form>
+      </Form>
     </Modal>
   );
 }
