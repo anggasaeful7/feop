@@ -91,6 +91,11 @@ export type Unit = {
   resident_id?: string | null;
   resident_name?: string | null;
   notes?: string | null;
+  active_components?: {
+    id: string;
+    name: string;
+    amount: number;
+  }[];
   created_at: string;
   updated_at: string;
 };

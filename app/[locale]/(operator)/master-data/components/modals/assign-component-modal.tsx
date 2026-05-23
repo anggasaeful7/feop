@@ -78,29 +78,29 @@ export function AssignComponentModal({ onClose }: { onClose: () => void }) {
             {isAllPageSelected && <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>}
           </div>
         ),
-      cell: ({ row }) => {
-        const isSelected = selectedComponents.has(row.original.id);
-        return (
-          <div
-            className={`w-4 h-4 rounded flex items-center justify-center text-white ${isSelected ? 'bg-brand-700' : 'border border-zinc-300 bg-white'
-              }`}
-          >
-            {isSelected && <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>}
-          </div>
-        );
+        cell: ({ row }) => {
+          const isSelected = selectedComponents.has(row.original.id);
+          return (
+            <div
+              className={`w-4 h-4 rounded flex items-center justify-center text-white ${isSelected ? 'bg-brand-700' : 'border border-zinc-300 bg-white'
+                }`}
+            >
+              {isSelected && <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+            </div>
+          );
+        },
       },
-    },
-    {
-      accessorKey: "name",
-      header: "Nama",
-      cell: ({ row }) => <span className="font-bold">{row.original.name}</span>,
-    },
-    {
-      accessorKey: "description",
-      header: "Desc",
-      cell: ({ row }) => <span className="text-zinc-500">{row.original.description || "-"}</span>,
-    }
-  ];
+      {
+        accessorKey: "name",
+        header: "Nama",
+        cell: ({ row }) => <span className="font-bold">{row.original.name}</span>,
+      },
+      {
+        accessorKey: "description",
+        header: "Desc",
+        cell: ({ row }) => <span className="text-zinc-500">{row.original.description || "-"}</span>,
+      }
+    ];
   }, [components, selectedComponents]);
 
   const unitsColumns: ColumnDef<Unit>[] = useMemo(() => {
@@ -109,52 +109,69 @@ export function AssignComponentModal({ onClose }: { onClose: () => void }) {
       {
         id: "select",
         header: () => (
-          <div
-            className={`w-4 h-4 rounded flex items-center justify-center text-white cursor-pointer ${isAllPageSelected
-              ? 'bg-brand-700'
-              : 'border border-zinc-400 bg-white'
-              }`}
-            onClick={() => {
-              const next = new Set(selectedUnits);
-              if (isAllPageSelected) {
-                units.forEach(u => next.delete(u.id));
-              } else {
-                units.forEach(u => next.add(u.id));
-              }
-              setSelectedUnits(next);
-            }}
-          >
-            {isAllPageSelected && <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+          <div className="w-6 flex justify-center">
+            <div
+              className={`w-4 h-4 rounded flex items-center justify-center text-white cursor-pointer ${isAllPageSelected
+                ? 'bg-brand-700'
+                : 'border border-zinc-400 bg-white'
+                }`}
+              onClick={() => {
+                const next = new Set(selectedUnits);
+                if (isAllPageSelected) {
+                  units.forEach(u => next.delete(u.id));
+                } else {
+                  units.forEach(u => next.add(u.id));
+                }
+                setSelectedUnits(next);
+              }}
+            >
+              {isAllPageSelected && <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+            </div>
           </div>
         ),
-      cell: ({ row }) => {
-        const isSelected = selectedUnits.has(row.original.id);
-        return (
-          <div
-            className={`w-4 h-4 rounded flex items-center justify-center text-white ${isSelected ? 'bg-brand-700' : 'border border-zinc-300 bg-white'
-              }`}
-          >
-            {isSelected && <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>}
-          </div>
-        );
+        cell: ({ row }) => {
+          const isSelected = selectedUnits.has(row.original.id);
+          return (
+            <div className="w-6 flex justify-center">
+              <div
+                className={`w-4 h-4 rounded flex items-center justify-center text-white ${isSelected ? 'bg-brand-700' : 'border border-zinc-300 bg-white'
+                  }`}
+              >
+                {isSelected && <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M10 3L4.5 8.5L2 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+              </div>
+            </div>
+          );
+        },
       },
-    },
-    {
-      accessorKey: "code",
-      header: "Unit",
-      cell: ({ row }) => <span className="font-bold">{row.original.code}</span>,
-    },
-    {
-      id: "penghuni",
-      header: "Penghuni",
-      cell: ({ row }) => <span className="text-zinc-500">{row.original.resident_name || row.original.owner_name || "-"}</span>,
-    },
-    {
-      id: "komponen",
-      header: "Komponen Aktif",
-      cell: () => <span className="text-zinc-500 truncate max-w-[100px]">-</span>,
-    }
-  ];
+      {
+        accessorKey: "code",
+        header: () => <div className="w-16">Unit</div>,
+        cell: ({ row }) => <div className="w-16 font-bold truncate">{row.original.code}</div>,
+      },
+      {
+        id: "penghuni",
+        header: () => <div className="w-28">Penghuni</div>,
+        cell: ({ row }) => (
+          <div className="w-28 text-zinc-500 truncate" title={row.original.resident_name || row.original.owner_name || ""}>
+            {row.original.resident_name || row.original.owner_name || "-"}
+          </div>
+        ),
+      },
+      {
+        id: "komponen",
+        header: "Komponen Aktif",
+        cell: ({ row }) => {
+          const comps = row.original.active_components || [];
+          if (comps.length === 0) return <span className="text-zinc-500">-</span>;
+          const names = comps.map(c => c.name).join(", ");
+          return (
+            <span className="text-zinc-500 whitespace-nowrap">
+              {names}
+            </span>
+          );
+        }
+      }
+    ];
   }, [units, selectedUnits]);
 
   return (

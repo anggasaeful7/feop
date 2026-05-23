@@ -4,13 +4,13 @@ import { useState, useMemo } from "react";
 import { Pencil, Plus, Trash2, Loader2 } from "lucide-react";
 import { Button, DataTable } from "@/components/ui";
 import { ColumnDef } from "@tanstack/react-table";
-import { ComponentFormModal } from "../modals/component-form-modal";
+import { BillComponentFormModal } from "../modals/bill-component-form-modal";
 import { AssignComponentModal } from "../modals/assign-component-modal";
 import type { BillComponent } from "@/types/master-data";
 import { useBillComponents, useDeleteBillComponent } from "@/hooks/api/use-bill-component";
 import { useDebounce } from "@/hooks/use-debounce";
 
-export function BillingComponentsCard() {
+export function BillComponentCard() {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
   const { data, isLoading } = useBillComponents({ search: debouncedSearch, per_page: 100 });
@@ -101,14 +101,14 @@ export function BillingComponentsCard() {
       />
 
       {creating && (
-        <ComponentFormModal
+        <BillComponentFormModal
           title="Tambah Komponen"
           onClose={() => setCreating(false)}
         />
       )}
 
       {editing && (
-        <ComponentFormModal
+        <BillComponentFormModal
           title="Edit Komponen"
           initial={editing}
           onClose={() => setEditing(null)}

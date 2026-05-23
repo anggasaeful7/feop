@@ -7,7 +7,7 @@ import { ApiError } from "@/lib/axios";
 export const billComponentQK = {
   all: ["bill-components"] as const,
   lists: () => [...billComponentQK.all, "list"] as const,
-  list: (params?: { search?: string; active?: boolean; page?: number; per_page?: number }) => 
+  list: (params?: { search?: string; active?: boolean; page?: number; per_page?: number }) =>
     [...billComponentQK.lists(), params] as const,
   details: () => [...billComponentQK.all, "detail"] as const,
   detail: (id: string) => [...billComponentQK.details(), id] as const,
@@ -74,6 +74,7 @@ export function useAssignBillComponents() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: billComponentQK.all });
+      queryClient.invalidateQueries({ queryKey: ["units"] });
       toast.success("Berhasil assign komponen ke unit");
     },
     onError: (error) => {
