@@ -7,7 +7,7 @@ import { PersonsCard } from "./components/cards/persons-card";
 import { UnitTypesCard } from "./components/cards/unit-types-card";
 import { BillComponentCard } from "./components/cards/bill-component-card";
 
-const TABS = ["Unit", "Pemilik", "Penghuni", "Tarif IPL", "Komponen Tagihan"] as const;
+const TABS = ["Unit", "Pemilik", "Penghuni", "Tipe Unit", "Komponen Tagihan"] as const;
 type Tab = (typeof TABS)[number];
 
 export default function MasterDataPage() {
@@ -39,11 +39,7 @@ export default function MasterDataPage() {
       {tab === "Unit" && <UnitsCard />}
       {tab === "Pemilik" && <PersonsCard role="owner" />}
       {tab === "Penghuni" && <PersonsCard role="resident" />}
-      {tab === "Tarif IPL" && (
-        <div className="grid grid-cols-3 gap-4">
-          <UnitTypesCard />
-        </div>
-      )}
+      {tab === "Tipe Unit" && <UnitTypesCard />}
       {tab === "Komponen Tagihan" && <BillComponentCard />}
     </>
   );

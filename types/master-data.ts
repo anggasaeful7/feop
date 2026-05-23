@@ -33,6 +33,12 @@ export type UnitTypePayload = {
   effective_from: string;
 };
 
+export type UnitTypeQueryParams = {
+  search?: string;
+  page?: number;
+  per_page?: number;
+};
+
 export type BillComponentPayload = {
   name: string;
   description?: string | null;
