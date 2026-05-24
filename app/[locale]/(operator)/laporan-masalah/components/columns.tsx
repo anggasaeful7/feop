@@ -33,7 +33,7 @@ export const getColumns = ({ onDetail }: ColumnsProps): ColumnDef<Complaint>[] =
   },
   {
     accessorKey: "title",
-    header: "Judul Komplain",
+    header: "Judul Masalah",
     cell: ({ row }) => (
       <div className="max-w-[200px] truncate font-medium">
         {row.original.title}

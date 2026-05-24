@@ -80,7 +80,7 @@ export function ComplaintList() {
           setSearch(v);
           setPage(1);
         }}
-        searchPlaceholder="Cari judul komplain..."
+        searchPlaceholder="Cari judul laporan..."
       />
 
       {selectedComplaint && (

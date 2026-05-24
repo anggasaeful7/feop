@@ -2,15 +2,15 @@ import { PageHeader } from "@/components/ui";
 import { ComplaintList } from "./components/complaint-list";
 
 export const metadata = {
-  title: "Komplain - IPL Sistem",
+  title: "Laporan Masalah - IPL Sistem",
 };
 
-export default function KomplainPage() {
+export default function LaporanMasalahPage() {
   return (
     <>
       <PageHeader
-        title="Komplain Penghuni"
-        subtitle="Kelola laporan komplain dari penghuni"
+        title="Laporan Masalah"
+        subtitle="Kelola laporan masalah dari penghuni"
       />
       <div className="mt-6">
         <ComplaintList />

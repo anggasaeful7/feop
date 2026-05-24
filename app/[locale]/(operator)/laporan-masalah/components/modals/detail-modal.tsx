@@ -56,11 +56,11 @@ export function DetailModal({ complaint, onClose }: DetailModalProps) {
       { id: complaint.id, payload: data },
       {
         onSuccess: () => {
-          toast.success("Komplain berhasil diperbarui");
+          toast.success("Laporan masalah berhasil diperbarui");
           onClose();
         },
         onError: () => {
-          toast.error("Gagal memperbarui komplain");
+          toast.error("Gagal memperbarui laporan masalah");
         },
       }
     );
@@ -79,11 +79,11 @@ export function DetailModal({ complaint, onClose }: DetailModalProps) {
     <Modal
       open={true}
       onClose={onClose}
-      title="Detail Komplain"
+      title="Detail Laporan Masalah"
       className="max-w-3xl"
     >
       <div className="mb-6 text-sm text-zinc-500">
-        Rincian dan tindak lanjut komplain dari penghuni
+        Rincian dan tindak lanjut laporan masalah dari penghuni
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6">
         <div className="space-y-4">
@@ -97,7 +97,7 @@ export function DetailModal({ complaint, onClose }: DetailModalProps) {
           </div>
 
           <div>
-            <h4 className="text-sm font-semibold text-zinc-900">Rincian Komplain</h4>
+            <h4 className="text-sm font-semibold text-zinc-900">Rincian Laporan Masalah</h4>
             <div className="mt-2 text-sm text-zinc-600 space-y-2">
               <p><span className="font-medium text-zinc-900">Judul:</span> {complaint.title}</p>
               <p><span className="font-medium text-zinc-900">Kategori:</span> <span className="capitalize">{complaint.category.replace(/_/g, " ")}</span></p>
@@ -121,7 +121,7 @@ export function DetailModal({ complaint, onClose }: DetailModalProps) {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={photoData.url}
-                    alt="Lampiran Komplain"
+                    alt="Lampiran Laporan"
                     className="h-full w-full object-cover"
                   />
                 </div>

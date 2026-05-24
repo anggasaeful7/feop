@@ -44,7 +44,7 @@ const NAV: NavItem[] = [
       { href: "/laporan", label: "Upload Laporan" },
       { href: "/laporan-tamu", label: "Laporan Tamu" },
       { href: "/pengajuan-surat", label: "Pengajuan Surat" },
-      { href: "/komplain", label: "Komplain Penghuni" },
+      { href: "/laporan-masalah", label: "Laporan Masalah" },
       { href: "/izin-renovasi", label: "Izin Renovasi" },
     ],
   },
