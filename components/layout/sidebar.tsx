@@ -13,6 +13,7 @@ import {
   Settings,
   ChevronDown,
   ChevronRight,
+  Database,
   type LucideIcon,
 } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth";
@@ -29,22 +30,21 @@ type NavItem = {
 const NAV: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
   {
-    label: "Billing & Keuangan",
+    label: "Billing",
     Icon: Receipt,
     children: [
       { href: "/billing", label: "Manage Billing" },
-      { href: "/penghuni", label: "Data Penghuni" },
-      { href: "/platform-billing", label: "Biaya Platform" },
+      { href: "/penghuni", label: "Billing Penghuni" },
+      { href: "/laporan", label: "Upload Laporan" },
     ],
   },
   {
-    label: "Laporan & Surat",
+    label: "Layanan Warga",
     Icon: Mail,
     children: [
-      { href: "/laporan", label: "Upload Laporan" },
+      { href: "/laporan-masalah", label: "Laporan Masalah" },
       { href: "/laporan-tamu", label: "Laporan Tamu" },
       { href: "/pengajuan-surat", label: "Pengajuan Surat" },
-      { href: "/laporan-masalah", label: "Laporan Masalah" },
       { href: "/izin-renovasi", label: "Izin Renovasi" },
     ],
   },
@@ -57,11 +57,12 @@ const NAV: NavItem[] = [
       { href: "/jadwal/kebersihan", label: "Jadwal Kebersihan" },
     ],
   },
+  { href: "/master-data", label: "Master Data", Icon: Database },
   {
     label: "Pengaturan & Lainnya",
     Icon: Settings,
     children: [
-      { href: "/master-data", label: "Master Data" },
+      { href: "/platform-billing", label: "Biaya Platform" },
       { href: "/notifikasi", label: "Notifikasi" },
       { href: "/pengaturan", label: "Pengaturan" },
     ],
