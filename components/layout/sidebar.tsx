@@ -44,6 +44,7 @@ const NAV: NavItem[] = [
       { href: "/laporan", label: "Upload Laporan" },
       { href: "/laporan-tamu", label: "Laporan Tamu" },
       { href: "/pengajuan-surat", label: "Pengajuan Surat" },
+      { href: "/komplain", label: "Komplain Penghuni" },
     ],
   },
   {
@@ -108,8 +109,8 @@ function NavGroup({ item, pathname }: { item: NavItem; pathname: string }) {
                 key={child.href}
                 href={child.href}
                 className={`block rounded-lg px-3 py-2 text-sm transition ${active
-                    ? "bg-brand-900 font-semibold text-white"
-                    : "text-zinc-600 hover:bg-cream-200/60 hover:text-zinc-900"
+                  ? "bg-brand-900 font-semibold text-white"
+                  : "text-zinc-600 hover:bg-cream-200/60 hover:text-zinc-900"
                   }`}
               >
                 {child.label}
@@ -184,8 +185,8 @@ export function Sidebar() {
               key={href}
               href={href}
               className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${active
-                  ? "bg-brand-900 font-semibold text-white"
-                  : "text-zinc-700 hover:bg-cream-200/60"
+                ? "bg-brand-900 font-semibold text-white"
+                : "text-zinc-700 hover:bg-cream-200/60"
                 }`}
             >
               <item.Icon

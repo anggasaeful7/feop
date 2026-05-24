@@ -63,6 +63,21 @@ export function formatDate(iso?: string) {
   return dateFmt.format(d);
 }
 
+const dateTimeFmt = new Intl.DateTimeFormat("id-ID", {
+  day: "2-digit",
+  month: "short",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
+export function formatDateTime(iso?: string) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return dateTimeFmt.format(d).replace(/\./g, ":");
+}
+
 export function formatBookingWindow(startsAt: string, endsAt: string) {
   const s = new Date(startsAt);
   const e = new Date(endsAt);
