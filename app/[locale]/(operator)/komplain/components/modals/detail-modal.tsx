@@ -101,7 +101,7 @@ export function DetailModal({ complaint, onClose }: DetailModalProps) {
             <div className="mt-2 text-sm text-zinc-600 space-y-2">
               <p><span className="font-medium text-zinc-900">Judul:</span> {complaint.title}</p>
               <p><span className="font-medium text-zinc-900">Kategori:</span> <span className="capitalize">{complaint.category.replace(/_/g, " ")}</span></p>
-              <p><span className="font-medium text-zinc-900">Urgensi:</span> <Badge variant="outline" className={`capitalize ${getUrgencyColor(complaint.urgency)}`}>{complaint.urgency}</Badge></p>
+              <div className="flex items-center gap-1.5"><span className="font-medium text-zinc-900">Urgensi:</span> <Badge variant="outline" className={`capitalize ${getUrgencyColor(complaint.urgency)}`}>{complaint.urgency}</Badge></div>
               <div>
                 <span className="font-medium text-zinc-900 block mb-1">Deskripsi:</span>
                 <div className="bg-zinc-50 p-3 rounded-md text-zinc-700 whitespace-pre-wrap border border-zinc-200/60">
