@@ -105,16 +105,15 @@ export function CreateBillModal({
     >
       <div className="space-y-3">
         <div className="flex gap-2">
-          {(["monthly", "one_time"] as BillKind[]).map((k) => (
+          {(["monthly", "specific"] as BillKind[]).map((k) => (
             <button
               key={k}
               type="button"
               onClick={() => setKind(k)}
-              className={`h-9 flex-1 rounded-full text-sm font-medium transition ${
-                kind === k
+              className={`h-9 flex-1 rounded-full text-sm font-medium transition ${kind === k
                   ? "bg-brand-900 text-white"
                   : "border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50"
-              }`}
+                }`}
             >
               {k === "monthly" ? "Bulanan" : "Tertentu"}
             </button>

@@ -14,6 +14,8 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { idr } from "@/lib/format";
 import { ResidentBill } from "@/types/billing";
 import { toast } from "sonner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ApiError, downloadCSV } from "@/lib/axios";
 
 const STATUS_TABS = [
   { key: "all", label: "Semua" },
@@ -26,10 +28,33 @@ type StatusTab = (typeof STATUS_TABS)[number]["key"];
 
 export default function BillingPenghuniPage() {
   const [activeTab, setActiveTab] = useState<StatusTab>("all");
+  const [kind, setKind] = useState<string>("all");
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
   const [page, setPage] = useState(1);
   const perPage = 10;
+  const [isExporting, setIsExporting] = useState(false);
+
+  const exportUrl = useMemo(() => {
+    const qs = new URLSearchParams();
+    if (activeTab !== "all") qs.set("status", activeTab);
+    if (kind !== "all") qs.set("kind", kind);
+    if (debouncedSearch) qs.set("search", debouncedSearch);
+    const query = qs.toString();
+    return `/api/v1/resident-bills/export.xlsx${query ? `?${query}` : ""}`;
+  }, [activeTab, kind, debouncedSearch]);
+
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      await downloadCSV(exportUrl, "billing-penghuni.xlsx");
+      toast.success("Berhasil mengekspor data billing");
+    } catch (e) {
+      toast.error(e instanceof ApiError ? e.message : "Gagal mengekspor data");
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   // Load all units to map unit_id -> unit details (code, resident_name, etc.)
   const { data: unitsData } = useUnits({ per_page: 500 });
@@ -49,6 +74,7 @@ export default function BillingPenghuniPage() {
   // Load resident bills
   const { data: billsData, isLoading, error } = useResidentBills({
     status: activeTab === "all" ? undefined : activeTab,
+    kind: kind === "all" ? undefined : kind,
     search: debouncedSearch,
     page,
     per_page: perPage,
@@ -251,11 +277,33 @@ export default function BillingPenghuniPage() {
                 {tab.label}
               </button>
             ))}
-            <a href="/api/v1/resident-bills/export.xlsx" download>
-              <Button variant="secondary" size="sm" className="font-bold italic">
-                <Download size={14} className="mr-1" /> CSV / Excel
-              </Button>
-            </a>
+            <div className="w-36">
+              <Select
+                value={kind}
+                onValueChange={(v) => {
+                  setKind(v);
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="h-9 rounded-full border-zinc-300 text-xs font-semibold px-4 bg-white text-zinc-700">
+                  <SelectValue placeholder="Semua Jenis" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Semua Jenis</SelectItem>
+                  <SelectItem value="monthly">Bulanan</SelectItem>
+                  <SelectItem value="specific">Spesifik</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="font-bold italic"
+              onClick={handleExport}
+              disabled={isExporting}
+            >
+              <Download size={14} className="mr-1" /> {isExporting ? "Mengekspor..." : "CSV / Excel"}
+            </Button>
           </div>
         }
       />
