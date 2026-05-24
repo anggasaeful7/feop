@@ -10,9 +10,11 @@ import {
   Database,
   LayoutDashboard,
   LogOut,
+  Mail,
   Receipt,
   Settings,
   Upload,
+  UserCheck,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -32,6 +34,8 @@ const NAV: NavItem[] = [
   { href: "/billing/penghuni", label: "Billing Penghuni", Icon: Users },
   { href: "/laporan", label: "Upload Laporan", Icon: Upload },
   { href: "/fasilitas", label: "Fasilitas", Icon: Building2 },
+  { href: "/pengajuan-surat", label: "Pengajuan Surat", Icon: Mail },
+  { href: "/laporan-tamu", label: "Laporan Tamu", Icon: UserCheck },
   { href: "/master-data", label: "Master Data", Icon: Database },
   { href: "/notifikasi", label: "Notifikasi", Icon: Bell },
   { href: "/platform-billing", label: "Biaya Platform", Icon: CreditCard },
@@ -80,11 +84,10 @@ export function Sidebar() {
             <Link
               key={href}
               href={href}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${
-                active
+              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${active
                   ? "bg-brand-900 font-semibold text-white"
                   : "text-zinc-700 hover:bg-cream-200/60"
-              }`}
+                }`}
             >
               <Icon
                 size={18}
