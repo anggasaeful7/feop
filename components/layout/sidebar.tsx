@@ -16,6 +16,8 @@ import {
   Upload,
   UserCheck,
   Users,
+  ShieldCheck,
+  CalendarClock,
   type LucideIcon,
 } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth";
@@ -36,6 +38,8 @@ const NAV: NavItem[] = [
   { href: "/fasilitas", label: "Fasilitas", Icon: Building2 },
   { href: "/pengajuan-surat", label: "Pengajuan Surat", Icon: Mail },
   { href: "/laporan-tamu", label: "Laporan Tamu", Icon: UserCheck },
+  { href: "/jadwal/keamanan", label: "Jadwal Keamanan", Icon: ShieldCheck },
+  { href: "/jadwal/kebersihan", label: "Jadwal Kebersihan", Icon: CalendarClock },
   { href: "/master-data", label: "Master Data", Icon: Database },
   { href: "/notifikasi", label: "Notifikasi", Icon: Bell },
   { href: "/platform-billing", label: "Biaya Platform", Icon: CreditCard },
@@ -85,8 +89,8 @@ export function Sidebar() {
               key={href}
               href={href}
               className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${active
-                  ? "bg-brand-900 font-semibold text-white"
-                  : "text-zinc-700 hover:bg-cream-200/60"
+                ? "bg-brand-900 font-semibold text-white"
+                : "text-zinc-700 hover:bg-cream-200/60"
                 }`}
             >
               <Icon
