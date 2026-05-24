@@ -5,36 +5,39 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AlertTriangle, Check, X, ArrowLeft, Loader2, FileText, CheckCircle } from "lucide-react";
 import { Badge, Button, Card, PageHeader } from "@/components/ui";
-import { useUnits } from "@/hooks/api/use-unit";
-import { useResidentBills, useApproveResidentBill, useRejectResidentBill } from "@/hooks/api/use-resident-bill";
+import { useUnit } from "@/hooks/api/use-unit";
+import { useResidentBills, useResidentBill, useApproveResidentBill, useRejectResidentBill } from "@/hooks/api/use-resident-bill";
 import { idr } from "@/lib/format";
 import { toast } from "sonner";
 
 export default function VerifikasiPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ unit: string }>;
+  searchParams: Promise<{ bill_id?: string }>;
 }) {
   const { unit } = use(params);
+  const searchParamsObj = use(searchParams);
+  const bill_id = searchParamsObj?.bill_id;
+
   const router = useRouter();
   const [rejectNotes, setRejectNotes] = useState("");
   const [isRejectingModal, setIsRejectingModal] = useState(false);
 
-  // Load all units to find unit ID matching the route parameter (unit code, e.g. A-12)
-  const { data: unitsData, isLoading: unitLoading } = useUnits({ search: unit });
-  const unitObj = useMemo(() => {
-    if (!unitsData?.items) return null;
-    return unitsData.items.find(
-      (u) => u.code.toLowerCase() === unit.toLowerCase()
-    ) || null;
-  }, [unitsData, unit]);
+  // Load unit detail
+  const { data: unitObj, isLoading: unitLoading } = useUnit(unit);
 
   // Load bills for the specific unit
   const { data: billsData, isLoading: billsLoading } = useResidentBills({
     unit_id: unitObj?.id,
   });
 
+  const { data: detailData, isLoading: detailLoading } = useResidentBill(bill_id || "");
+
   const pendingBill = useMemo(() => {
+    if (bill_id && detailData) return detailData;
+
     if (!billsData?.items) return null;
     // Find the first bill pending verification, otherwise fallback to any rejected/unpaid bill to view details
     return (
@@ -43,7 +46,7 @@ export default function VerifikasiPage({
       billsData.items[0] ||
       null
     );
-  }, [billsData]);
+  }, [billsData, detailData, bill_id]);
 
   // Hook mutations
   const approveMutation = useApproveResidentBill();
@@ -60,7 +63,7 @@ export default function VerifikasiPage({
       },
       {
         onSuccess: () => {
-          router.push("/billing/penghuni");
+          router.push("/penghuni");
         },
       }
     );
@@ -80,13 +83,13 @@ export default function VerifikasiPage({
         onSuccess: () => {
           setIsRejectingModal(false);
           setRejectNotes("");
-          router.push("/billing/penghuni");
+          router.push("/penghuni");
         },
       }
     );
   };
 
-  const isLoading = unitLoading || billsLoading;
+  const isLoading = unitLoading || billsLoading || detailLoading;
 
   if (isLoading) {
     return (
@@ -105,7 +108,7 @@ export default function VerifikasiPage({
         <p className="text-sm text-zinc-500 max-w-md">
           Unit &quot;{unit}&quot; tidak dapat ditemukan di workspace ini. Pastikan URL unit sudah benar.
         </p>
-        <Link href="/billing/penghuni">
+        <Link href="/penghuni">
           <Button className="mt-2">
             <ArrowLeft size={16} className="mr-1" /> Kembali ke Billing
           </Button>
@@ -122,7 +125,7 @@ export default function VerifikasiPage({
         <p className="text-sm text-zinc-500 max-w-sm">
           Tidak ada tagihan pending yang memerlukan verifikasi untuk unit <b>{unitObj.code}</b> ({unitObj.resident_name || unitObj.owner_name}).
         </p>
-        <Link href="/billing/penghuni">
+        <Link href="/penghuni">
           <Button className="mt-2">
             <ArrowLeft size={16} className="mr-1" /> Kembali ke Billing
           </Button>
@@ -154,7 +157,7 @@ export default function VerifikasiPage({
               </Button>
             </div>
           ) : (
-            <Link href="/billing/penghuni">
+            <Link href="/penghuni">
               <Button variant="secondary">
                 <ArrowLeft size={16} className="mr-1" /> Kembali ke Billing
               </Button>
@@ -289,11 +292,10 @@ export default function VerifikasiPage({
 
           <Card>
             <h3 className="mb-3 text-base font-bold text-zinc-900">Riwayat Tagihan Unit</h3>
-            <ul className="space-y-2 text-sm">
+            <ul className="space-y-2 text-sm max-h-[280px] overflow-y-auto pr-3">
               {billsData?.items && billsData.items.length > 1 ? (
                 billsData.items
                   .filter((b) => b.id !== pendingBill.id)
-                  .slice(0, 5)
                   .map((h) => (
                     <li
                       key={h.id}

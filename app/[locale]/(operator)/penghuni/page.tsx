@@ -181,7 +181,7 @@ export default function BillingPenghuniPage() {
 
         if (bill.status === "pending_verification") {
           return (
-            <Link href={`/billing/penghuni/${unitCode}/verifikasi`}>
+            <Link href={`/penghuni/${bill.unit_id}/verifikasi?bill_id=${bill.id}`}>
               <Button variant="warning" size="sm">
                 Verifikasi
               </Button>
@@ -190,7 +190,7 @@ export default function BillingPenghuniPage() {
         }
 
         return (
-          <Link href={`/billing/penghuni/${unitCode}/verifikasi`} className="text-xs text-zinc-600 hover:underline hover:text-zinc-900 font-semibold italic">
+          <Link href={`/penghuni/${bill.unit_id}/verifikasi?bill_id=${bill.id}`} className="text-xs text-zinc-600 hover:underline hover:text-zinc-900 font-semibold italic">
             Detail →
           </Link>
         );

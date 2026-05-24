@@ -33,7 +33,7 @@ const NAV: NavItem[] = [
     Icon: Receipt,
     children: [
       { href: "/billing", label: "Manage Billing" },
-      { href: "/billing/penghuni", label: "Billing Penghuni" },
+      { href: "/penghuni", label: "Data Penghuni" },
       { href: "/platform-billing", label: "Biaya Platform" },
     ],
   },
@@ -45,6 +45,7 @@ const NAV: NavItem[] = [
       { href: "/laporan-tamu", label: "Laporan Tamu" },
       { href: "/pengajuan-surat", label: "Pengajuan Surat" },
       { href: "/komplain", label: "Komplain Penghuni" },
+      { href: "/izin-renovasi", label: "Izin Renovasi" },
     ],
   },
   {

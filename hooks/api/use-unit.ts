@@ -19,6 +19,14 @@ export function useUnits(params?: UnitQueryParams) {
   });
 }
 
+export function useUnit(id: string) {
+  return useQuery({
+    queryKey: unitQK.detail(id),
+    queryFn: () => UnitService.getUnit(id),
+    enabled: !!id,
+  });
+}
+
 export function useCreateUnit() {
   const queryClient = useQueryClient();
 
