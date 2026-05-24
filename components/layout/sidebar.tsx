@@ -3,17 +3,17 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import {
-  Bell,
   Building2,
-  CreditCard,
-  Database,
   LayoutDashboard,
   LogOut,
+  Mail,
   Receipt,
   Settings,
-  Upload,
-  Users,
+  ChevronDown,
+  ChevronRight,
+  Database,
   type LucideIcon,
 } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth";
@@ -21,22 +21,109 @@ import { useLogout } from "@/hooks/use-logout";
 import { initials } from "@/lib/format";
 
 type NavItem = {
-  href: string;
+  href?: string;
   label: string;
   Icon: LucideIcon;
+  children?: { href: string; label: string }[];
 };
 
 const NAV: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
-  { href: "/billing", label: "Manage Billing", Icon: Receipt },
-  { href: "/billing/penghuni", label: "Billing Penghuni", Icon: Users },
-  { href: "/laporan", label: "Upload Laporan", Icon: Upload },
-  { href: "/fasilitas", label: "Fasilitas", Icon: Building2 },
+  {
+    label: "Billing",
+    Icon: Receipt,
+    children: [
+      { href: "/billing", label: "Manage Billing" },
+      { href: "/penghuni", label: "Billing Penghuni" },
+      { href: "/laporan", label: "Upload Laporan" },
+    ],
+  },
+  {
+    label: "Layanan Warga",
+    Icon: Mail,
+    children: [
+      { href: "/laporan-masalah", label: "Laporan Masalah" },
+      { href: "/laporan-tamu", label: "Laporan Tamu" },
+      { href: "/pengajuan-surat", label: "Pengajuan Surat" },
+      { href: "/izin-renovasi", label: "Izin Renovasi" },
+    ],
+  },
+  {
+    label: "Fasilitas & Jadwal",
+    Icon: Building2,
+    children: [
+      { href: "/fasilitas", label: "Fasilitas" },
+      { href: "/jadwal/keamanan", label: "Jadwal Keamanan" },
+      { href: "/jadwal/kebersihan", label: "Jadwal Kebersihan" },
+    ],
+  },
   { href: "/master-data", label: "Master Data", Icon: Database },
-  { href: "/notifikasi", label: "Notifikasi", Icon: Bell },
-  { href: "/platform-billing", label: "Biaya Platform", Icon: CreditCard },
-  { href: "/pengaturan", label: "Pengaturan", Icon: Settings },
+  {
+    label: "Pengaturan & Lainnya",
+    Icon: Settings,
+    children: [
+      { href: "/platform-billing", label: "Biaya Platform" },
+      { href: "/notifikasi", label: "Notifikasi" },
+      { href: "/pengaturan", label: "Pengaturan" },
+    ],
+  },
 ];
+
+function NavGroup({ item, pathname }: { item: NavItem; pathname: string }) {
+  const hasActiveChild = item.children?.some(
+    (child) => pathname === child.href || pathname.startsWith(child.href + "/")
+  );
+  const [isOpen, setIsOpen] = useState(hasActiveChild || false);
+  const [prevPathname, setPrevPathname] = useState(pathname);
+
+  // Sync state during render to avoid cascading renders from useEffect
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname);
+    if (hasActiveChild) {
+      setIsOpen(true);
+    }
+  }
+
+  return (
+    <div className="space-y-1">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-700 transition hover:bg-cream-200/60"
+      >
+        <div className="flex items-center gap-3">
+          <item.Icon size={18} aria-hidden="true" className="text-zinc-500" />
+          {item.label}
+        </div>
+        {isOpen ? (
+          <ChevronDown size={16} className="text-zinc-400" />
+        ) : (
+          <ChevronRight size={16} className="text-zinc-400" />
+        )}
+      </button>
+      {isOpen && (
+        <div className="ml-9 space-y-1">
+          {item.children?.map((child) => {
+            // Precise matching to prevent parent path matching child path incorrectly if similar
+            const active =
+              pathname === child.href || pathname.startsWith(child.href + "/");
+            return (
+              <Link
+                key={child.href}
+                href={child.href}
+                className={`block rounded-lg px-3 py-2 text-sm transition ${active
+                  ? "bg-brand-900 font-semibold text-white"
+                  : "text-zinc-600 hover:bg-cream-200/60 hover:text-zinc-900"
+                  }`}
+              >
+                {child.label}
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -65,33 +152,51 @@ export function Sidebar() {
       </div>
 
       <nav className="flex-1 space-y-1 px-3">
-        {NAV.map(({ href, label, Icon }) => {
-          const matches =
-            pathname === href || pathname.startsWith(href + "/");
-          const moreSpecificMatch = NAV.some(
-            (other) =>
-              other.href !== href &&
-              other.href.startsWith(href + "/") &&
-              (pathname === other.href ||
-                pathname.startsWith(other.href + "/")),
-          );
+        {NAV.map((item) => {
+          if (item.children) {
+            return <NavGroup key={item.label} item={item} pathname={pathname} />;
+          }
+
+          const href = item.href!;
+          const matches = pathname === href || pathname.startsWith(href + "/");
+          // Check if there's any other route that is more specific (for single items)
+          let moreSpecificMatch = false;
+          NAV.forEach((other) => {
+            if (other.children) {
+              moreSpecificMatch =
+                moreSpecificMatch ||
+                other.children.some(
+                  (child) =>
+                    child.href !== href &&
+                    child.href.startsWith(href + "/") &&
+                    (pathname === child.href || pathname.startsWith(child.href + "/"))
+                );
+            } else {
+              moreSpecificMatch =
+                moreSpecificMatch ||
+                (other.href !== href &&
+                  other.href!.startsWith(href + "/") &&
+                  (pathname === other.href || pathname.startsWith(other.href + "/")));
+            }
+          });
+
           const active = matches && !moreSpecificMatch;
+
           return (
             <Link
               key={href}
               href={href}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${
-                active
-                  ? "bg-brand-900 font-semibold text-white"
-                  : "text-zinc-700 hover:bg-cream-200/60"
-              }`}
+              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${active
+                ? "bg-brand-900 font-semibold text-white"
+                : "text-zinc-700 hover:bg-cream-200/60"
+                }`}
             >
-              <Icon
+              <item.Icon
                 size={18}
                 aria-hidden="true"
                 className={active ? "text-white" : "text-zinc-500"}
               />
-              {label}
+              {item.label}
             </Link>
           );
         })}

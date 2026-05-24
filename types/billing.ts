@@ -1,4 +1,4 @@
-export type BillKind = "monthly" | "one_time";
+export type BillKind = "monthly" | "specific";
 export type BillStatus = "unpaid" | "pending_verification" | "paid" | "rejected" | "void";
 
 export type ResidentBillQueryParams = {

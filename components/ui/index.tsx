@@ -186,3 +186,4 @@ export function ErrorBanner({ children }: { children: ReactNode }) {
 }
 
 export * from "./data-table";
+export * from "./modal";

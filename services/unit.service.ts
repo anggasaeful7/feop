@@ -15,6 +15,10 @@ export const UnitService = {
     return api<Paged<Unit>>(path);
   },
 
+  getUnit: async (id: string) => {
+    return api<Unit>(`/api/v1/master/units/${id}`);
+  },
+
   createUnit: async (payload: UnitPayload) => {
     return api<Unit>("/api/v1/master/units", {
       method: "POST",
