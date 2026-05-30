@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Download, MoreVertical, Trash2, UploadCloud, X } from "lucide-react";
 import { ApiError, API_URL, authHeaders, api } from "@/lib/axios";
-import { Badge, Button, Card, PageHeader } from "@/components/ui";
+import { PageHeader } from "@/components/layout/page-header";
+import { Badge, Button, Card } from "@/components/ui";
 
 type ReportKind = "monthly" | "yearly";
 type ReportStatus = "draft" | "published";

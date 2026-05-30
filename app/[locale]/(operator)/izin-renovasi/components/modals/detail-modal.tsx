@@ -219,7 +219,7 @@ export function DetailModal({ permit, onClose }: DetailModalProps) {
 
           {permit.status === "pending" && (
             <>
-              <Button variant="destructive" onClick={() => setShowReject(true)}>
+              <Button variant="danger" onClick={() => setShowReject(true)}>
                 Tolak
               </Button>
               <Button onClick={() => setShowApprove(true)}>

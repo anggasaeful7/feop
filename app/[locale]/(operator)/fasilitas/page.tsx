@@ -10,7 +10,8 @@ import {
   Receipt,
   X,
 } from "lucide-react";
-import { Badge, Button, Card, PageHeader } from "@/components/ui";
+import { PageHeader } from "@/components/layout/page-header";
+import { Badge, Button, Card } from "@/components/ui";
 import { api, ApiError } from "@/lib/axios";
 import { idr, idrShort, formatBookingWindow } from "@/lib/format";
 import type { Paged } from "@/types";

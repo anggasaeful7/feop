@@ -2,7 +2,8 @@
 
 import { useState, useMemo } from "react";
 import { Plus, Pencil, Trash2, Send, Loader2 } from "lucide-react";
-import { Badge, Button, Card, DataTable, PageHeader } from "@/components/ui";
+import { PageHeader } from "@/components/layout/page-header";
+import { Badge, Button, Card, DataTable } from "@/components/ui";
 import { ColumnDef } from "@tanstack/react-table";
 import { useDebounce } from "@/hooks/use-debounce";
 import { idr } from "@/lib/format";

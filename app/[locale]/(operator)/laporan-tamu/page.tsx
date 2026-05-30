@@ -1,4 +1,5 @@
-import { PageHeader } from "@/components/ui";
+import { PageHeader } from "@/components/layout/page-header";
+
 import { GuestReportList } from "./components/guest-report-list";
 
 export const metadata = {

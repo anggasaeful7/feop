@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Save } from "lucide-react";
-import { Badge, Button, Card, PageHeader } from "@/components/ui";
+import { PageHeader } from "@/components/layout/page-header";
+import { Badge, Button, Card } from "@/components/ui";
 import { api, ApiError } from "@/lib/axios";
 import { idr } from "@/lib/format";
 import { Field, inputClass } from "@/components/ui/modal";

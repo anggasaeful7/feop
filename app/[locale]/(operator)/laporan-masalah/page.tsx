@@ -1,4 +1,5 @@
-import { PageHeader } from "@/components/ui";
+import { PageHeader } from "@/components/layout/page-header";
+
 import { ComplaintList } from "./components/complaint-list";
 
 export const metadata = {

@@ -51,7 +51,7 @@ export function ApproveModal({
         </Field>
 
         <div className="mt-6 flex justify-end gap-2">
-          <Button type="button" variant="ghost" onClick={onClose} disabled={isPending}>
+          <Button type="button" variant="danger" onClick={onClose} disabled={isPending}>
             Batal
           </Button>
           <Button type="submit" disabled={!file || isPending}>

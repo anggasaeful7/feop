@@ -2,7 +2,8 @@
 
 import { useState, useMemo } from "react";
 import { Plus } from "lucide-react";
-import { Button, PageHeader } from "@/components/ui";
+import { PageHeader } from "@/components/layout/page-header";
+import { Button } from "@/components/ui";
 import { useSecuritySchedules } from "@/hooks/api/use-schedules";
 import type { SecuritySchedule } from "@/types/schedules";
 import { SecurityScheduleFormModal } from "./components/security-schedule-modal";

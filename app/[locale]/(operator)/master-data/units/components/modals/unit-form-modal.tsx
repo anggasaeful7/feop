@@ -2,10 +2,8 @@
 
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
 
-import { Button } from "@/components/ui";
-import { Modal } from "@/components/ui/modal";
+import { Modal, ModalFormFooter } from "@/components/ui/modal";
 import {
   Form,
   FormControl,
@@ -21,6 +19,7 @@ import { unitSchema, type UnitFormValues } from "@/lib/validations/unit";
 import { useCreateUnit, useUpdateUnit } from "@/hooks/api/use-unit";
 import { useUnitTypes } from "@/hooks/api/use-unit-type";
 import { usePersons } from "@/hooks/api/use-person";
+import { UNIT_STATUS_LABEL, BILL_PAYER_LABEL } from "@/lib/constants";
 
 export function UnitFormModal({
   title,
@@ -105,15 +104,13 @@ export function UnitFormModal({
       }
       onClose={onClose}
       footer={
-        <>
-          <Button variant="danger" onClick={onClose} disabled={isPending}>
-            ✕ Batal
-          </Button>
-          <Button onClick={form.handleSubmit(onSubmit)} disabled={isPending}>
-            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            ✓ {isEditing ? "Simpan Perubahan" : "Tambahkan Unit"}
-          </Button>
-        </>
+        <ModalFormFooter
+          isPending={isPending}
+          isEditing={isEditing}
+          onClose={onClose}
+          onSubmit={form.handleSubmit(onSubmit)}
+          submitLabel="✓ Simpan Unit"
+        />
       }
     >
       <Form {...form}>
@@ -275,9 +272,11 @@ export function UnitFormModal({
                     {...field}
                     className="flex h-10 w-full rounded-xl border border-zinc-200 bg-transparent px-3 py-2 text-sm italic ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    <option value="occupied">Terhuni</option>
-                    <option value="vacant">Kosong</option>
-                    <option value="maintenance">Perbaikan</option>
+                    {Object.entries(UNIT_STATUS_LABEL).map(([val, label]) => (
+                      <option key={val} value={val}>
+                        {label}
+                      </option>
+                    ))}
                   </select>
                 </FormControl>
                 <FormMessage />
@@ -296,8 +295,11 @@ export function UnitFormModal({
                     {...field}
                     className="flex h-10 w-full rounded-xl border border-zinc-200 bg-transparent px-3 py-2 text-sm italic ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    <option value="resident">Penghuni</option>
-                    <option value="owner">Pemilik</option>
+                    {Object.entries(BILL_PAYER_LABEL).map(([val, label]) => (
+                      <option key={val} value={val}>
+                        {label}
+                      </option>
+                    ))}
                   </select>
                 </FormControl>
                 <p className="text-xs text-zinc-500 mt-1">Pilih pihak yang menanggung iuran IPL bulanan.</p>

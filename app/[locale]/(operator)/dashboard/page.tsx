@@ -8,7 +8,8 @@ import {
   Plus,
   type LucideIcon,
 } from "lucide-react";
-import { Badge, Card, PageHeader, Button, Stat } from "@/components/ui";
+import { PageHeader } from "@/components/layout/page-header";
+import { Badge, Card, Button, Stat } from "@/components/ui";
 import { PaymentStatusChart, TrendBarChart } from "./components/charts";
 
 import { useTranslations } from "next-intl";

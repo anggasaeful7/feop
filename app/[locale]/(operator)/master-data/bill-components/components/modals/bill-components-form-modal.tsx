@@ -2,10 +2,9 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
 
-import { Button, Toggle } from "@/components/ui";
-import { Modal } from "@/components/ui/modal";
+import { Toggle } from "@/components/ui";
+import { Modal, ModalFormFooter } from "@/components/ui/modal";
 import {
   Form,
   FormControl,
@@ -21,7 +20,7 @@ import type { BillComponent } from "@/types/master-data";
 import { billComponentSchema, type BillComponentFormValues } from "@/lib/validations/bill-component";
 import { useCreateBillComponent, useUpdateBillComponent } from "@/hooks/api/use-bill-component";
 
-export function BillComponentFormModal({
+export function BillComponentsFormModal({
   title,
   initial,
   onClose,
@@ -80,15 +79,13 @@ export function BillComponentFormModal({
       }
       onClose={onClose}
       footer={
-        <>
-          <Button variant="danger" onClick={onClose} disabled={isPending}>
-            ✕ Batal
-          </Button>
-          <Button onClick={form.handleSubmit(onSubmit)} disabled={isPending}>
-            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            ✓ {isEditing ? "Simpan Perubahan" : "Tambahkan Komponen"}
-          </Button>
-        </>
+        <ModalFormFooter
+          isPending={isPending}
+          isEditing={isEditing}
+          onClose={onClose}
+          onSubmit={form.handleSubmit(onSubmit)}
+          submitLabel="✓ Simpan Komponen"
+        />
       }
     >
       <Form {...form}>
