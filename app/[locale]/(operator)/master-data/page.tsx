@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/ui";
 import { UnitsCard } from "./components/cards/units-card";
 import { PersonsCard } from "./components/cards/persons-card";
 import { UnitTypesCard } from "./components/cards/unit-types-card";
-import { BillComponentCard } from "./components/cards/bill-component-card";
+import { BillComponentsCard } from "./components/cards/bill-components-card";
 import { EmergencyContactsCard } from "./components/cards/emergency-contacts-card";
 
 const TABS = ["Unit", "Pemilik", "Penghuni", "Tipe Unit", "Komponen Tagihan", "Kontak Darurat"] as const;
@@ -41,7 +41,7 @@ export default function MasterDataPage() {
       {tab === "Pemilik" && <PersonsCard role="owner" />}
       {tab === "Penghuni" && <PersonsCard role="resident" />}
       {tab === "Tipe Unit" && <UnitTypesCard />}
-      {tab === "Komponen Tagihan" && <BillComponentCard />}
+      {tab === "Komponen Tagihan" && <BillComponentsCard />}
       {tab === "Kontak Darurat" && <EmergencyContactsCard />}
     </>
   );

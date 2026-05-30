@@ -21,7 +21,7 @@ import type { BillComponent } from "@/types/master-data";
 import { billComponentSchema, type BillComponentFormValues } from "@/lib/validations/bill-component";
 import { useCreateBillComponent, useUpdateBillComponent } from "@/hooks/api/use-bill-component";
 
-export function BillComponentFormModal({
+export function BillComponentsFormModal({
   title,
   initial,
   onClose,
@@ -86,7 +86,7 @@ export function BillComponentFormModal({
           </Button>
           <Button onClick={form.handleSubmit(onSubmit)} disabled={isPending}>
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            ✓ {isEditing ? "Simpan Perubahan" : "Tambahkan Komponen"}
+            ✓ {isEditing ? "Simpan Perubahan" : "Simpan Komponen"}
           </Button>
         </>
       }

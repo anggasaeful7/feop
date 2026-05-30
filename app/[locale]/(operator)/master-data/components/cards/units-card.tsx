@@ -177,13 +177,14 @@ export function UnitsCard() {
         columns={columns}
         isLoading={isLoading}
         search={search}
-        onSearchChange={setSearch}
-        searchPlaceholder="Cari Unit"
+        onSearchChange={(val) => {
+          setSearch(val);
+          setPage(1);
+        }}
         total={total}
         page={page}
         perPage={perPage}
         onPageChange={setPage}
-        emptyMessage="Belum ada unit. Buat tipe unit di tab “Tarif IPL”, lalu klik “Tambah Unit”."
         actions={
           <div className="flex items-center gap-2">
             <CSVTools
@@ -193,7 +194,7 @@ export function UnitsCard() {
               templateFilename="units-template.csv"
               onAfterImport={() => { refetch(); }}
             />
-            <Button size="sm" onClick={() => setCreating(true)} className="font-bold italic">
+            <Button size="sm" onClick={() => setCreating(true)}>
               <Plus size={16} className="mr-1" /> Tambah Unit
             </Button>
           </div>

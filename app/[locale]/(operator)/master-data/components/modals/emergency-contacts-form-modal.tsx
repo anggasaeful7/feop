@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Modal } from "@/components/ui/modal";
@@ -9,14 +9,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { emergencyContactSchema, type EmergencyContactFormValues } from "@/lib/validations/emergency-contact";
 import type { EmergencyContact } from "@/types/emergency-contact";
-
-interface ContactModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  initialData?: EmergencyContact | null;
-  onSubmit: (data: EmergencyContactFormValues) => void;
-  isLoading?: boolean;
-}
+import {
+  useCreateEmergencyContact,
+  useUpdateEmergencyContact,
+} from "@/hooks/api/use-emergency-contacts";
 
 const ROLE_OPTIONS = [
   "Keamanan",
@@ -33,71 +29,77 @@ const HOURS_OPTIONS = [
   "Bebas"
 ];
 
-export function ContactModal({
-  open,
-  onOpenChange,
-  initialData,
-  onSubmit,
-  isLoading,
-}: ContactModalProps) {
+export function EmergencyContactFormModal({
+  title,
+  initial,
+  onClose,
+}: {
+  title: string;
+  initial?: EmergencyContact | null;
+  onClose: () => void;
+}) {
+  const isEditing = !!initial;
+
   const form = useForm<EmergencyContactFormValues>({
     resolver: zodResolver(emergencyContactSchema),
     defaultValues: {
-      name: "",
-      role: "",
-      hours: "24 Jam",
-      phone: "",
-      whatsapp: "",
-      email: "",
-      address: "",
-      is_active: true,
-      is_emergency: true,
-      sort_order: 0,
+      name: initial?.name || "",
+      role: initial?.role || "",
+      hours: initial?.hours || "24 Jam",
+      phone: initial?.phone || "",
+      whatsapp: initial?.whatsapp || "",
+      email: initial?.email || "",
+      address: initial?.address || "",
+      is_active: initial?.is_active ?? true,
+      is_emergency: initial?.is_emergency ?? true,
+      sort_order: initial?.sort_order ?? 0,
     },
   });
 
-  useEffect(() => {
-    if (open && initialData) {
-      form.reset({
-        name: initialData.name,
-        role: initialData.role,
-        hours: initialData.hours,
-        phone: initialData.phone,
-        whatsapp: initialData.whatsapp || "",
-        email: initialData.email || "",
-        address: initialData.address || "",
-        is_active: initialData.is_active,
-        is_emergency: initialData.is_emergency,
-        sort_order: initialData.sort_order,
+  const createMut = useCreateEmergencyContact();
+  const updateMut = useUpdateEmergencyContact(initial?.id || "");
+
+  const isPending = createMut.isPending || updateMut.isPending;
+
+  function onSubmit(values: EmergencyContactFormValues) {
+    if (isEditing) {
+      updateMut.mutate(values, {
+        onSuccess: () => {
+          onClose();
+        },
       });
-    } else if (open && !initialData) {
-      form.reset({
-        name: "",
-        role: "",
-        hours: "24 Jam",
-        phone: "",
-        whatsapp: "",
-        email: "",
-        address: "",
-        is_active: true,
-        is_emergency: true,
-        sort_order: 0,
+    } else {
+      createMut.mutate(values, {
+        onSuccess: () => {
+          onClose();
+        },
       });
     }
-  }, [open, initialData, form]);
-
-  const handleSubmit = form.handleSubmit((data) => {
-    onSubmit(data);
-  });
+  }
 
   return (
     <Modal
-      open={open}
-      onClose={() => onOpenChange(false)}
-      title={initialData ? "Edit Kontak Darurat" : "Tambah Kontak Darurat"}
+      open
+      title={
+        <div className="flex items-center justify-between w-full pr-8">
+          <span className="text-2xl font-bold italic">{title}</span>
+        </div>
+      }
+      onClose={onClose}
+      footer={
+        <>
+          <Button variant="danger" onClick={onClose} disabled={isPending}>
+            ✕ Batal
+          </Button>
+          <Button onClick={form.handleSubmit(onSubmit)} disabled={isPending}>
+            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            ✓ {isEditing ? "Simpan Perubahan" : "Simpan Kontak"}
+          </Button>
+        </>
+      }
     >
       <Form {...form}>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
             control={form.control}
             name="name"
@@ -243,20 +245,6 @@ export function ContactModal({
               </FormItem>
             )}
           />
-
-          <div className="flex justify-end gap-3 pt-4 border-t border-zinc-100">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => onOpenChange(false)}
-              disabled={isLoading}
-            >
-              Batal
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Menyimpan..." : "Simpan Kontak"}
-            </Button>
-          </div>
         </form>
       </Form>
     </Modal>

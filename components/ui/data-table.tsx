@@ -63,11 +63,11 @@ export function DataTable<TData, TValue>({
         <div className="flex flex-col sm:flex-row items-center gap-2">
           {onSearchChange && (
             <div className="relative">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A9582]" size={18} />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A9582]" size={size === 'sm' ? 14 : 16} />
               <input
                 type="text"
                 placeholder={searchPlaceholder}
-                className={`w-full sm:w-72 pl-10 pr-4 rounded-full border border-[#E4DDCB] bg-transparent italic text-zinc-700 placeholder:text-[#8A9582] focus:outline-none focus:ring-1 focus:ring-[#E4DDCB] transition-shadow ${size === 'sm' ? 'h-8 text-xs' : 'h-10'}`}
+                className={`w-full sm:w-72 pl-10 pr-4 rounded-full border border-[#E4DDCB] bg-transparent italic text-zinc-700 placeholder:text-[#8A9582] focus:outline-none focus:ring-1 focus:ring-[#E4DDCB] transition-shadow ${size === 'sm' ? 'h-8 text-xs' : 'h-9 text-sm'}`}
                 value={search || ""}
                 onChange={(e) => onSearchChange(e.target.value)}
               />

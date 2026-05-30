@@ -30,4 +30,7 @@ export interface EmergencyContactPayload {
 
 export interface EmergencyContactQueryParams {
   only_active?: boolean;
+  search?: string;
+  page?: number;
+  per_page?: number;
 }

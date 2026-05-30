@@ -4,16 +4,23 @@ import { useState, useMemo } from "react";
 import { Pencil, Plus, Trash2, Loader2 } from "lucide-react";
 import { Button, DataTable } from "@/components/ui";
 import { ColumnDef } from "@tanstack/react-table";
-import { BillComponentFormModal } from "../modals/bill-component-form-modal";
+import { BillComponentsFormModal } from "../modals/bill-components-form-modal";
 import { AssignComponentModal } from "../modals/assign-component-modal";
 import type { BillComponent } from "@/types/master-data";
 import { useBillComponents, useDeleteBillComponent } from "@/hooks/api/use-bill-component";
 import { useDebounce } from "@/hooks/use-debounce";
 
-export function BillComponentCard() {
+export function BillComponentsCard() {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
-  const { data, isLoading } = useBillComponents({ search: debouncedSearch, per_page: 100 });
+  const [page, setPage] = useState(1);
+  const perPage = 10;
+
+  const { data, isLoading } = useBillComponents({
+    search: debouncedSearch,
+    page,
+    per_page: perPage,
+  });
   const deleteMutation = useDeleteBillComponent();
 
   const items = data?.items || [];
@@ -85,15 +92,20 @@ export function BillComponentCard() {
         columns={columns}
         isLoading={isLoading}
         search={search}
-        onSearchChange={setSearch}
-        searchPlaceholder="Cari Komponen Tagihan"
+        onSearchChange={(val) => {
+          setSearch(val);
+          setPage(1);
+        }}
         total={data?.total || 0}
+        page={page}
+        perPage={perPage}
+        onPageChange={setPage}
         actions={
           <>
-            <Button onClick={() => setAssigning(true)} className="font-bold italic">
+            <Button size="sm" onClick={() => setAssigning(true)}>
               <Plus size={16} className="mr-1" /> Asign ke unit
             </Button>
-            <Button onClick={() => setCreating(true)} className="font-bold italic">
+            <Button size="sm" onClick={() => setCreating(true)}>
               <Plus size={16} className="mr-1" /> Tambah Komponen
             </Button>
           </>
@@ -101,14 +113,14 @@ export function BillComponentCard() {
       />
 
       {creating && (
-        <BillComponentFormModal
+        <BillComponentsFormModal
           title="Tambah Komponen"
           onClose={() => setCreating(false)}
         />
       )}
 
       {editing && (
-        <BillComponentFormModal
+        <BillComponentsFormModal
           title="Edit Komponen"
           initial={editing}
           onClose={() => setEditing(null)}

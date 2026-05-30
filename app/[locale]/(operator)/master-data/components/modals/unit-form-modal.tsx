@@ -111,7 +111,7 @@ export function UnitFormModal({
           </Button>
           <Button onClick={form.handleSubmit(onSubmit)} disabled={isPending}>
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            ✓ {isEditing ? "Simpan Perubahan" : "Tambahkan Unit"}
+            ✓ {isEditing ? "Simpan Perubahan" : "Simpan Unit"}
           </Button>
         </>
       }

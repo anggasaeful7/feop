@@ -4,25 +4,30 @@ import { useState, useMemo } from "react";
 import { Pencil, Plus, Trash2, Loader2 } from "lucide-react";
 import { Button, DataTable, Badge } from "@/components/ui";
 import { ColumnDef } from "@tanstack/react-table";
-import { ContactModal } from "../modals/contact-modal";
 import type { EmergencyContact } from "@/types/emergency-contact";
 import {
   useEmergencyContacts,
-  useCreateEmergencyContact,
-  useUpdateEmergencyContact,
   useDeleteEmergencyContact,
 } from "@/hooks/api/use-emergency-contacts";
-import type { EmergencyContactFormValues } from "@/lib/validations/emergency-contact";
+import { useDebounce } from "@/hooks/use-debounce";
+import { EmergencyContactFormModal } from "../modals/emergency-contacts-form-modal";
 
 export function EmergencyContactsCard() {
-  const { data: response, isLoading } = useEmergencyContacts();
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 500);
+  const [page, setPage] = useState(1);
+  const perPage = 10;
+
+  const { data: response, isLoading } = useEmergencyContacts({
+    search: debouncedSearch,
+    page,
+    per_page: perPage,
+  });
   const contacts = response?.items || [];
 
   const [editing, setEditing] = useState<EmergencyContact | null>(null);
   const [creating, setCreating] = useState(false);
 
-  const createMutation = useCreateEmergencyContact();
-  const updateMutation = useUpdateEmergencyContact(editing?.id || "");
   const deleteMutation = useDeleteEmergencyContact();
 
   const columns: ColumnDef<EmergencyContact>[] = useMemo(() => [
@@ -89,21 +94,7 @@ export function EmergencyContactsCard() {
     },
   ], [deleteMutation]);
 
-  const handleSubmit = (formData: EmergencyContactFormValues) => {
-    if (editing) {
-      updateMutation.mutate(formData, {
-        onSuccess: () => {
-          setEditing(null);
-        }
-      });
-    } else {
-      createMutation.mutate(formData, {
-        onSuccess: () => {
-          setCreating(false);
-        }
-      });
-    }
-  };
+
 
   return (
     <>
@@ -112,27 +103,34 @@ export function EmergencyContactsCard() {
         data={contacts}
         columns={columns}
         isLoading={isLoading}
-        emptyMessage="Belum ada data kontak darurat."
+        search={search}
+        onSearchChange={(val) => {
+          setSearch(val);
+          setPage(1);
+        }}
         total={response?.total || 0}
+        page={page}
+        perPage={perPage}
+        onPageChange={setPage}
         actions={
-          <Button onClick={() => setCreating(true)} className="font-bold italic">
+          <Button size="sm" onClick={() => setCreating(true)}>
             <Plus size={16} className="mr-1" /> Tambah Kontak
           </Button>
         }
       />
 
-      {(creating || editing) && (
-        <ContactModal
-          open={creating || !!editing}
-          onOpenChange={(open) => {
-            if (!open) {
-              setCreating(false);
-              setEditing(null);
-            }
-          }}
-          initialData={editing}
-          onSubmit={handleSubmit}
-          isLoading={createMutation.isPending || updateMutation.isPending}
+      {creating && (
+        <EmergencyContactFormModal
+          title="Tambah Kontak"
+          onClose={() => setCreating(false)}
+        />
+      )}
+
+      {editing && (
+        <EmergencyContactFormModal
+          title="Edit Kontak"
+          initial={editing}
+          onClose={() => setEditing(null)}
         />
       )}
     </>

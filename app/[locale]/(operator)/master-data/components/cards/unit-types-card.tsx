@@ -16,7 +16,15 @@ export function UnitTypesCard() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
-  const { data, isLoading } = useUnitTypes({ search: debouncedSearch, per_page: 100 });
+  const [page, setPage] = useState(1);
+  const perPage = 10;
+
+  const { data, isLoading } = useUnitTypes({
+    search: debouncedSearch,
+    page,
+    per_page: perPage,
+  });
+
   const deleteMutation = useDeleteUnitType();
 
   const items = data?.items || [];
@@ -98,9 +106,14 @@ export function UnitTypesCard() {
         columns={columns}
         isLoading={isLoading}
         search={search}
-        onSearchChange={setSearch}
-        searchPlaceholder="Cari Tipe Unit"
+        onSearchChange={(val) => {
+          setSearch(val);
+          setPage(1);
+        }}
         total={data?.total || 0}
+        page={page}
+        perPage={perPage}
+        onPageChange={setPage}
         actions={
           <div className="flex items-center gap-2">
             <CSVTools
@@ -110,7 +123,7 @@ export function UnitTypesCard() {
               templateFilename="unit-types-template.csv"
               onAfterImport={() => queryClient.invalidateQueries({ queryKey: unitTypeQK.all })}
             />
-            <Button onClick={() => setCreating(true)} className="font-bold italic">
+            <Button size="sm" onClick={() => setCreating(true)}>
               <Plus size={16} className="mr-1" /> Tambah Tipe
             </Button>
           </div>
