@@ -13,9 +13,7 @@ export default function LaporanTamuPage() {
         title="Laporan Tamu"
         subtitle="Daftar laporan kedatangan tamu dan pengunjung"
       />
-      <div className="mt-6">
-        <GuestReportList />
-      </div>
+      <GuestReportList />
     </>
   );
 }

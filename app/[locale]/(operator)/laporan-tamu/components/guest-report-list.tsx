@@ -1,21 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useGuestReports } from "@/hooks/api/use-guest-report";
-import { DataTable } from "@/components/ui";
-import { getColumns } from "./columns";
+import { Button, DataTable } from "@/components/ui";
+import { baseColumns } from "./columns";
 import type { GuestReport } from "@/types/guest-report";
 import { DetailModal } from "./modals/detail-modal";
+import { useDebounce } from "@/hooks/use-debounce";
+import { Eye } from "lucide-react";
+import { ColumnDef } from "@tanstack/react-table";
 
 export function GuestReportList() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 500);
   const [perPage] = useState(10);
 
   const { data, isLoading } = useGuestReports({
     page,
     per_page: perPage,
-    search: search || undefined,
+    search: debouncedSearch || undefined,
   });
 
   const [selectedReport, setSelectedReport] = useState<GuestReport | null>(null);
@@ -28,10 +32,31 @@ export function GuestReportList() {
     setSelectedReport(null);
   };
 
+  const columns: ColumnDef<GuestReport>[] = useMemo(() => [
+    ...baseColumns,
+    {
+      id: "actions",
+      cell: ({ row }) => {
+        const report = row.original;
+        return (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleViewDetail(report)}
+            title="Lihat Detail"
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+        );
+      },
+    },
+  ], []);
+
   return (
-    <>
+    <div className="space-y-4">
       <DataTable
-        columns={getColumns(handleViewDetail)}
+        title="Daftar Laporan Tamu"
+        columns={columns}
         data={data?.items ?? []}
         isLoading={isLoading}
         total={data?.total ?? 0}
@@ -43,12 +68,11 @@ export function GuestReportList() {
           setSearch(v);
           setPage(1);
         }}
-        searchPlaceholder="Cari nama tamu atau unit code..."
       />
 
       {selectedReport && (
         <DetailModal report={selectedReport} onClose={closeModal} />
       )}
-    </>
+    </div>
   );
 }

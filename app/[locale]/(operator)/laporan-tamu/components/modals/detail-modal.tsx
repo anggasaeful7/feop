@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { Modal, Button } from "@/components/ui";
 import type { GuestReport } from "@/types/guest-report";
@@ -86,12 +88,6 @@ export function DetailModal({
             <div className="text-sm text-zinc-400">Tidak ada lampiran KTP</div>
           )}
         </div>
-      </div>
-
-      <div className="mt-6 flex justify-end">
-        <Button variant="secondary" onClick={onClose}>
-          Tutup
-        </Button>
       </div>
     </Modal>
   );
