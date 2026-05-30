@@ -1,18 +1,18 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Pencil, Plus, Trash2, Loader2 } from "lucide-react";
-import { Button, DataTable } from "@/components/ui";
+import { Plus } from "lucide-react";
+import { Button, DataTable, DataTableRowActions } from "@/components/ui";
 import { ColumnDef } from "@tanstack/react-table";
 import { useQueryClient } from "@tanstack/react-query";
-import { UnitTypeFormModal } from "../modals/unit-type-form-modal";
-import { CSVTools } from "../csv-import";
+import { UnitTypeFormModal } from "./modals/unit-type-form-modal";
+import { CSVTools } from "@/components/csv-import";
 import type { UnitType } from "@/types/master-data";
 import { useUnitTypes, useDeleteUnitType, unitTypeQK } from "@/hooks/api/use-unit-type";
 import { useDebounce } from "@/hooks/use-debounce";
-import { formatEffective } from "@/lib/format";
+import { baseColumns } from "./columns";
 
-export function UnitTypesCard() {
+export function UnitTypesList() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
@@ -33,66 +33,19 @@ export function UnitTypesCard() {
   const [creating, setCreating] = useState(false);
 
   const columns: ColumnDef<UnitType>[] = useMemo(() => [
-    {
-      header: "Tipe",
-      accessorKey: "code",
-      cell: ({ row }) => <span className="font-bold text-zinc-900">{row.original.code}</span>,
-    },
-    {
-      header: "Luas",
-      accessorKey: "area_sqm",
-      cell: ({ row }) => <span className="text-zinc-700">{row.original.area_sqm} m²</span>,
-    },
-    {
-      header: "Unit",
-      accessorKey: "unit_count",
-      cell: ({ row }) => <span className="text-zinc-700">{row.original.unit_count} unit</span>,
-    },
-    // {
-    //   header: "Tarif Bulanan",
-    //   accessorKey: "monthly_tariff",
-    //   cell: ({ row }) => (
-    //     <span className="font-semibold text-zinc-900">
-    //       {idr(row.original.monthly_tariff)}
-    //     </span>
-    //   ),
-    // },
-    {
-      header: "Efektif",
-      accessorKey: "effective_from",
-      cell: ({ row }) => (
-        <span className="italic text-zinc-500">
-          {formatEffective(row.original.effective_from)}
-        </span>
-      ),
-    },
+    ...baseColumns,
     {
       id: "actions",
       header: "",
       cell: ({ row }) => {
         const t = row.original;
         return (
-          <div className="flex justify-end gap-2 text-zinc-400">
-            <button onClick={() => setEditing(t)} className="hover:text-zinc-700 transition" aria-label="Edit">
-              <Pencil size={16} />
-            </button>
-            <button
-              onClick={() => {
-                if (confirm(`Hapus tipe ${t.code}?`)) {
-                  deleteMutation.mutate(t.id);
-                }
-              }}
-              className="text-rose-400 hover:text-rose-600 transition"
-              disabled={deleteMutation.isPending}
-              aria-label="Delete"
-            >
-              {deleteMutation.isPending && deleteMutation.variables === t.id ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Trash2 size={16} />
-              )}
-            </button>
-          </div>
+          <DataTableRowActions
+            onEdit={() => setEditing(t)}
+            onDelete={() => deleteMutation.mutate(t.id)}
+            isDeleting={deleteMutation.isPending && deleteMutation.variables === t.id}
+            deleteConfirmMessage={`Hapus tipe ${t.code}?`}
+          />
         );
       },
     },

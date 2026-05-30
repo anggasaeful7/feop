@@ -1,8 +1,7 @@
-import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Modal } from "@/components/ui/modal";
-import { Button, Toggle } from "@/components/ui";
+import { Modal, ModalFormFooter } from "@/components/ui/modal";
+import { Toggle } from "@/components/ui";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -87,15 +86,13 @@ export function EmergencyContactFormModal({
       }
       onClose={onClose}
       footer={
-        <>
-          <Button variant="danger" onClick={onClose} disabled={isPending}>
-            ✕ Batal
-          </Button>
-          <Button onClick={form.handleSubmit(onSubmit)} disabled={isPending}>
-            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            ✓ {isEditing ? "Simpan Perubahan" : "Simpan Kontak"}
-          </Button>
-        </>
+        <ModalFormFooter
+          isPending={isPending}
+          isEditing={isEditing}
+          onClose={onClose}
+          onSubmit={form.handleSubmit(onSubmit)}
+          submitLabel="✓ Simpan Kontak"
+        />
       }
     >
       <Form {...form}>
@@ -228,19 +225,12 @@ export function EmergencyContactFormModal({
             control={form.control}
             name="is_active"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border border-zinc-200 p-4">
-                <div className="space-y-0.5">
-                  <FormLabel className="text-base">Status Aktif</FormLabel>
-                  <div className="text-sm text-zinc-500">
-                    Tentukan apakah kontak ini aktif dan dapat dilihat oleh penghuni
-                  </div>
-                </div>
+              <FormItem className="flex flex-row items-center justify-between space-y-0 rounded-lg border border-zinc-200/70 p-3 flex-1">
+                <FormLabel>
+                  Status Aktif
+                </FormLabel>
                 <FormControl>
-                  <Toggle
-                    checked={field.value}
-                    onChange={field.onChange}
-                    ariaLabel="Toggle active status"
-                  />
+                  <Toggle checked={field.value} onChange={field.onChange} />
                 </FormControl>
               </FormItem>
             )}

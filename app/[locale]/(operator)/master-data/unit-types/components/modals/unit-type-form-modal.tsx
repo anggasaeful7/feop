@@ -2,10 +2,8 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
 
-import { Button } from "@/components/ui";
-import { Modal } from "@/components/ui/modal";
+import { Modal, ModalFormFooter } from "@/components/ui/modal";
 import {
   Form,
   FormControl,
@@ -74,15 +72,13 @@ export function UnitTypeFormModal({
       }
       onClose={onClose}
       footer={
-        <>
-          <Button variant="danger" onClick={onClose} disabled={isPending}>
-            ✕ Batal
-          </Button>
-          <Button onClick={form.handleSubmit(onSubmit)} disabled={isPending}>
-            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            ✓ {isEditing ? "Simpan Perubahan" : "Simpan Tipe Unit"}
-          </Button>
-        </>
+        <ModalFormFooter
+          isPending={isPending}
+          isEditing={isEditing}
+          onClose={onClose}
+          onSubmit={form.handleSubmit(onSubmit)}
+          submitLabel="✓ Simpan Tipe Unit"
+        />
       }
     >
       <Form {...form}>
