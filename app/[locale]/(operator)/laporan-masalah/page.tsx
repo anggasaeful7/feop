@@ -13,9 +13,7 @@ export default function LaporanMasalahPage() {
         title="Laporan Masalah"
         subtitle="Kelola laporan masalah dari penghuni"
       />
-      <div className="mt-6">
-        <ComplaintList />
-      </div>
+      <ComplaintList />
     </>
   );
 }

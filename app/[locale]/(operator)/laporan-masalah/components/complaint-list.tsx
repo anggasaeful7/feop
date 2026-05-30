@@ -1,16 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useComplaints } from "@/hooks/api/use-complaint";
-import { DataTable } from "@/components/ui";
-import { getColumns } from "./columns";
+import { Button, DataTable } from "@/components/ui";
+import { baseColumns } from "./columns";
 import type { Complaint } from "@/types/complaint";
 import { DetailModal } from "./modals/detail-modal";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useDebounce } from "@/hooks/use-debounce";
+import { Pencil } from "lucide-react";
+import { ColumnDef } from "@tanstack/react-table";
 
 export function ComplaintList() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 500);
   const [status, setStatus] = useState<string>("all");
   const [category, setCategory] = useState<string>("all");
   const [perPage] = useState(10);
@@ -18,7 +22,7 @@ export function ComplaintList() {
   const { data, isLoading } = useComplaints({
     page,
     per_page: perPage,
-    search: search || undefined,
+    search: debouncedSearch || undefined,
     status: status !== "all" ? status : undefined,
     category: category !== "all" ? category : undefined,
   });
@@ -33,42 +37,31 @@ export function ComplaintList() {
     setSelectedComplaint(null);
   };
 
+  const columns: ColumnDef<Complaint>[] = useMemo(() => [
+    ...baseColumns,
+    {
+      id: "actions",
+      cell: ({ row }) => {
+        const c = row.original;
+        return (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleViewDetail(c)}
+            title="Lihat Detail"
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+        );
+      },
+    },
+  ], []);
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-4">
-        <div className="w-48">
-          <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1); }}>
-            <SelectTrigger>
-              <SelectValue placeholder="Semua Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Semua Status</SelectItem>
-              <SelectItem value="open">Open</SelectItem>
-              <SelectItem value="in_progress">In Progress</SelectItem>
-              <SelectItem value="resolved">Resolved</SelectItem>
-              <SelectItem value="rejected">Rejected</SelectItem>
-              <SelectItem value="closed">Closed</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="w-48">
-          <Select value={category} onValueChange={(v) => { setCategory(v); setPage(1); }}>
-            <SelectTrigger>
-              <SelectValue placeholder="Semua Kategori" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Semua Kategori</SelectItem>
-              <SelectItem value="fasilitas_umum">Fasilitas Umum</SelectItem>
-              <SelectItem value="kebersihan">Kebersihan</SelectItem>
-              <SelectItem value="keamanan">Keamanan</SelectItem>
-              <SelectItem value="lainnya">Lainnya</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
       <DataTable
-        columns={getColumns({ onDetail: handleViewDetail })}
+        title="Daftar Laporan"
+        columns={columns}
         data={data?.items ?? []}
         isLoading={isLoading}
         total={data?.total ?? 0}
@@ -80,7 +73,36 @@ export function ComplaintList() {
           setSearch(v);
           setPage(1);
         }}
-        searchPlaceholder="Cari judul laporan..."
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1); }}>
+              <SelectTrigger className="w-40 bg-[#FFFDF7]">
+                <SelectValue placeholder="Semua Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Semua Status</SelectItem>
+                <SelectItem value="open">Baru</SelectItem>
+                <SelectItem value="in_progress">Diproses</SelectItem>
+                <SelectItem value="resolved">Selesai</SelectItem>
+                <SelectItem value="rejected">Ditolak</SelectItem>
+                <SelectItem value="closed">Ditutup</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={category} onValueChange={(v) => { setCategory(v); setPage(1); }}>
+              <SelectTrigger className="w-40 bg-[#FFFDF7]">
+                <SelectValue placeholder="Semua Kategori" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Semua Kategori</SelectItem>
+                <SelectItem value="fasilitas_umum">Fasilitas Umum</SelectItem>
+                <SelectItem value="kebersihan">Kebersihan</SelectItem>
+                <SelectItem value="keamanan">Keamanan</SelectItem>
+                <SelectItem value="lainnya">Lainnya</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        }
       />
 
       {selectedComplaint && (
