@@ -24,6 +24,7 @@ type NavItem = {
   href?: string;
   label: string;
   Icon: LucideIcon;
+  activePath?: string;
   children?: { href: string; label: string }[];
 };
 
@@ -57,7 +58,12 @@ const NAV: NavItem[] = [
       { href: "/jadwal/kebersihan", label: "Jadwal Kebersihan" },
     ],
   },
-  { href: "/master-data", label: "Master Data", Icon: Database },
+  {
+    href: "/master-data/units",
+    activePath: "/master-data",
+    label: "Master Data",
+    Icon: Database,
+  },
   {
     label: "Pengaturan & Lainnya",
     Icon: Settings,
@@ -158,25 +164,28 @@ export function Sidebar() {
           }
 
           const href = item.href!;
-          const matches = pathname === href || pathname.startsWith(href + "/");
+          const activePath = item.activePath ?? href;
+          const matches = pathname === activePath || pathname.startsWith(activePath + "/");
           // Check if there's any other route that is more specific (for single items)
           let moreSpecificMatch = false;
           NAV.forEach((other) => {
+            const otherHref = other.href!;
+            const otherActivePath = other.activePath ?? otherHref;
             if (other.children) {
               moreSpecificMatch =
                 moreSpecificMatch ||
                 other.children.some(
                   (child) =>
                     child.href !== href &&
-                    child.href.startsWith(href + "/") &&
+                    child.href.startsWith(activePath + "/") &&
                     (pathname === child.href || pathname.startsWith(child.href + "/"))
                 );
             } else {
               moreSpecificMatch =
                 moreSpecificMatch ||
-                (other.href !== href &&
-                  other.href!.startsWith(href + "/") &&
-                  (pathname === other.href || pathname.startsWith(other.href + "/")));
+                (otherHref !== href &&
+                  otherActivePath.startsWith(activePath + "/") &&
+                  (pathname === otherHref || pathname.startsWith(otherHref + "/")));
             }
           });
 
