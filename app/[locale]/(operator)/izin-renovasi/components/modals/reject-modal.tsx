@@ -91,7 +91,7 @@ export function RejectModal({ permit, onClose, onSuccess }: RejectModalProps) {
             <Button type="button" variant="outline" onClick={onClose} disabled={isPending}>
               Batal
             </Button>
-            <Button type="submit" variant="destructive" disabled={isPending}>
+            <Button type="submit" variant="danger" disabled={isPending}>
               {isPending ? "Menyimpan..." : "Tolak Izin"}
             </Button>
           </div>

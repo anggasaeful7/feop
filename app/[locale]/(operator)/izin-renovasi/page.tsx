@@ -1,4 +1,5 @@
-import { PageHeader } from "@/components/ui";
+import { PageHeader } from "@/components/layout/page-header";
+
 import { RenovationPermitList } from "./components/renovation-permit-list";
 
 export const metadata = {

@@ -2,7 +2,8 @@
 
 import { useState, useMemo } from "react";
 import { Plus } from "lucide-react";
-import { Button, PageHeader } from "@/components/ui";
+import { PageHeader } from "@/components/layout/page-header";
+import { Button } from "@/components/ui";
 import { useCleaningSchedules } from "@/hooks/api/use-schedules";
 import type { CleaningSchedule } from "@/types/schedules";
 import { CleaningScheduleFormModal } from "./components/cleaning-schedule-modal";

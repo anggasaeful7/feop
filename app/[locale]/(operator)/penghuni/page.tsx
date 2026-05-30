@@ -6,7 +6,8 @@ import {
   Download,
   MessageCircle,
 } from "lucide-react";
-import { Badge, Button, PageHeader, DataTable } from "@/components/ui";
+import { PageHeader } from "@/components/layout/page-header";
+import { Badge, Button, DataTable } from "@/components/ui";
 import { ColumnDef } from "@tanstack/react-table";
 import { useResidentBills } from "@/hooks/api/use-resident-bill";
 import { useUnits } from "@/hooks/api/use-unit";

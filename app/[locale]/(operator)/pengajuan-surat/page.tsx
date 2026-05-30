@@ -1,4 +1,5 @@
-import { PageHeader } from "@/components/ui";
+import { PageHeader } from "@/components/layout/page-header";
+
 import { LetterRequestList } from "./components/letter-request-list";
 
 export const metadata = {

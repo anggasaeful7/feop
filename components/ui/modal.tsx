@@ -1,8 +1,9 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { X } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button, type ButtonVariant } from "./button";
 
 export function Modal({
   open,
@@ -69,3 +70,42 @@ export function Field({
 
 export const inputClass =
   "h-10 w-full rounded-lg border border-zinc-300 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-brand focus:ring-2 focus:ring-(--brand)/20";
+
+export function ModalFormFooter({
+  isPending,
+  isEditing,
+  onClose,
+  onSubmit,
+  submitLabel,
+  extraButtons,
+  cancelVariant = "danger",
+  submitVariant = "primary",
+  submitDisabled = false,
+  cancelLabel = "✕ Batal",
+  isPendingText,
+}: {
+  isPending?: boolean;
+  isEditing?: boolean;
+  onClose: () => void;
+  onSubmit: () => void;
+  submitLabel: ReactNode;
+  extraButtons?: ReactNode;
+  cancelVariant?: ButtonVariant;
+  submitVariant?: ButtonVariant;
+  submitDisabled?: boolean;
+  cancelLabel?: ReactNode;
+  isPendingText?: string;
+}) {
+  return (
+    <>
+      {extraButtons}
+      <Button variant={cancelVariant} type="button" onClick={onClose} disabled={isPending}>
+        {cancelLabel}
+      </Button>
+      <Button variant={submitVariant} type="button" onClick={onSubmit} disabled={isPending || submitDisabled}>
+        {isPending && !isPendingText && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        {isPending && isPendingText ? isPendingText : (isEditing ? "✓ Simpan Perubahan" : submitLabel)}
+      </Button>
+    </>
+  );
+}
