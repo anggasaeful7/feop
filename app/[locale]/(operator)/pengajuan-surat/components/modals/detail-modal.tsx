@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { Modal, Button } from "@/components/ui";
 import type { LetterRequest } from "@/types/letter-request";
@@ -6,13 +8,14 @@ import { formatDate } from "@/lib/format";
 import { Download, Loader2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
-export function DetailModal({
-  request,
-  onClose,
-}: {
+interface DetailModalProps {
   request: LetterRequest;
   onClose: () => void;
-}) {
+  onApprove?: () => void;
+  onReject?: () => void;
+}
+
+export function DetailModal({ request, onClose, onApprove, onReject }: DetailModalProps) {
   const [downloading, setDownloading] = useState<string | null>(null);
 
   const handleDownloadAttachment = async (attachmentId: string) => {
@@ -132,11 +135,20 @@ export function DetailModal({
         )}
       </div>
 
-      <div className="mt-6 flex justify-end">
-        <Button variant="secondary" onClick={onClose}>
-          Tutup
-        </Button>
-      </div>
+      {request.status === "pending" && (onApprove || onReject) && (
+        <div className="mt-6 flex justify-end gap-2 border-t border-zinc-100 pt-4">
+          {onReject && (
+            <Button variant="danger" onClick={onReject}>
+              Tolak
+            </Button>
+          )}
+          {onApprove && (
+            <Button onClick={onApprove}>
+              Setujui
+            </Button>
+          )}
+        </div>
+      )}
     </Modal>
   );
 }

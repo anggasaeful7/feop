@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { Modal, Field, Button } from "@/components/ui";
 import type { LetterRequest } from "@/types/letter-request";
@@ -7,9 +9,11 @@ import { Loader2 } from "lucide-react";
 export function RejectModal({
   request,
   onClose,
+  onBack,
 }: {
   request: LetterRequest;
   onClose: () => void;
+  onBack: () => void;
 }) {
   const [reason, setReason] = useState("");
   const { mutate, isPending } = useRejectLetterRequest(request.id);
@@ -47,7 +51,7 @@ export function RejectModal({
         </Field>
 
         <div className="mt-6 flex justify-end gap-2">
-          <Button type="button" variant="ghost" onClick={onClose} disabled={isPending}>
+          <Button type="button" variant="ghost" onClick={onBack} disabled={isPending}>
             Batal
           </Button>
           <Button type="submit" variant="danger" disabled={!reason.trim() || isPending}>

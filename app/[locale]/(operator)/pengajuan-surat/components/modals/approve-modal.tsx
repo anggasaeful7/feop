@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { Modal, Field, Button } from "@/components/ui";
 import type { LetterRequest } from "@/types/letter-request";
@@ -7,9 +9,11 @@ import { Loader2 } from "lucide-react";
 export function ApproveModal({
   request,
   onClose,
+  onBack,
 }: {
   request: LetterRequest;
   onClose: () => void;
+  onBack: () => void;
 }) {
   const [file, setFile] = useState<File | null>(null);
   const { mutate, isPending } = useApproveLetterRequest(request.id);
@@ -51,7 +55,7 @@ export function ApproveModal({
         </Field>
 
         <div className="mt-6 flex justify-end gap-2">
-          <Button type="button" variant="danger" onClick={onClose} disabled={isPending}>
+          <Button type="button" variant="ghost" onClick={onBack} disabled={isPending}>
             Batal
           </Button>
           <Button type="submit" disabled={!file || isPending}>

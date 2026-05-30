@@ -1,62 +1,76 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useLetterRequests } from "@/hooks/api/use-letter-request";
-import { DataTable } from "@/components/ui";
-import { getColumns } from "./columns";
+import { Button, DataTable } from "@/components/ui";
+import { baseColumns } from "./columns";
 import type { LetterRequest } from "@/types/letter-request";
 import { ApproveModal } from "./modals/approve-modal";
 import { RejectModal } from "./modals/reject-modal";
 import { DetailModal } from "./modals/detail-modal";
+import { useDebounce } from "@/hooks/use-debounce";
+import { Pencil } from "lucide-react";
+import { ColumnDef } from "@tanstack/react-table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export function LetterRequestList() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState<"pending" | "approved" | "rejected" | undefined>();
+  const debouncedSearch = useDebounce(search, 500);
+  const [status, setStatus] = useState<string>("all");
   const [perPage] = useState(10);
 
   const { data, isLoading } = useLetterRequests({
     page,
     per_page: perPage,
-    search: search || undefined,
-    status,
+    search: debouncedSearch || undefined,
+    status: status !== "all" ? (status as "pending" | "approved" | "rejected") : undefined,
   });
 
   const [selectedRequest, setSelectedRequest] = useState<LetterRequest | null>(null);
   const [modalAction, setModalAction] = useState<"detail" | "approve" | "reject" | null>(null);
 
-  const handleAction = (request: LetterRequest, action: "detail" | "approve" | "reject") => {
+  const openDetail = (request: LetterRequest) => {
     setSelectedRequest(request);
-    setModalAction(action);
+    setModalAction("detail");
   };
 
-  const closeModal = () => {
+  const closeAll = () => {
     setSelectedRequest(null);
     setModalAction(null);
   };
 
-  return (
-    <>
-      <div className="mb-4 flex items-center gap-2">
-        {(["pending", "approved", "rejected", undefined] as const).map((s) => (
-          <button
-            key={s ?? "all"}
-            onClick={() => {
-              setStatus(s);
-              setPage(1);
-            }}
-            className={`h-8 rounded-full px-4 text-xs font-semibold transition ${status === s
-              ? "bg-brand-900 text-white"
-              : "border border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
-              }`}
-          >
-            {s ? s.charAt(0).toUpperCase() + s.slice(1) : "Semua"}
-          </button>
-        ))}
-      </div>
+  // Dari detail → approve: detail hilang, approve muncul
+  const openApproveFromDetail = () => setModalAction("approve");
 
+  // Dari detail → reject: detail hilang, reject muncul
+  const openRejectFromDetail = () => setModalAction("reject");
+
+  // Dari approve/reject → kembali ke detail
+  const backToDetail = () => setModalAction("detail");
+
+  const columns: ColumnDef<LetterRequest>[] = useMemo(() => [
+    ...baseColumns,
+    {
+      id: "actions",
+      cell: ({ row }) => (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => openDetail(row.original)}
+          title="Lihat Detail"
+        >
+          <Pencil className="h-4 w-4" />
+        </Button>
+      ),
+    },
+  ], []);
+
+  return (
+    <div className="space-y-4">
       <DataTable
-        columns={getColumns(handleAction)}
+        title="Daftar Pengajuan Surat"
+        columns={columns}
         data={data?.items ?? []}
         isLoading={isLoading}
         total={data?.total ?? 0}
@@ -68,18 +82,43 @@ export function LetterRequestList() {
           setSearch(v);
           setPage(1);
         }}
-        searchPlaceholder="Cari subject, unit code, atau resident..."
+        actions={
+          <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1); }}>
+            <SelectTrigger className="w-40 bg-[#FFFDF7]">
+              <SelectValue placeholder="Semua Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua Status</SelectItem>
+              <SelectItem value="pending">Menunggu</SelectItem>
+              <SelectItem value="approved">Disetujui</SelectItem>
+              <SelectItem value="rejected">Ditolak</SelectItem>
+            </SelectContent>
+          </Select>
+        }
       />
 
       {modalAction === "detail" && selectedRequest && (
-        <DetailModal request={selectedRequest} onClose={closeModal} />
+        <DetailModal
+          request={selectedRequest}
+          onClose={closeAll}
+          onApprove={openApproveFromDetail}
+          onReject={openRejectFromDetail}
+        />
       )}
       {modalAction === "approve" && selectedRequest && (
-        <ApproveModal request={selectedRequest} onClose={closeModal} />
+        <ApproveModal
+          request={selectedRequest}
+          onClose={closeAll}
+          onBack={backToDetail}
+        />
       )}
       {modalAction === "reject" && selectedRequest && (
-        <RejectModal request={selectedRequest} onClose={closeModal} />
+        <RejectModal
+          request={selectedRequest}
+          onClose={closeAll}
+          onBack={backToDetail}
+        />
       )}
-    </>
+    </div>
   );
 }

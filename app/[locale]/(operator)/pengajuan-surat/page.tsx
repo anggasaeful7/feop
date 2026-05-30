@@ -13,9 +13,7 @@ export default function PengajuanSuratPage() {
         title="Pengajuan Surat"
         subtitle="Review dan kelola permohonan surat dari penghuni"
       />
-      <div className="mt-6">
-        <LetterRequestList />
-      </div>
+      <LetterRequestList />
     </>
   );
 }
