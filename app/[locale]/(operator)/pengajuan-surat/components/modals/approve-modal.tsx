@@ -5,16 +5,15 @@ import { Modal, Field, Button } from "@/components/ui";
 import type { LetterRequest } from "@/types/letter-request";
 import { useApproveLetterRequest } from "@/hooks/api/use-letter-request";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
-export function ApproveModal({
-  request,
-  onClose,
-  onBack,
-}: {
+interface ApproveModalProps {
   request: LetterRequest;
   onClose: () => void;
   onBack: () => void;
-}) {
+}
+
+export function ApproveModal({ request, onClose, onBack }: ApproveModalProps) {
   const [file, setFile] = useState<File | null>(null);
   const { mutate, isPending } = useApproveLetterRequest(request.id);
 
@@ -27,7 +26,11 @@ export function ApproveModal({
 
     mutate(fd, {
       onSuccess: () => {
+        toast.success("Pengajuan surat berhasil disetujui");
         onClose();
+      },
+      onError: () => {
+        toast.error("Gagal menyetujui pengajuan surat");
       },
     });
   };
@@ -47,8 +50,8 @@ export function ApproveModal({
             className="block w-full text-sm text-zinc-500
               file:mr-4 file:py-2 file:px-4
               file:rounded-full file:border-0
-              file:text-sm file:font-semibold
-              file:bg-brand file:text-brand-900
+              file:text-sm
+              file:bg-brand file:text-zinc-100
               hover:file:bg-brand-100 mt-2"
             required
           />

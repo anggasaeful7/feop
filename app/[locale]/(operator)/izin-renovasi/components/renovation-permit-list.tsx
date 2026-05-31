@@ -1,56 +1,73 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRenovationPermits } from "@/hooks/api/use-renovation-permit";
-import { DataTable } from "@/components/ui/data-table";
-import { getColumns } from "./columns";
+import { Button, DataTable } from "@/components/ui";
+import { baseColumns } from "./columns";
 import type { RenovationPermit, RenovationPermitStatus } from "@/types/renovation-permit";
 import { DetailModal } from "./modals/detail-modal";
+import { ApproveModal } from "./modals/approve-modal";
+import { RejectModal } from "./modals/reject-modal";
+import { useDebounce } from "@/hooks/use-debounce";
+import { Pencil } from "lucide-react";
+import { ColumnDef } from "@tanstack/react-table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export function RenovationPermitList() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 500);
   const [status, setStatus] = useState<string>("all");
   const [perPage] = useState(10);
 
   const { data, isLoading } = useRenovationPermits({
     page,
     per_page: perPage,
-    search: search || undefined,
+    search: debouncedSearch || undefined,
     status: status !== "all" ? (status as RenovationPermitStatus) : undefined,
   });
 
   const [selectedPermit, setSelectedPermit] = useState<RenovationPermit | null>(null);
+  const [modalAction, setModalAction] = useState<"detail" | "approve" | "reject" | null>(null);
 
-  const handleViewDetail = (permit: RenovationPermit) => {
+  const openDetail = (permit: RenovationPermit) => {
     setSelectedPermit(permit);
+    setModalAction("detail");
   };
 
-  const closeModal = () => {
+  const closeAll = () => {
     setSelectedPermit(null);
+    setModalAction(null);
   };
+
+  const openApproveFromDetail = () => setModalAction("approve");
+  const openRejectFromDetail = () => setModalAction("reject");
+  const backToDetail = () => setModalAction("detail");
+
+  const columns: ColumnDef<RenovationPermit>[] = useMemo(() => [
+    ...baseColumns,
+    {
+      id: "actions",
+      cell: ({ row }) => (
+        <div className="flex justify-end">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => openDetail(row.original)}
+            title="Lihat Detail"
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
+    },
+  ], []);
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-4">
-        <div className="w-48">
-          <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1); }}>
-            <SelectTrigger>
-              <SelectValue placeholder="Semua Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Semua Status</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="approved">Approved</SelectItem>
-              <SelectItem value="rejected">Rejected</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
       <DataTable
-        columns={getColumns({ onDetail: handleViewDetail })}
+        title="Daftar Izin Renovasi"
+        columns={columns}
         data={data?.items ?? []}
         isLoading={isLoading}
         total={data?.total ?? 0}
@@ -62,11 +79,42 @@ export function RenovationPermitList() {
           setSearch(v);
           setPage(1);
         }}
-        searchPlaceholder="Cari nama pemohon atau unit..."
+        actions={
+          <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1); }}>
+            <SelectTrigger className="w-40 bg-[#FFFDF7]">
+              <SelectValue placeholder="Semua Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua Status</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="approved">Approved</SelectItem>
+              <SelectItem value="rejected">Rejected</SelectItem>
+            </SelectContent>
+          </Select>
+        }
       />
 
-      {selectedPermit && (
-        <DetailModal permit={selectedPermit} onClose={closeModal} />
+      {modalAction === "detail" && selectedPermit && (
+        <DetailModal
+          permit={selectedPermit}
+          onClose={closeAll}
+          onApprove={openApproveFromDetail}
+          onReject={openRejectFromDetail}
+        />
+      )}
+      {modalAction === "approve" && selectedPermit && (
+        <ApproveModal
+          permit={selectedPermit}
+          onClose={closeAll}
+          onBack={backToDetail}
+        />
+      )}
+      {modalAction === "reject" && selectedPermit && (
+        <RejectModal
+          permit={selectedPermit}
+          onClose={closeAll}
+          onBack={backToDetail}
+        />
       )}
     </div>
   );

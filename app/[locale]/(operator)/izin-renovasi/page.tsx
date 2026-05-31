@@ -13,9 +13,7 @@ export default function IzinRenovasiPage() {
         title="Izin Renovasi"
         subtitle="Review dan kelola permohonan izin renovasi dari penghuni"
       />
-      <div className="mt-6">
-        <RenovationPermitList />
-      </div>
+      <RenovationPermitList />
     </>
   );
 }

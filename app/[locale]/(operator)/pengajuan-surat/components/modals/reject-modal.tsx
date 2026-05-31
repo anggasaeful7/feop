@@ -5,16 +5,15 @@ import { Modal, Field, Button } from "@/components/ui";
 import type { LetterRequest } from "@/types/letter-request";
 import { useRejectLetterRequest } from "@/hooks/api/use-letter-request";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
-export function RejectModal({
-  request,
-  onClose,
-  onBack,
-}: {
+interface RejectModalProps {
   request: LetterRequest;
   onClose: () => void;
   onBack: () => void;
-}) {
+}
+
+export function RejectModal({ request, onClose, onBack }: RejectModalProps) {
   const [reason, setReason] = useState("");
   const { mutate, isPending } = useRejectLetterRequest(request.id);
 
@@ -23,10 +22,14 @@ export function RejectModal({
     if (!reason.trim()) return;
 
     mutate(
-      { reason: reason.trim() },
+      { reason },
       {
         onSuccess: () => {
+          toast.success("Pengajuan surat berhasil ditolak");
           onClose();
+        },
+        onError: () => {
+          toast.error("Gagal menolak pengajuan surat");
         },
       }
     );
@@ -39,14 +42,14 @@ export function RejectModal({
           Anda akan menolak pengajuan surat <strong>{request.subject}</strong> dari <strong>{request.resident_name}</strong>.
         </div>
 
-        <Field label="Alasan Penolakan" hint="Wajib diisi">
+        <Field label="Alasan Penolakan">
           <textarea
-            required
-            rows={4}
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-            placeholder="Tuliskan alasan penolakan..."
-            className="w-full rounded-lg border border-zinc-300 bg-white p-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-brand focus:ring-2 focus:ring-(--brand)/20"
+            placeholder="Contoh: Dokumen tidak lengkap, dll."
+            className="w-full rounded-lg border border-zinc-300 bg-white p-3 text-sm text-zinc-900 focus:border-brand focus:outline-none"
+            rows={4}
+            required
           />
         </Field>
 
@@ -62,3 +65,4 @@ export function RejectModal({
     </Modal>
   );
 }
+
