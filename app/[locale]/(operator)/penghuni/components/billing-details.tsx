@@ -36,7 +36,7 @@ export function BillingDetails({ unit, year, handleTagih }: BillingDetailsProps)
                   <th className="px-4 py-2 w-32">Nominal</th>
                   <th className="px-4 py-2 w-28">Pembayar</th>
                   <th className="px-4 py-2 w-28">Status</th>
-                  <th className="px-4 py-2 w-44">Jatuh Tempo</th>
+                  <th className="px-4 py-2 w-44">Keterangan</th>
                   <th className="px-4 py-2 text-right w-36">Aksi</th>
                 </tr>
               </thead>

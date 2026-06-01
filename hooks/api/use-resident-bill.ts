@@ -25,6 +25,7 @@ export function useResidentBills(params?: ResidentBillQueryParams) {
     queryKey: residentBillQK.list(params),
     queryFn: () => getResidentBills(params),
     placeholderData: (prev) => prev,
+    staleTime: 0,
   });
 }
 
@@ -33,6 +34,7 @@ export function useResidentBillsByUnit(params?: ResidentBillByUnitQueryParams) {
     queryKey: residentBillQK.byUnit(params),
     queryFn: () => getResidentBillsByUnit(params),
     placeholderData: (prev) => prev,
+    staleTime: 0,
   });
 }
 
@@ -52,6 +54,7 @@ export function useApproveResidentBill() {
       toast.success("Pembayaran berhasil diverifikasi & ditandai lunas");
       qc.invalidateQueries({ queryKey: residentBillQK.detail(variables.id) });
       qc.invalidateQueries({ queryKey: residentBillQK.lists() });
+      qc.invalidateQueries({ queryKey: residentBillQK.byUnits() });
     },
     onError: (error) => {
       toast.error(error.message || "Gagal memverifikasi pembayaran");
@@ -67,6 +70,7 @@ export function useRejectResidentBill() {
       toast.success("Bukti transfer berhasil ditolak");
       qc.invalidateQueries({ queryKey: residentBillQK.detail(variables.id) });
       qc.invalidateQueries({ queryKey: residentBillQK.lists() });
+      qc.invalidateQueries({ queryKey: residentBillQK.byUnits() });
     },
     onError: (error) => {
       toast.error(error.message || "Gagal menolak bukti transfer");
@@ -81,6 +85,7 @@ export function useDeleteResidentBill() {
     onSuccess: () => {
       toast.success("Tagihan berhasil dihapus");
       qc.invalidateQueries({ queryKey: residentBillQK.lists() });
+      qc.invalidateQueries({ queryKey: residentBillQK.byUnits() });
     },
     onError: (error) => {
       toast.error(error.message || "Gagal menghapus tagihan");
