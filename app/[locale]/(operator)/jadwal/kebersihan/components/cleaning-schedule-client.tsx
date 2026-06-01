@@ -7,7 +7,6 @@ import { Button } from "@/components/ui";
 import { useCleaningSchedules } from "@/hooks/api/use-schedules";
 import type { CleaningSchedule } from "@/types/schedules";
 import { CleaningScheduleFormModal } from "./cleaning-schedule-modal";
-import { BulkCleaningScheduleFormModal } from "./bulk-cleaning-schedule-modal";
 import { CalendarView, type CalendarEvent } from "@/components/ui/calendar-view";
 
 export function CleaningScheduleClient() {
@@ -22,14 +21,13 @@ export function CleaningScheduleClient() {
   const [editing, setEditing] = useState<CleaningSchedule | null>(null);
   const [creatingDate, setCreatingDate] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
-  const [creatingBulk, setCreatingBulk] = useState(false);
 
   const calendarEvents: CalendarEvent[] = useMemo(() => {
     const items = data?.items || [];
     return items.map((item) => ({
       id: item.id,
       date: item.scheduled_date,
-      title: item.activity,
+      title: item.officer_name ? `${item.activity} (${item.officer_name})` : item.activity,
       time: item.scheduled_time,
       colorClass: "bg-emerald-100 text-emerald-800 border-emerald-200",
       raw: item,
@@ -60,17 +58,12 @@ export function CleaningScheduleClient() {
         title="Jadwal Kebersihan"
         subtitle="Atur dan pantau jadwal kebersihan lingkungan"
         actions={
-          <div className="flex items-center gap-2">
-            <Button variant="secondary" onClick={() => setCreatingBulk(true)}>
-              <Plus size={16} className="mr-2" /> Tambah Massal
-            </Button>
-            <Button onClick={() => {
-              setCreatingDate(null);
-              setCreating(true);
-            }}>
-              <Plus size={16} className="mr-2" /> Tambah Jadwal
-            </Button>
-          </div>
+          <Button onClick={() => {
+            setCreatingDate(null);
+            setCreating(true);
+          }}>
+            <Plus size={16} className="mr-2" /> Tambah Jadwal
+          </Button>
         }
       />
 
@@ -99,12 +92,6 @@ export function CleaningScheduleClient() {
             setCreating(false);
             setCreatingDate(null);
           }}
-        />
-      )}
-
-      {creatingBulk && (
-        <BulkCleaningScheduleFormModal
-          onClose={() => setCreatingBulk(false)}
         />
       )}
 

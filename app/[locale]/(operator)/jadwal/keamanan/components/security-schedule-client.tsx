@@ -7,7 +7,6 @@ import { Button } from "@/components/ui";
 import { useSecuritySchedules } from "@/hooks/api/use-schedules";
 import type { SecuritySchedule } from "@/types/schedules";
 import { SecurityScheduleFormModal } from "./security-schedule-modal";
-import { BulkSecurityScheduleFormModal } from "./bulk-security-schedule-modal";
 import { CalendarView, type CalendarEvent } from "@/components/ui/calendar-view";
 
 export function SecurityScheduleClient() {
@@ -20,7 +19,6 @@ export function SecurityScheduleClient() {
   const [editing, setEditing] = useState<SecuritySchedule | null>(null);
   const [creatingDate, setCreatingDate] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
-  const [creatingBulk, setCreatingBulk] = useState(false);
 
   const calendarEvents: CalendarEvent[] = useMemo(() => {
     const items = data?.items || [];
@@ -58,17 +56,12 @@ export function SecurityScheduleClient() {
         title="Jadwal Keamanan"
         subtitle="Atur dan pantau jadwal petugas keamanan"
         actions={
-          <div className="flex items-center gap-2">
-            <Button variant="secondary" onClick={() => setCreatingBulk(true)}>
-              <Plus size={16} className="mr-2" /> Tambah Massal
-            </Button>
-            <Button onClick={() => {
-              setCreatingDate(null);
-              setCreating(true);
-            }}>
-              <Plus size={16} className="mr-2" /> Tambah Jadwal
-            </Button>
-          </div>
+          <Button onClick={() => {
+            setCreatingDate(null);
+            setCreating(true);
+          }}>
+            <Plus size={16} className="mr-2" /> Tambah Jadwal
+          </Button>
         }
       />
 
@@ -97,12 +90,6 @@ export function SecurityScheduleClient() {
             setCreating(false);
             setCreatingDate(null);
           }}
-        />
-      )}
-
-      {creatingBulk && (
-        <BulkSecurityScheduleFormModal
-          onClose={() => setCreatingBulk(false)}
         />
       )}
 

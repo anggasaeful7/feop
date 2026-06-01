@@ -15,6 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import type { CleaningSchedule } from "@/types/schedules";
 import { cleaningScheduleSchema, type CleaningScheduleFormValues } from "@/lib/validations/schedules";
@@ -37,6 +38,8 @@ export function CleaningScheduleFormModal({
     resolver: zodResolver(cleaningScheduleSchema),
     defaultValues: {
       activity: initial?.activity || "",
+      officer_name: initial?.officer_name || "",
+      category: initial?.category || "once",
       scheduled_date: initial?.scheduled_date || initialDate || "",
       scheduled_time: initial?.scheduled_time || "",
       notes: initial?.notes || "",
@@ -103,13 +106,36 @@ export function CleaningScheduleFormModal({
 
           <FormField
             control={form.control}
-            name="scheduled_date"
+            name="officer_name"
+            render={({ field }) => (
+              <FormItem className="col-span-2">
+                <FormLabel>Nama Petugas</FormLabel>
+                <FormControl>
+                  <Input placeholder="Asep Setiawan" {...field} className="rounded-xl italic bg-transparent" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="category"
             render={({ field }) => (
               <FormItem className="col-span-2 sm:col-span-1">
-                <FormLabel>Tanggal</FormLabel>
-                <FormControl>
-                  <Input type="date" {...field} className="rounded-xl italic bg-transparent" />
-                </FormControl>
+                <FormLabel>Kategori Jadwal</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="rounded-xl italic bg-transparent">
+                      <SelectValue placeholder="Pilih kategori" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="once">Sekali (Once)</SelectItem>
+                    <SelectItem value="daily">Harian (Daily)</SelectItem>
+                    <SelectItem value="weekly">Mingguan (Weekly)</SelectItem>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
@@ -123,6 +149,20 @@ export function CleaningScheduleFormModal({
                 <FormLabel>Waktu</FormLabel>
                 <FormControl>
                   <Input type="time" {...field} className="rounded-xl italic bg-transparent" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="scheduled_date"
+            render={({ field }) => (
+              <FormItem className="col-span-2">
+                <FormLabel>Tanggal</FormLabel>
+                <FormControl>
+                  <Input type="date" {...field} className="rounded-xl italic bg-transparent" />
                 </FormControl>
                 <FormMessage />
               </FormItem>

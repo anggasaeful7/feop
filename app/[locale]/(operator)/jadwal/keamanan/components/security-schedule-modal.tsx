@@ -15,6 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import type { SecuritySchedule } from "@/types/schedules";
 import { securityScheduleSchema, type SecurityScheduleFormValues } from "@/lib/validations/schedules";
@@ -41,6 +42,7 @@ export function SecurityScheduleFormModal({
       scheduled_date: initial?.scheduled_date || initialDate || "",
       start_time: initial?.start_time || "",
       end_time: initial?.end_time || "",
+      category: initial?.category || "once",
       notes: initial?.notes || "",
     },
   });
@@ -119,9 +121,32 @@ export function SecurityScheduleFormModal({
 
           <FormField
             control={form.control}
-            name="scheduled_date"
+            name="category"
             render={({ field }) => (
               <FormItem className="col-span-2 sm:col-span-1">
+                <FormLabel>Kategori Jadwal</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="rounded-xl italic bg-transparent">
+                      <SelectValue placeholder="Pilih kategori" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="once">Sekali (Once)</SelectItem>
+                    <SelectItem value="daily">Harian (Daily)</SelectItem>
+                    <SelectItem value="weekly">Mingguan (Weekly)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="scheduled_date"
+            render={({ field }) => (
+              <FormItem className="col-span-2">
                 <FormLabel>Tanggal</FormLabel>
                 <FormControl>
                   <Input type="date" {...field} className="rounded-xl italic bg-transparent" />
