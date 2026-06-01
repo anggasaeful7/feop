@@ -3,13 +3,10 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Button,
-  Toggle,
-} from "@/components/ui";
+import { Toggle } from "@/components/ui";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Modal } from "@/components/ui/modal";
+import { Modal, ModalFormFooter } from "@/components/ui/modal";
 import {
   Form,
   FormControl,
@@ -28,12 +25,15 @@ import {
 } from "@/hooks/api/use-specific-billing";
 import type { SpecificBilling, SpecificBillingPayload } from "@/types/specific-billing";
 
-type Props = {
-  initial?: SpecificBilling;
+export function SpecificBillingFormModal({
+  title,
+  initial,
+  onClose,
+}: {
+  title: string;
+  initial?: SpecificBilling | null;
   onClose: () => void;
-};
-
-export function SpecificBillingFormModal({ initial, onClose }: Props) {
+}) {
   const create = useCreateSpecificBilling();
   const update = useUpdateSpecificBilling();
   const isPending = create.isPending || update.isPending;
@@ -75,36 +75,37 @@ export function SpecificBillingFormModal({ initial, onClose }: Props) {
     }
   });
 
+  const isEditing = !!initial;
+
   return (
     <Modal
       open
-      title={initial ? "Edit Tagihan" : "Tambah Tagihan"}
+      title={
+        <div className="flex items-center justify-between w-full pr-8">
+          <span className="text-2xl font-bold italic">{title}</span>
+        </div>
+      }
       onClose={onClose}
+      footer={
+        <ModalFormFooter
+          isPending={isPending}
+          isEditing={isEditing}
+          onClose={onClose}
+          onSubmit={onSubmit}
+          submitLabel="✓ Simpan Tagihan"
+        />
+      }
     >
       <Form {...form}>
-        <form onSubmit={onSubmit} className="space-y-4">
+        <form onSubmit={onSubmit} className="grid grid-cols-2 gap-4 mt-2">
           <FormField
             control={form.control}
             name="title"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-2 sm:col-span-1">
                 <FormLabel>Judul Tagihan</FormLabel>
                 <FormControl>
-                  <Input placeholder="Contoh: Tagihan Renovasi" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Deskripsi</FormLabel>
-                <FormControl>
-                  <Textarea placeholder="Opsional" {...field} />
+                  <Input placeholder="Contoh: Tagihan Renovasi" {...field} className="rounded-xl italic bg-transparent" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -115,13 +116,14 @@ export function SpecificBillingFormModal({ initial, onClose }: Props) {
             control={form.control}
             name="amount"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-2 sm:col-span-1">
                 <FormLabel>Nominal (Rp)</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
                     {...field}
                     onChange={(e) => field.onChange(e.target.value === "" ? 0 : Number(e.target.value))}
+                    className="rounded-xl italic bg-transparent"
                   />
                 </FormControl>
                 <FormMessage />
@@ -129,26 +131,39 @@ export function SpecificBillingFormModal({ initial, onClose }: Props) {
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="is_active"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border border-zinc-200 p-4">
-                <FormLabel className="text-base">Status Aktif</FormLabel>
-                <FormControl>
-                  <Toggle checked={field.value} onChange={field.onChange} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
+          <div className="col-span-2">
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Deskripsi</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Opsional"
+                      {...field}
+                      className="h-28 py-3 rounded-xl italic resize-none bg-transparent"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
-          <div className="pt-4 flex justify-end gap-2">
-            <Button type="button" variant="ghost" onClick={onClose}>
-              Batal
-            </Button>
-            <Button type="submit" disabled={isPending}>
-              Simpan
-            </Button>
+          <div className="col-span-2 sm:col-span-1 flex items-center space-x-4">
+            <FormField
+              control={form.control}
+              name="is_active"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between space-y-0 rounded-lg border border-zinc-200/70 p-3 flex-1">
+                  <FormLabel>Status Aktif</FormLabel>
+                  <FormControl>
+                    <Toggle checked={field.value} onChange={field.onChange} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
           </div>
         </form>
       </Form>

@@ -8,6 +8,8 @@ const TABS = [
   { label: "Warga", href: "residents" },
   { label: "Tipe Unit", href: "unit-types" },
   { label: "Komponen Tagihan", href: "bill-components" },
+  { label: "Assign Komponen", href: "assign-components" },
+  { label: "Manage Billing", href: "billing" },
   { label: "Kontak Darurat", href: "emergency-contacts" },
 ];
 

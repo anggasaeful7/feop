@@ -84,10 +84,6 @@ export default function BillingPenghuniPage() {
   const bills = billsData?.items || [];
   const total = billsData?.total || 0;
 
-  const handleSendReminderMassal = () => {
-    toast.success("Reminder massal berhasil dikirim ke WhatsApp penghuni!");
-  };
-
   const handleTagih = (unitCode: string, title: string, amount: number) => {
     toast.success(`Reminder tagihan ${title} sebesar ${idr(amount)} dikirim ke Unit ${unitCode}`);
   };
@@ -231,11 +227,6 @@ export default function BillingPenghuniPage() {
         eyebrow="Admin · Kelola Tagihan"
         title="Billing Penghuni"
         subtitle="Status pembayaran per unit · Verifikasi bukti transfer"
-        actions={
-          <Button onClick={handleSendReminderMassal} disabled={isLoading || total === 0} className="font-bold italic">
-            Kirim Reminder Massal
-          </Button>
-        }
       />
 
       {error && (

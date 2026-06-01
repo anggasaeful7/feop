@@ -34,7 +34,6 @@ const NAV: NavItem[] = [
     label: "Billing",
     Icon: Receipt,
     children: [
-      { href: "/billing", label: "Manage Billing" },
       { href: "/penghuni", label: "Billing Penghuni" },
       { href: "/laporan", label: "Upload Laporan" },
     ],
