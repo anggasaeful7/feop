@@ -25,7 +25,6 @@ export function useResidentBills(params?: ResidentBillQueryParams) {
     queryKey: residentBillQK.list(params),
     queryFn: () => getResidentBills(params),
     placeholderData: (prev) => prev,
-    staleTime: 0,
   });
 }
 
@@ -34,7 +33,6 @@ export function useResidentBillsByUnit(params?: ResidentBillByUnitQueryParams) {
     queryKey: residentBillQK.byUnit(params),
     queryFn: () => getResidentBillsByUnit(params),
     placeholderData: (prev) => prev,
-    staleTime: 0,
   });
 }
 
