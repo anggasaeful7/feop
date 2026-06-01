@@ -19,7 +19,7 @@ export interface RenovationPermit {
   id: string;
   material_vehicle: string;
   rejection_reason: string | null;
-  renovation_level: string;
+  renovation_level?: string;
   resident_name: string;
   result_file_name: string | null;
   reviewed_at: string | null;

@@ -103,10 +103,6 @@ export function DetailModal({ permit, onClose, onApprove, onReject }: DetailModa
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <p className="text-zinc-500">Tingkat Renovasi</p>
-                  <p className="font-medium text-zinc-900 capitalize">{permit.renovation_level.replace(/_/g, " ")}</p>
-                </div>
-                <div>
                   <p className="text-zinc-500">Kendaraan Material</p>
                   <p className="font-medium text-zinc-900">{permit.material_vehicle || "-"}</p>
                 </div>

@@ -5,25 +5,6 @@ import { formatDateTime } from "@/lib/format";
 import type { RenovationPermit } from "@/types/renovation-permit";
 import { Badge } from "@/components/ui/badge";
 
-const getLevelColor = (level: string) => {
-  if (level.includes("berat")) return "bg-red-50 text-red-700 border-red-200";
-  if (level.includes("sedang")) return "bg-amber-50 text-amber-700 border-amber-200";
-  return "bg-blue-50 text-blue-700 border-blue-200";
-};
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "pending":
-      return "bg-amber-100 text-amber-800 border-amber-300";
-    case "approved":
-      return "bg-emerald-100 text-emerald-800 border-emerald-300";
-    case "rejected":
-      return "bg-red-100 text-red-800 border-red-300";
-    default:
-      return "bg-zinc-100 text-zinc-800 border-zinc-300";
-  }
-};
-
 export const baseColumns: ColumnDef<RenovationPermit>[] = [
   {
     accessorKey: "created_at",
@@ -45,18 +26,6 @@ export const baseColumns: ColumnDef<RenovationPermit>[] = [
     ),
   },
   {
-    accessorKey: "renovation_level",
-    header: "Tingkat Renovasi",
-    cell: ({ row }) => {
-      const level = row.original.renovation_level;
-      return (
-        <Badge variant="outline" className={`capitalize ${getLevelColor(level)}`}>
-          {level.replace(/_/g, " ")}
-        </Badge>
-      );
-    },
-  },
-  {
     accessorKey: "contractor_pic_name",
     header: "Kontraktor",
     cell: ({ row }) => (
@@ -67,15 +36,17 @@ export const baseColumns: ColumnDef<RenovationPermit>[] = [
     ),
   },
   {
-    accessorKey: "status",
     header: "Status",
+    accessorKey: "status",
     cell: ({ row }) => {
       const status = row.original.status;
-      return (
-        <Badge variant="outline" className={`capitalize ${getStatusColor(status)}`}>
-          {status}
-        </Badge>
-      );
+      if (status === "approved") {
+        return <Badge tone="success">Disetujui</Badge>;
+      }
+      if (status === "rejected") {
+        return <Badge tone="danger">Ditolak</Badge>;
+      }
+      return <Badge tone="warning">Menunggu</Badge>;
     },
   },
 ];
