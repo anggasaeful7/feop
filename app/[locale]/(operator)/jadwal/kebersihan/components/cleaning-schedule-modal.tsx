@@ -16,6 +16,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import DatePicker from "react-datepicker";
+import {
+  parseLocalDate,
+  formatLocalDate,
+  parseLocalTime,
+  formatLocalTime,
+} from "@/lib/utils";
 
 import type { CleaningSchedule } from "@/types/schedules";
 import { cleaningScheduleSchema, type CleaningScheduleFormValues } from "@/lib/validations/schedules";
@@ -148,7 +155,17 @@ export function CleaningScheduleFormModal({
               <FormItem className="col-span-2 sm:col-span-1">
                 <FormLabel>Waktu</FormLabel>
                 <FormControl>
-                  <Input type="time" {...field} className="rounded-xl italic bg-transparent" />
+                  <DatePicker
+                    selected={field.value ? parseLocalTime(field.value) : null}
+                    onChange={(date: Date | null) => field.onChange(date ? formatLocalTime(date) : "")}
+                    showTimeSelect
+                    showTimeSelectOnly
+                    timeIntervals={15}
+                    timeCaption="Waktu"
+                    dateFormat="HH:mm"
+                    placeholderText="Pilih waktu"
+                    customInput={<Input className="rounded-xl italic bg-transparent w-full" />}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -162,7 +179,13 @@ export function CleaningScheduleFormModal({
               <FormItem className="col-span-2">
                 <FormLabel>Tanggal</FormLabel>
                 <FormControl>
-                  <Input type="date" {...field} className="rounded-xl italic bg-transparent" />
+                  <DatePicker
+                    selected={field.value ? parseLocalDate(field.value) : null}
+                    onChange={(date: Date | null) => field.onChange(date ? formatLocalDate(date) : "")}
+                    dateFormat="yyyy-MM-dd"
+                    placeholderText="Pilih tanggal"
+                    customInput={<Input className="rounded-xl italic bg-transparent w-full" />}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

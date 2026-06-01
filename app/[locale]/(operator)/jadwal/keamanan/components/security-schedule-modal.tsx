@@ -16,6 +16,14 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import DatePicker from "react-datepicker";
+
+import {
+  parseLocalDate,
+  formatLocalDate,
+  parseLocalTime,
+  formatLocalTime,
+} from "@/lib/utils";
 
 import type { SecuritySchedule } from "@/types/schedules";
 import { securityScheduleSchema, type SecurityScheduleFormValues } from "@/lib/validations/schedules";
@@ -149,7 +157,13 @@ export function SecurityScheduleFormModal({
               <FormItem className="col-span-2">
                 <FormLabel>Tanggal</FormLabel>
                 <FormControl>
-                  <Input type="date" {...field} className="rounded-xl italic bg-transparent" />
+                  <DatePicker
+                    selected={field.value ? parseLocalDate(field.value) : null}
+                    onChange={(date: Date | null) => field.onChange(date ? formatLocalDate(date) : "")}
+                    dateFormat="yyyy-MM-dd"
+                    placeholderText="Pilih tanggal"
+                    customInput={<Input className="rounded-xl italic bg-transparent w-full" />}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -163,7 +177,17 @@ export function SecurityScheduleFormModal({
               <FormItem className="col-span-2 sm:col-span-1">
                 <FormLabel>Waktu Mulai</FormLabel>
                 <FormControl>
-                  <Input type="time" {...field} className="rounded-xl italic bg-transparent" />
+                  <DatePicker
+                    selected={field.value ? parseLocalTime(field.value) : null}
+                    onChange={(date: Date | null) => field.onChange(date ? formatLocalTime(date) : "")}
+                    showTimeSelect
+                    showTimeSelectOnly
+                    timeIntervals={15}
+                    timeCaption="Waktu"
+                    dateFormat="HH:mm"
+                    placeholderText="Pilih waktu mulai"
+                    customInput={<Input className="rounded-xl italic bg-transparent w-full" />}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -177,7 +201,17 @@ export function SecurityScheduleFormModal({
               <FormItem className="col-span-2 sm:col-span-1">
                 <FormLabel>Waktu Selesai</FormLabel>
                 <FormControl>
-                  <Input type="time" {...field} className="rounded-xl italic bg-transparent" />
+                  <DatePicker
+                    selected={field.value ? parseLocalTime(field.value) : null}
+                    onChange={(date: Date | null) => field.onChange(date ? formatLocalTime(date) : "")}
+                    showTimeSelect
+                    showTimeSelectOnly
+                    timeIntervals={15}
+                    timeCaption="Waktu"
+                    dateFormat="HH:mm"
+                    placeholderText="Pilih waktu selesai"
+                    customInput={<Input className="rounded-xl italic bg-transparent w-full" />}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
