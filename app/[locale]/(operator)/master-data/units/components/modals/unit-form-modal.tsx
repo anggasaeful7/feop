@@ -14,6 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import type { Unit } from "@/types/master-data";
 import { unitSchema, type UnitFormValues } from "@/lib/validations/unit";
@@ -146,19 +147,23 @@ export function UnitFormModal({
             render={({ field }) => (
               <FormItem className="col-span-2 sm:col-span-1">
                 <FormLabel>Tipe Unit</FormLabel>
-                <FormControl>
-                  <select
-                    {...field}
-                    className="flex h-10 w-full rounded-xl border border-zinc-200 bg-transparent px-3 py-2 text-sm italic ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <option value="">— pilih tipe —</option>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value || undefined}
+                >
+                  <FormControl>
+                    <SelectTrigger className="rounded-xl italic bg-transparent">
+                      <SelectValue placeholder="— pilih tipe —" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
                     {unitTypes.map((t) => (
-                      <option key={t.id} value={t.id}>
+                      <SelectItem key={t.id} value={t.id}>
                         {t.code} · {t.area_sqm} m²
-                      </option>
+                      </SelectItem>
                     ))}
-                  </select>
-                </FormControl>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
@@ -208,18 +213,23 @@ export function UnitFormModal({
             render={({ field }) => (
               <FormItem className="col-span-2 sm:col-span-1">
                 <FormLabel>Status Unit</FormLabel>
-                <FormControl>
-                  <select
-                    {...field}
-                    className="flex h-10 w-full rounded-xl border border-zinc-200 bg-transparent px-3 py-2 text-sm italic ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value || undefined}
+                >
+                  <FormControl>
+                    <SelectTrigger className="rounded-xl italic bg-transparent">
+                      <SelectValue placeholder="— pilih status —" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
                     {Object.entries(UNIT_STATUS_LABEL).map(([val, label]) => (
-                      <option key={val} value={val}>
+                      <SelectItem key={val} value={val}>
                         {label}
-                      </option>
+                      </SelectItem>
                     ))}
-                  </select>
-                </FormControl>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
@@ -231,21 +241,25 @@ export function UnitFormModal({
             render={({ field }) => (
               <FormItem className="col-span-2 sm:col-span-1">
                 <FormLabel>Pembayar Iuran</FormLabel>
-                <FormControl>
-                  <select
-                    {...field}
-                    value={field.value || ""}
-                    disabled={status === "vacant"}
-                    className="flex h-10 w-full rounded-xl border border-zinc-200 bg-transparent px-3 py-2 text-sm italic ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <option value="">— pilih pembayar —</option>
+                <Select
+                  onValueChange={(val) => field.onChange(val === "none" ? null : val)}
+                  value={field.value || "none"}
+                  disabled={status === "vacant"}
+                >
+                  <FormControl>
+                    <SelectTrigger className="rounded-xl italic bg-transparent">
+                      <SelectValue placeholder="— pilih pembayar —" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="none">— pilih pembayar —</SelectItem>
                     {Object.entries(BILL_PAYER_LABEL).map(([val, label]) => (
-                      <option key={val} value={val}>
+                      <SelectItem key={val} value={val}>
                         {label}
-                      </option>
+                      </SelectItem>
                     ))}
-                  </select>
-                </FormControl>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
@@ -257,28 +271,31 @@ export function UnitFormModal({
             render={({ field }) => (
               <FormItem className="col-span-2 sm:col-span-1">
                 <FormLabel>Pemilik</FormLabel>
-                <FormControl>
-                  <select
-                    {...field}
-                    value={field.value || ""}
-                    disabled={status === "vacant"}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      field.onChange(val);
-                      if (ownerIsResident) {
-                        form.setValue("resident_id", val, { shouldValidate: true });
-                      }
-                    }}
-                    className="flex h-10 w-full rounded-xl border border-zinc-200 bg-transparent px-3 py-2 text-sm italic ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <option value="">— belum ada —</option>
+                <Select
+                  onValueChange={(val) => {
+                    const mappedVal = val === "none" ? "" : val;
+                    field.onChange(mappedVal);
+                    if (ownerIsResident) {
+                      form.setValue("resident_id", mappedVal, { shouldValidate: true });
+                    }
+                  }}
+                  value={field.value || "none"}
+                  disabled={status === "vacant"}
+                >
+                  <FormControl>
+                    <SelectTrigger className="rounded-xl italic bg-transparent">
+                      <SelectValue placeholder="— belum ada —" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="none">— belum ada —</SelectItem>
                     {persons.map((p) => (
-                      <option key={p.id} value={p.id}>
+                      <SelectItem key={p.id} value={p.id}>
                         {p.full_name}
-                      </option>
+                      </SelectItem>
                     ))}
-                  </select>
-                </FormControl>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
@@ -290,21 +307,25 @@ export function UnitFormModal({
             render={({ field }) => (
               <FormItem className="col-span-2 sm:col-span-1">
                 <FormLabel>Penghuni</FormLabel>
-                <FormControl>
-                  <select
-                    {...field}
-                    value={field.value || ""}
-                    disabled={status === "vacant" || ownerIsResident}
-                    className="flex h-10 w-full rounded-xl border border-zinc-200 bg-transparent px-3 py-2 text-sm italic ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <option value="">— belum ada —</option>
+                <Select
+                  onValueChange={(val) => field.onChange(val === "none" ? null : val)}
+                  value={field.value || "none"}
+                  disabled={status === "vacant" || ownerIsResident}
+                >
+                  <FormControl>
+                    <SelectTrigger className="rounded-xl italic bg-transparent">
+                      <SelectValue placeholder="— belum ada —" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="none">— belum ada —</SelectItem>
                     {persons.map((p) => (
-                      <option key={p.id} value={p.id}>
+                      <SelectItem key={p.id} value={p.id}>
                         {p.full_name}
-                      </option>
+                      </SelectItem>
                     ))}
-                  </select>
-                </FormControl>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
