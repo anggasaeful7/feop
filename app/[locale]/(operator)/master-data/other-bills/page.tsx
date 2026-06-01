@@ -1,5 +1,5 @@
 import { BillingList } from "./components/billing-list";
 
-export default function MasterDataBillingPage() {
+export default function MasterDataOtherBillsPage() {
   return <BillingList />;
 }

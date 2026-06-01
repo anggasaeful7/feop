@@ -8,8 +8,8 @@ const TABS = [
   { label: "Warga", href: "residents" },
   { label: "Tipe Unit", href: "unit-types" },
   { label: "Komponen Tagihan", href: "bill-components" },
+  { label: "Tagihan Lainnya", href: "other-bills" },
   { label: "Assign Komponen", href: "assign-components" },
-  { label: "Manage Billing", href: "billing" },
   { label: "Kontak Darurat", href: "emergency-contacts" },
 ];
 
@@ -25,16 +25,15 @@ export function MasterDataTabs() {
       {TABS.map((t) => {
         const fullPath = `${basePath}/${t.href}`;
         const isActive = pathname.includes(`/master-data/${t.href}`);
-        
+
         return (
           <Link
             key={t.href}
             href={fullPath}
-            className={`flex h-10 items-center whitespace-nowrap rounded-full px-5 text-sm font-medium transition ${
-              isActive
-                ? "bg-brand-900 text-white"
-                : "border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50"
-            }`}
+            className={`flex h-10 items-center whitespace-nowrap rounded-full px-5 text-sm font-medium transition ${isActive
+              ? "bg-brand-900 text-white"
+              : "border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50"
+              }`}
           >
             {t.label}
           </Link>

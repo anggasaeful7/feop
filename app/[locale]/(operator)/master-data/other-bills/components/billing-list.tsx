@@ -63,7 +63,7 @@ export function BillingList() {
       )}
 
       <DataTable
-        title="Daftar Tagihan Spesifik"
+        title="Daftar Tagihan Lainnya"
         data={items}
         columns={columns}
         isLoading={isLoading}
@@ -73,7 +73,7 @@ export function BillingList() {
         page={page}
         perPage={perPage}
         onPageChange={setPage}
-        emptyMessage="Belum ada tagihan spesifik. Klik 'Tambah Tagihan' untuk membuat baru."
+        emptyMessage="Belum ada tagihan lainnya. Klik 'Tambah Tagihan' untuk membuat baru."
         actions={
           <div className="flex gap-2">
             <Button size="sm" variant="secondary" onClick={() => setIssuing(true)}>
