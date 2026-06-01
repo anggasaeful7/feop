@@ -61,9 +61,12 @@ export const baseColumns: ColumnDef<Unit>[] = [
     cell: ({ row }) => {
       const u = row.original;
       return (
-        <Badge tone={u.bill_payer === "owner" ? "info" : "success"}>
-          {BILL_PAYER_LABEL[u.bill_payer]}
-        </Badge>
+        u.bill_payer
+          ?
+          <Badge tone={u.bill_payer === "owner" ? "info" : "success"}>
+            {BILL_PAYER_LABEL[u.bill_payer]}
+          </Badge>
+          : <span className="italic text-zinc-400">-</span>
       );
     },
   },

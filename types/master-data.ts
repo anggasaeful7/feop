@@ -103,7 +103,7 @@ export type Unit = {
   block?: string | null;
   floor?: number | null;
   status: UnitStatus;
-  bill_payer: BillPayer;
+  bill_payer: BillPayer | null;
   owner_id?: string | null;
   owner_name?: string | null;
   resident_id?: string | null;
@@ -124,7 +124,7 @@ export type UnitPayload = {
   block?: string | null;
   floor?: number | null;
   status?: UnitStatus;
-  bill_payer: BillPayer;
+  bill_payer: BillPayer | null;
   owner_id?: string | null;
   resident_id?: string | null;
   notes?: string | null;

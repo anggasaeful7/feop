@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -46,7 +47,7 @@ export function UnitFormModal({
       block: initial?.block || "",
       floor: initial?.floor ?? null,
       status: initial?.status || "vacant",
-      bill_payer: initial?.bill_payer || "resident",
+      bill_payer: initial?.bill_payer || null,
       owner_id: initial?.owner_id || "",
       resident_id: initial?.resident_id || "",
       notes: initial?.notes || "",
@@ -62,8 +63,9 @@ export function UnitFormModal({
     const payload = {
       ...values,
       block: values.block === "" ? null : values.block,
-      owner_id: values.owner_id === "" ? null : values.owner_id,
-      resident_id: values.resident_id === "" ? null : values.resident_id,
+      bill_payer: values.status === "vacant" ? null : (values.bill_payer || null),
+      owner_id: values.status === "vacant" || values.owner_id === "" ? null : values.owner_id,
+      resident_id: values.status === "vacant" || values.resident_id === "" ? null : values.resident_id,
       notes: values.notes === "" ? null : values.notes,
     };
 
@@ -82,9 +84,18 @@ export function UnitFormModal({
     }
   }
 
+  const status = useWatch({ control: form.control, name: "status" });
   const ownerId = useWatch({ control: form.control, name: "owner_id" });
   const residentId = useWatch({ control: form.control, name: "resident_id" });
   const ownerIsResident = !!ownerId && ownerId === residentId;
+
+  useEffect(() => {
+    if (status === "vacant") {
+      form.setValue("bill_payer", null, { shouldValidate: true });
+      form.setValue("owner_id", "");
+      form.setValue("resident_id", "");
+    }
+  }, [status, form]);
 
   const toggleOwnerIsResident = (checked: boolean) => {
     if (checked && ownerId) {
@@ -193,6 +204,55 @@ export function UnitFormModal({
 
           <FormField
             control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem className="col-span-2 sm:col-span-1">
+                <FormLabel>Status Unit</FormLabel>
+                <FormControl>
+                  <select
+                    {...field}
+                    className="flex h-10 w-full rounded-xl border border-zinc-200 bg-transparent px-3 py-2 text-sm italic ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {Object.entries(UNIT_STATUS_LABEL).map(([val, label]) => (
+                      <option key={val} value={val}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="bill_payer"
+            render={({ field }) => (
+              <FormItem className="col-span-2 sm:col-span-1">
+                <FormLabel>Pembayar Iuran</FormLabel>
+                <FormControl>
+                  <select
+                    {...field}
+                    value={field.value || ""}
+                    disabled={status === "vacant"}
+                    className="flex h-10 w-full rounded-xl border border-zinc-200 bg-transparent px-3 py-2 text-sm italic ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <option value="">— pilih pembayar —</option>
+                    {Object.entries(BILL_PAYER_LABEL).map(([val, label]) => (
+                      <option key={val} value={val}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
             name="owner_id"
             render={({ field }) => (
               <FormItem className="col-span-2 sm:col-span-1">
@@ -201,6 +261,7 @@ export function UnitFormModal({
                   <select
                     {...field}
                     value={field.value || ""}
+                    disabled={status === "vacant"}
                     onChange={(e) => {
                       const val = e.target.value;
                       field.onChange(val);
@@ -233,7 +294,7 @@ export function UnitFormModal({
                   <select
                     {...field}
                     value={field.value || ""}
-                    disabled={ownerIsResident}
+                    disabled={status === "vacant" || ownerIsResident}
                     className="flex h-10 w-full rounded-xl border border-zinc-200 bg-transparent px-3 py-2 text-sm italic ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <option value="">— belum ada —</option>
@@ -254,59 +315,12 @@ export function UnitFormModal({
               type="checkbox"
               id="ownerIsResident"
               checked={ownerIsResident}
-              disabled={!ownerId}
+              disabled={status === "vacant" || !ownerId}
               onChange={(e) => toggleOwnerIsResident(e.target.checked)}
               className="h-4 w-4 rounded border-zinc-300 accent-brand"
             />
             <label htmlFor="ownerIsResident">Pemilik tinggal sendiri di unit ini (penghuni = pemilik)</label>
           </div>
-
-          <FormField
-            control={form.control}
-            name="status"
-            render={({ field }) => (
-              <FormItem className="col-span-2 sm:col-span-1">
-                <FormLabel>Status Unit</FormLabel>
-                <FormControl>
-                  <select
-                    {...field}
-                    className="flex h-10 w-full rounded-xl border border-zinc-200 bg-transparent px-3 py-2 text-sm italic ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {Object.entries(UNIT_STATUS_LABEL).map(([val, label]) => (
-                      <option key={val} value={val}>
-                        {label}
-                      </option>
-                    ))}
-                  </select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="bill_payer"
-            render={({ field }) => (
-              <FormItem className="col-span-2 sm:col-span-1">
-                <FormLabel>Pembayar Iuran</FormLabel>
-                <FormControl>
-                  <select
-                    {...field}
-                    className="flex h-10 w-full rounded-xl border border-zinc-200 bg-transparent px-3 py-2 text-sm italic ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {Object.entries(BILL_PAYER_LABEL).map(([val, label]) => (
-                      <option key={val} value={val}>
-                        {label}
-                      </option>
-                    ))}
-                  </select>
-                </FormControl>
-                <p className="text-xs text-zinc-500 mt-1">Pilih pihak yang menanggung iuran IPL bulanan.</p>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
 
           <FormField
             control={form.control}
