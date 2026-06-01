@@ -203,23 +203,7 @@ export function AssignComponentModal({ onClose }: { onClose: () => void }) {
       }
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2 h-[450px]">
-        {/* Left Table: Komponen Tagihan */}
-        <div className="flex flex-col h-full overflow-hidden [&_.overflow-x-auto]:max-h-[300px]">
-          <DataTable
-            title="Komponen Tagihan"
-            data={components}
-            columns={componentsColumns}
-            total={componentsData?.total || 0}
-            onRowClick={(row) => toggleComponent(row.id)}
-            size="sm"
-            page={componentsPage}
-            perPage={10}
-            onPageChange={setComponentsPage}
-            isLoading={isFetchingComponents}
-          />
-        </div>
-
-        {/* Right Table: Unit */}
+        {/* Left Table: Unit */}
         <div className="flex flex-col h-full overflow-hidden [&_.overflow-x-auto]:max-h-[300px]">
           <DataTable
             title="Unit"
@@ -238,6 +222,22 @@ export function AssignComponentModal({ onClose }: { onClose: () => void }) {
             perPage={10}
             onPageChange={setUnitsPage}
             isLoading={isFetchingUnits}
+          />
+        </div>
+
+        {/* Right Table: Komponen Tagihan */}
+        <div className="flex flex-col h-full overflow-hidden [&_.overflow-x-auto]:max-h-[300px]">
+          <DataTable
+            title="Komponen Tagihan"
+            data={components}
+            columns={componentsColumns}
+            total={componentsData?.total || 0}
+            onRowClick={(row) => toggleComponent(row.id)}
+            size="sm"
+            page={componentsPage}
+            perPage={10}
+            onPageChange={setComponentsPage}
+            isLoading={isFetchingComponents}
           />
         </div>
       </div>

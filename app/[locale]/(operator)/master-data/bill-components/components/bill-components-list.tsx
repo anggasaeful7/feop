@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Link } from "lucide-react";
 import { Button, DataTable, DataTableRowActions } from "@/components/ui";
 import { ColumnDef } from "@tanstack/react-table";
 import { BillComponentsFormModal } from "./modals/bill-components-form-modal";
@@ -67,8 +67,8 @@ export function BillComponentsList() {
         onPageChange={setPage}
         actions={
           <>
-            <Button size="sm" onClick={() => setAssigning(true)}>
-              <Plus size={16} className="mr-1" /> Asign ke unit
+            <Button size="sm" variant="secondary" onClick={() => setAssigning(true)}>
+              <Link size={16} className="mr-1" /> Asign ke unit
             </Button>
             <Button size="sm" onClick={() => setCreating(true)}>
               <Plus size={16} className="mr-1" /> Tambah Komponen
