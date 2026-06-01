@@ -4,7 +4,7 @@ import type {
   SpecificBilling,
   SpecificBillingPayload,
   SpecificBillingQueryParams,
-  IssueSpecificBillingPayload,
+  BulkIssueSpecificBillingPayload,
 } from "@/types/specific-billing";
 
 const BASE_URL = "/api/v1/master/specific-billings";
@@ -48,8 +48,8 @@ export async function deleteSpecificBilling(id: string) {
   });
 }
 
-export async function issueSpecificBilling({ id, payload }: { id: string; payload: IssueSpecificBillingPayload }) {
-  return api(`${BASE_URL}/${id}/issue`, {
+export async function issueSpecificBilling(payload: BulkIssueSpecificBillingPayload) {
+  return api(`${BASE_URL}/issue`, {
     method: "POST",
     body: JSON.stringify(payload),
   });

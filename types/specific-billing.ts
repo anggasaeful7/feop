@@ -23,6 +23,13 @@ export type IssueSpecificBillingPayload = {
   unit_ids: string[];
 };
 
+export type BulkIssueSpecificBillingPayload = {
+  specific_billing_ids: string[];
+  unit_ids: string[];
+  year: number;
+  month: number;
+};
+
 export type SpecificBillingQueryParams = {
   search?: string;
   page?: number;
