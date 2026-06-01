@@ -1,5 +1,4 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { Badge } from "@/components/ui";
 import { Person } from "@/types/master-data";
 
 export const baseColumns: ColumnDef<Person>[] = [
@@ -34,35 +33,23 @@ export const baseColumns: ColumnDef<Person>[] = [
     },
   },
   {
-    header: "Unit",
-    id: "units",
+    header: "Unit Milik",
+    id: "owned_units",
     cell: ({ row }) => {
       const p = row.original;
-      const allRefsMap = new Map();
-      p.owned_units?.forEach((u) => allRefsMap.set(u.id, { ...u, type: 'owner' }));
-      p.resided_in_units?.forEach((u) => {
-        if (allRefsMap.has(u.id)) {
-          allRefsMap.set(u.id, { ...u, type: 'both' });
-        } else {
-          allRefsMap.set(u.id, { ...u, type: 'resident' });
-        }
-      });
-
-      const allRefs = Array.from(allRefsMap.values());
-
+      const owned = p.owned_units || [];
       return (
         <div className="text-zinc-700">
-          {allRefs.length === 0 ? (
+          {owned.length === 0 ? (
             <span className="italic text-zinc-400">-</span>
           ) : (
             <span className="flex flex-wrap gap-1">
-              {allRefs.map((r) => (
+              {owned.map((u) => (
                 <span
-                  key={r.id}
-                  className="rounded-md bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-700"
-                  title={r.type === 'both' ? 'Pemilik & Penghuni' : r.type === 'owner' ? 'Pemilik' : 'Penghuni'}
+                  key={u.id}
+                  className="rounded-md bg-sky-50 border border-sky-200 px-2 py-0.5 text-xs font-medium text-sky-700"
                 >
-                  {r.code}
+                  {u.code}
                 </span>
               ))}
             </span>
@@ -72,18 +59,28 @@ export const baseColumns: ColumnDef<Person>[] = [
     },
   },
   {
-    header: "Status",
-    id: "status",
+    header: "Unit Huni",
+    id: "resided_units",
     cell: ({ row }) => {
       const p = row.original;
+      const resided = p.resided_in_units || [];
       return (
-        <span className="flex flex-wrap gap-1">
-          {p.is_owner && <Badge tone="info">Pemilik</Badge>}
-          {p.is_resident && <Badge tone="success">Penghuni</Badge>}
-          {!p.is_owner && !p.is_resident && (
-            <Badge tone="neutral">-</Badge>
+        <div className="text-zinc-700">
+          {resided.length === 0 ? (
+            <span className="italic text-zinc-400">-</span>
+          ) : (
+            <span className="flex flex-wrap gap-1">
+              {resided.map((u) => (
+                <span
+                  key={u.id}
+                  className="rounded-md bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-xs font-medium text-emerald-700"
+                >
+                  {u.code}
+                </span>
+              ))}
+            </span>
           )}
-        </span>
+        </div>
       );
     },
   },
