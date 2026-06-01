@@ -75,6 +75,7 @@ export function useAssignBillComponents() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: billComponentQK.all });
       queryClient.invalidateQueries({ queryKey: ["units"] });
+      queryClient.invalidateQueries({ queryKey: ["resident-bills"] });
       toast.success("Berhasil assign komponen ke unit");
     },
     onError: (error) => {

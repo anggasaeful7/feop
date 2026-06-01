@@ -27,6 +27,10 @@ export interface DataTableProps<TData, TValue> {
   page?: number;
   perPage?: number;
   onPageChange?: (page: number) => void;
+  renderRowDetails?: (row: TData) => ReactNode;
+  expandableRowKey?: (row: TData) => string;
+  expandedRowKeys?: Set<string>;
+  onExpandedRowKeysChange?: (keys: Set<string>) => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -46,7 +50,30 @@ export function DataTable<TData, TValue>({
   page = 1,
   perPage = 10,
   onPageChange,
+  renderRowDetails,
+  expandableRowKey,
+  expandedRowKeys,
+  onExpandedRowKeysChange,
 }: DataTableProps<TData, TValue>) {
+  const [internalExpandedKeys, setInternalExpandedKeys] = React.useState<Set<string>>(new Set());
+  const isControlled = expandedRowKeys !== undefined;
+  const activeExpandedKeys = isControlled ? expandedRowKeys : internalExpandedKeys;
+
+  const toggleRow = (key: string) => {
+    const nextKeys = new Set(activeExpandedKeys);
+    if (nextKeys.has(key)) {
+      nextKeys.delete(key);
+    } else {
+      nextKeys.add(key);
+    }
+
+    if (isControlled) {
+      onExpandedRowKeysChange?.(nextKeys);
+    } else {
+      setInternalExpandedKeys(nextKeys);
+    }
+  };
+
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data,
@@ -110,19 +137,40 @@ export function DataTable<TData, TValue>({
                 </td>
               </tr>
             ) : table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <tr
-                  key={row.id}
-                  onClick={() => onRowClick?.(row.original)}
-                  className={`border-b border-zinc-200 transition-colors ${onRowClick ? 'cursor-pointer hover:bg-zinc-50' : 'hover:bg-zinc-50'}`}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className={`${size === 'sm' ? 'px-3 py-2' : 'px-4 py-4'}`}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
-                </tr>
-              ))
+              table.getRowModel().rows.map((row) => {
+                const rowKey = expandableRowKey ? expandableRowKey(row.original) : undefined;
+                const isExpanded = rowKey ? activeExpandedKeys.has(rowKey) : false;
+
+                return (
+                  <React.Fragment key={row.id}>
+                    <tr
+                      onClick={() => {
+                        if (rowKey) {
+                          toggleRow(rowKey);
+                        } else {
+                          onRowClick?.(row.original);
+                        }
+                      }}
+                      className={`border-b border-zinc-200 transition-colors ${
+                        onRowClick || rowKey ? 'cursor-pointer hover:bg-zinc-50' : 'hover:bg-zinc-50'
+                      } ${isExpanded ? 'bg-zinc-50/50' : ''}`}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <td key={cell.id} className={`${size === 'sm' ? 'px-3 py-2' : 'px-4 py-4'}`}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </td>
+                      ))}
+                    </tr>
+                    {isExpanded && renderRowDetails && (
+                      <tr className="bg-zinc-50/40 border-b border-zinc-200">
+                        <td colSpan={columns.length} className="px-6 py-3">
+                          {renderRowDetails(row.original)}
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                );
+              })
             ) : (
               <tr>
                 <td colSpan={columns.length} className={`${size === 'sm' ? 'px-3 py-4' : 'px-4 py-8'} text-center text-zinc-500`}>

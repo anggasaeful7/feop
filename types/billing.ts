@@ -1,3 +1,5 @@
+import type { BillPayer } from "./master-data";
+
 export type BillKind = "monthly" | "specific";
 export type BillStatus = "unpaid" | "pending_verification" | "paid" | "rejected" | "void";
 
@@ -30,6 +32,8 @@ export type ResidentBill = {
   proof_mime_type?: string;
   proof_size?: number;
   notes?: string;
+  bill_payer?: BillPayer | null;
+  bill_payer_name?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -57,3 +61,23 @@ export type ProofURL = {
   expires_at: string;
   file_name: string;
 };
+
+export type ResidentBillByUnitQueryParams = {
+  year?: number;
+  status?: string;
+  kind?: string;
+  search?: string;
+  page?: number;
+  per_page?: number;
+};
+
+export type ResidentBillByUnitItem = {
+  unit_id: string;
+  unit_code: string;
+  unit_block?: string;
+  owner_name?: string;
+  resident_name?: string;
+  bills: ResidentBill[];
+  bills_debt?: ResidentBill[];
+};
+

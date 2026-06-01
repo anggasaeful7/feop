@@ -6,13 +6,16 @@ import {
   approveResidentBill,
   rejectResidentBill,
   deleteResidentBill,
+  getResidentBillsByUnit,
 } from "@/services/resident-bill.service";
-import type { ResidentBillQueryParams } from "@/types/billing";
+import type { ResidentBillQueryParams, ResidentBillByUnitQueryParams } from "@/types/billing";
 
 export const residentBillQK = {
   all: ["resident-bills"] as const,
   lists: () => [...residentBillQK.all, "list"] as const,
   list: (params?: ResidentBillQueryParams) => [...residentBillQK.lists(), params] as const,
+  byUnits: () => [...residentBillQK.all, "by-unit-list"] as const,
+  byUnit: (params?: ResidentBillByUnitQueryParams) => [...residentBillQK.byUnits(), params] as const,
   details: () => [...residentBillQK.all, "detail"] as const,
   detail: (id: string) => [...residentBillQK.details(), id] as const,
 };
@@ -21,6 +24,14 @@ export function useResidentBills(params?: ResidentBillQueryParams) {
   return useQuery({
     queryKey: residentBillQK.list(params),
     queryFn: () => getResidentBills(params),
+    placeholderData: (prev) => prev,
+  });
+}
+
+export function useResidentBillsByUnit(params?: ResidentBillByUnitQueryParams) {
+  return useQuery({
+    queryKey: residentBillQK.byUnit(params),
+    queryFn: () => getResidentBillsByUnit(params),
     placeholderData: (prev) => prev,
   });
 }

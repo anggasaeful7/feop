@@ -4,6 +4,8 @@ import type {
   ResidentBill,
   ResidentBillQueryParams,
   ResidentBillCreatePayload,
+  ResidentBillByUnitQueryParams,
+  ResidentBillByUnitItem,
 } from "@/types/billing";
 
 const BASE_URL = "/api/v1/resident-bills";
@@ -63,3 +65,17 @@ export async function rejectResidentBill({
     body: JSON.stringify({ reason }),
   });
 }
+
+export async function getResidentBillsByUnit(params?: ResidentBillByUnitQueryParams) {
+  const qs = new URLSearchParams();
+  if (params?.year) qs.set("year", params.year.toString());
+  if (params?.status) qs.set("status", params.status);
+  if (params?.kind) qs.set("kind", params.kind);
+  if (params?.search) qs.set("search", params.search);
+  if (params?.page) qs.set("page", params.page.toString());
+  if (params?.per_page) qs.set("per_page", params.per_page.toString());
+
+  const query = qs.toString();
+  return api<Paged<ResidentBillByUnitItem>>(`${BASE_URL}/by-unit${query ? `?${query}` : ""}`);
+}
+
