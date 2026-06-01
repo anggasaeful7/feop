@@ -24,6 +24,7 @@ export function useAssignUnitBillComponents(id: string) {
       UnitService.assignUnitBillComponents(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: unitBillComponentsQK.matrix(id) });
+      queryClient.invalidateQueries({ queryKey: ["units"] });
       toast.success("Berhasil mengatur komponen tagihan");
     },
     onError: (err) => {
