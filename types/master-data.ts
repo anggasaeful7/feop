@@ -52,6 +52,18 @@ export type AssignBillComponentPayload = {
   component_ids: string[];
 };
 
+export type BillComponentMatrixItem = {
+  id: string;
+  name: string;
+  amount: number;
+  assigned: boolean;
+};
+
+export type UnitBillComponentsMatrixResponse = {
+  unit_id: string;
+  components: BillComponentMatrixItem[];
+};
+
 export type UnitRef = { id: string; code: string };
 
 export type Person = {
