@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Modal, Button } from "@/components/ui";
+import { Modal, Button, Textarea } from "@/components/ui";
 import type { GuestReport } from "@/types/guest-report";
 import { GuestReportService } from "@/services/guest-report.service";
+import { useUpdateGuestReportNote } from "@/hooks/api/use-guest-report";
 import { formatDate } from "@/lib/format";
 import { Loader2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
@@ -16,6 +17,24 @@ export function DetailModal({
   onClose: () => void;
 }) {
   const [downloadingKtp, setDownloadingKtp] = useState(false);
+  const [operatorNote, setOperatorNote] = useState(report.operator_note || "");
+  const [editNote, setEditNote] = useState(report.operator_note || "");
+
+  const updateNoteMutation = useUpdateGuestReportNote();
+
+  const handleSaveNote = async () => {
+    try {
+      await updateNoteMutation.mutateAsync({
+        id: report.id,
+        operator_note: editNote,
+      });
+      setOperatorNote(editNote);
+      toast.success("Catatan operator berhasil disimpan");
+      onClose();
+    } catch {
+      toast.error("Gagal menyimpan catatan operator");
+    }
+  };
 
   const handleViewKtp = async () => {
     try {
@@ -87,6 +106,38 @@ export function DetailModal({
           ) : (
             <div className="text-sm text-zinc-400">Tidak ada lampiran KTP</div>
           )}
+        </div>
+
+        <div className="pt-4 border-t border-zinc-100">
+          <div className="text-xs font-semibold text-zinc-600 mb-2">CATATAN OPERATOR</div>
+          <div className="space-y-3 mt-1">
+            <Textarea
+              value={editNote}
+              onChange={(e) => setEditNote(e.target.value)}
+              placeholder="Tambahkan keterangan atau catatan operator di sini..."
+              rows={4}
+              className="w-full text-sm bg-white resize-none border border-zinc-200 focus:border-emerald-600 rounded-xl p-3"
+            />
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="danger" onClick={onClose} disabled={updateNoteMutation.isPending}>
+                Batal
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleSaveNote}
+                disabled={updateNoteMutation.isPending || editNote === operatorNote}
+              >
+                {updateNoteMutation.isPending ? (
+                  <>
+                    <Loader2 size={12} className="animate-spin mr-1" />
+                    Menyimpan...
+                  </>
+                ) : (
+                  "Simpan Catatan"
+                )}
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     </Modal>

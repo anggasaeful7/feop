@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { GuestReportService } from "@/services/guest-report.service";
 import type { GetGuestReportsParams } from "@/types/guest-report";
 
@@ -23,5 +23,17 @@ export function useGuestReportDetail(id: string) {
     queryKey: guestReportQK.detail(id),
     queryFn: () => GuestReportService.getGuestReportDetail(id),
     enabled: !!id,
+  });
+}
+
+export function useUpdateGuestReportNote() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, operator_note }: { id: string; operator_note: string }) =>
+      GuestReportService.updateGuestReportNote(id, operator_note),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: guestReportQK.all });
+    },
   });
 }

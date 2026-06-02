@@ -7,7 +7,7 @@ import { baseColumns } from "./columns";
 import type { GuestReport } from "@/types/guest-report";
 import { DetailModal } from "./modals/detail-modal";
 import { useDebounce } from "@/hooks/use-debounce";
-import { Eye } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 
 export function GuestReportList() {
@@ -45,7 +45,7 @@ export function GuestReportList() {
             onClick={() => handleViewDetail(report)}
             title="Lihat Detail"
           >
-            <Eye className="h-4 w-4" />
+            <Pencil className="h-4 w-4" />
           </Button>
         );
       },

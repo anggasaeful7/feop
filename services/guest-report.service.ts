@@ -23,4 +23,11 @@ export const GuestReportService = {
   getKtpUrl: async (id: string) => {
     return api<{ url: string }>(`/api/v1/guest-reports/${id}/ktp-url`);
   },
+
+  updateGuestReportNote: async (id: string, operator_note: string) => {
+    return api<GuestReport>(`/api/v1/guest-reports/${id}/note`, {
+      method: "PATCH",
+      body: JSON.stringify({ note: operator_note }),
+    });
+  },
 };

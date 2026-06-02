@@ -6,6 +6,7 @@ export interface GuestReport {
   id: string;
   ktp_file_name: string | null;
   notes: string | null;
+  operator_note: string | null;
   resident_name: string;
   submitted_by_resident_user_id: string;
   unit_code: string;
