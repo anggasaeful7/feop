@@ -48,8 +48,8 @@ export function SecurityScheduleFormModal({
       officer_name: initial?.officer_name || "",
       shift_name: initial?.shift_name || "",
       scheduled_date: initial?.scheduled_date || initialDate || "",
-      start_time: initial?.start_time || "",
-      end_time: initial?.end_time || "",
+      start_time: initial?.start_time ? initial.start_time.slice(0, 5) : "",
+      end_time: initial?.end_time ? initial.end_time.slice(0, 5) : "",
       category: initial?.category || "once",
       notes: initial?.notes || "",
     },
@@ -61,14 +61,20 @@ export function SecurityScheduleFormModal({
   const isPending = createMut.isPending || updateMut.isPending;
 
   function onSubmit(values: SecurityScheduleFormValues) {
+    const formattedValues = {
+      ...values,
+      start_time: values.start_time.slice(0, 5),
+      end_time: values.end_time.slice(0, 5),
+    };
+
     if (isEditing) {
-      updateMut.mutate(values, {
+      updateMut.mutate(formattedValues, {
         onSuccess: () => {
           onClose();
         },
       });
     } else {
-      createMut.mutate(values, {
+      createMut.mutate(formattedValues, {
         onSuccess: () => {
           onClose();
         },

@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const cleaningScheduleSchema = z.object({
   activity: z.string().min(1, "Aktivitas wajib diisi").max(160, "Maksimal 160 karakter"),
-  officer_name: z.string().min(1, "Nama petugas wajib diisi").max(160, "Maksimal 160 karakter"),
+  worker_name: z.string().min(1, "Nama petugas wajib diisi").max(160, "Maksimal 160 karakter"),
   category: z.enum(["daily", "weekly", "once"], { message: "Kategori jadwal wajib dipilih" }),
   scheduled_date: z.string().min(1, "Tanggal wajib diisi"),
   scheduled_time: z.string().min(1, "Waktu wajib diisi"),

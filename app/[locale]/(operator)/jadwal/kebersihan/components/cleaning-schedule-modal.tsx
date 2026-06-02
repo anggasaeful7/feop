@@ -45,10 +45,10 @@ export function CleaningScheduleFormModal({
     resolver: zodResolver(cleaningScheduleSchema),
     defaultValues: {
       activity: initial?.activity || "",
-      officer_name: initial?.officer_name || "",
+      worker_name: initial?.worker_name || "",
       category: initial?.category || "once",
       scheduled_date: initial?.scheduled_date || initialDate || "",
-      scheduled_time: initial?.scheduled_time || "",
+      scheduled_time: initial?.scheduled_time ? initial.scheduled_time.slice(0, 5) : "",
       notes: initial?.notes || "",
     },
   });
@@ -59,14 +59,19 @@ export function CleaningScheduleFormModal({
   const isPending = createMut.isPending || updateMut.isPending;
 
   function onSubmit(values: CleaningScheduleFormValues) {
+    const formattedValues = {
+      ...values,
+      scheduled_time: values.scheduled_time.slice(0, 5),
+    };
+
     if (isEditing) {
-      updateMut.mutate(values, {
+      updateMut.mutate(formattedValues, {
         onSuccess: () => {
           onClose();
         },
       });
     } else {
-      createMut.mutate(values, {
+      createMut.mutate(formattedValues, {
         onSuccess: () => {
           onClose();
         },
@@ -113,7 +118,7 @@ export function CleaningScheduleFormModal({
 
           <FormField
             control={form.control}
-            name="officer_name"
+            name="worker_name"
             render={({ field }) => (
               <FormItem className="col-span-2">
                 <FormLabel>Nama Petugas</FormLabel>

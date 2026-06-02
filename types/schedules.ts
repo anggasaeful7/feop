@@ -2,7 +2,7 @@ export type CleaningSchedule = {
   id: string;
   workspace_id: string;
   activity: string;
-  officer_name: string;
+  worker_name: string;
   scheduled_date: string;
   scheduled_time: string;
   notes: string;
@@ -13,7 +13,7 @@ export type CleaningSchedule = {
 
 export type CleaningSchedulePayload = {
   activity: string;
-  officer_name: string;
+  worker_name: string;
   scheduled_date: string;
   scheduled_time: string;
   notes: string;
