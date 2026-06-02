@@ -84,4 +84,31 @@ export const baseColumns: ColumnDef<Person>[] = [
       );
     },
   },
+  {
+    header: "Anggota Keluarga",
+    id: "family_members",
+    cell: ({ row }) => {
+      const p = row.original;
+      const family = p.family_members || [];
+      return (
+        <div className="text-zinc-700 max-w-[200px]">
+          {family.length === 0 ? (
+            <span className="italic text-zinc-400">-</span>
+          ) : (
+            <div className="flex flex-wrap gap-1">
+              {family.map((f, idx) => (
+                <span
+                  key={f.id || idx}
+                  className="inline-flex items-center gap-1 rounded-md bg-purple-50 border border-purple-200 px-2 py-0.5 text-xs font-medium text-purple-700"
+                  title={`${f.name} (${f.relationship})`}
+                >
+                  <span className="font-semibold">{f.relationship}:</span> {f.name}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    },
+  },
 ];

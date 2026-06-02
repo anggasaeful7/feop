@@ -1,15 +1,20 @@
 import { api } from "@/lib/axios";
 import type { Paged } from "@/types";
-import type { Person, PersonPayload } from "@/types/master-data";
+import type { Person, PersonPayload, PersonQueryParams } from "@/types/master-data";
 
 export const PersonService = {
-  getPersons: async (role?: string) => {
+  getPersons: async (params?: PersonQueryParams) => {
     const searchParams = new URLSearchParams();
-    searchParams.append("per_page", "100");
-    if (role) {
-      searchParams.append("role", role);
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          searchParams.append(key, String(value));
+        }
+      });
     }
-    return api<Paged<Person>>(`/api/v1/master/persons?${searchParams.toString()}`);
+    const query = searchParams.toString();
+    const path = `/api/v1/master/persons${query ? `?${query}` : ""}`;
+    return api<Paged<Person>>(path);
   },
 
   createPerson: async (payload: PersonPayload) => {

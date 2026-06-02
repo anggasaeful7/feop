@@ -8,13 +8,22 @@ import { usePersons, useDeletePerson } from "@/hooks/api/use-person";
 import type { Person } from "@/types/master-data";
 import { CSVTools } from "@/components/csv-import";
 import { ResidentFormModal } from "./modals/resident-form-modal";
+import { useDebounce } from "@/hooks/use-debounce";
 import { baseColumns } from "./columns";
 
 export function ResidentList() {
   const [search, setSearch] = useState("");
-  
-  const { data, error, isLoading, refetch } = usePersons();
+  const debouncedSearch = useDebounce(search, 500);
+  const [page, setPage] = useState(1);
+  const perPage = 10;
+
+  const { data, error, isLoading, refetch } = usePersons({
+    search: debouncedSearch,
+    page,
+    per_page: perPage,
+  });
   const items = data?.items || [];
+  const total = data?.total || 0;
 
   const [editing, setEditing] = useState<Person | null>(null);
   const [creating, setCreating] = useState(false);
@@ -54,7 +63,14 @@ export function ResidentList() {
         columns={columns}
         isLoading={isLoading}
         search={search}
-        onSearchChange={setSearch}
+        onSearchChange={(val) => {
+          setSearch(val);
+          setPage(1);
+        }}
+        total={total}
+        page={page}
+        perPage={perPage}
+        onPageChange={setPage}
         actions={
           <div className="flex items-center gap-2">
             <CSVTools

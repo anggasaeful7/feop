@@ -1,21 +1,21 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { PersonService } from "@/services/person.service";
-import type { PersonPayload } from "@/types/master-data";
+import type { PersonPayload, PersonQueryParams } from "@/types/master-data";
 import { toast } from "sonner";
 import { ApiError } from "@/lib/axios";
 
 export const personQK = {
   all: ["persons"] as const,
   lists: () => [...personQK.all, "list"] as const,
-  list: (role?: string) => [...personQK.lists(), role] as const,
+  list: (params?: PersonQueryParams) => [...personQK.lists(), params] as const,
   details: () => [...personQK.all, "detail"] as const,
   detail: (id: string) => [...personQK.details(), id] as const,
 };
 
-export function usePersons(role?: string) {
+export function usePersons(params?: PersonQueryParams) {
   return useQuery({
-    queryKey: personQK.list(role),
-    queryFn: () => PersonService.getPersons(role),
+    queryKey: personQK.list(params),
+    queryFn: () => PersonService.getPersons(params),
   });
 }
 

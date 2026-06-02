@@ -66,6 +66,12 @@ export type UnitBillComponentsMatrixResponse = {
 
 export type UnitRef = { id: string; code: string };
 
+export type FamilyMember = {
+  id?: string;
+  name: string;
+  relationship: string;
+};
+
 export type Person = {
   id: string;
   workspace_id: string;
@@ -78,6 +84,7 @@ export type Person = {
   resided_in_units: UnitRef[];
   is_owner: boolean;
   is_resident: boolean;
+  family_members?: FamilyMember[];
   created_at: string;
   updated_at: string;
 };
@@ -88,6 +95,7 @@ export type PersonPayload = {
   email?: string | null;
   id_card_no?: string | null;
   notes?: string | null;
+  family_members?: FamilyMember[];
 };
 
 export type UnitStatus = "occupied" | "vacant" | "maintenance";
@@ -134,6 +142,13 @@ export type UnitQueryParams = {
   search?: string;
   unit_type_id?: string;
   status?: UnitStatus;
+  page?: number;
+  per_page?: number;
+};
+
+export type PersonQueryParams = {
+  search?: string;
+  role?: string;
   page?: number;
   per_page?: number;
 };
