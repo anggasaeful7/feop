@@ -8,6 +8,7 @@ import { useUnits } from "@/hooks/api/use-unit";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Loader2 } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
+import { useConfirmStore } from "@/store/use-confirm-store";
 import type { BillComponent, Unit } from "@/types/master-data";
 
 export function AssignComponentModal({ onClose }: { onClose: () => void }) {
@@ -22,22 +23,30 @@ export function AssignComponentModal({ onClose }: { onClose: () => void }) {
   const { data: componentsData, isFetching: isFetchingComponents } = useBillComponents({ per_page: 10, page: componentsPage });
   const { data: unitsData, isFetching: isFetchingUnits } = useUnits({ search: debouncedSearchUnit, per_page: 10, page: unitsPage });
   const assignMutation = useAssignBillComponents();
+  const { confirm } = useConfirmStore();
 
   const components = useMemo(() => componentsData?.items || [], [componentsData?.items]);
   const units = useMemo(() => unitsData?.items || [], [unitsData?.items]);
 
   const handleSave = () => {
-    assignMutation.mutate(
-      {
-        component_ids: Array.from(selectedComponents),
-        unit_ids: Array.from(selectedUnits),
-      },
-      {
-        onSuccess: () => {
-          onClose();
-        },
+    confirm({
+      title: "Assign Komponen",
+      message: `Anda akan menerapkan ${selectedComponents.size} komponen tagihan rutin ke ${selectedUnits.size} unit.\n\nApakah Anda yakin ingin menyimpan pengaturan ini?`,
+      confirmLabel: "Assign",
+      onConfirm: () => {
+        assignMutation.mutate(
+          {
+            component_ids: Array.from(selectedComponents),
+            unit_ids: Array.from(selectedUnits),
+          },
+          {
+            onSuccess: () => {
+              onClose();
+            },
+          }
+        );
       }
-    );
+    });
   };
 
   const toggleComponent = (id: string) => {
@@ -179,8 +188,8 @@ export function AssignComponentModal({ onClose }: { onClose: () => void }) {
       open
       title={
         <div>
-          <div className="text-xl font-bold italic">Asign Komponen ke Unit</div>
-          <div className="text-xs text-zinc-400 italic font-normal mt-1">Perbaharui Asign Komponen ke Unit</div>
+          <div className="text-xl font-bold italic">Assign Komponen ke Unit</div>
+          <div className="text-xs text-zinc-400 italic font-normal mt-1">Perbaharui Assign Komponen ke Unit</div>
         </div>
       }
       onClose={onClose}
@@ -196,7 +205,7 @@ export function AssignComponentModal({ onClose }: { onClose: () => void }) {
               ✕ Batal
             </Button>
             <Button onClick={handleSave} className="rounded-full px-6" disabled={assignMutation.isPending || selectedComponents.size === 0 || selectedUnits.size === 0}>
-              {assignMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : "✓ "} Simpan Perubahan
+              {assignMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : "✓ "} Assign Komponen
             </Button>
           </div>
         </div>

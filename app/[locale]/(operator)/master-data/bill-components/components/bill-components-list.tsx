@@ -62,7 +62,7 @@ export function BillComponentsList() {
         actions={
           <>
             <Button size="sm" variant="secondary" onClick={() => setAssigning(true)}>
-              <Link size={16} className="mr-1" /> Asign ke unit
+              <Link size={16} className="mr-1" /> Assign ke unit
             </Button>
             <Button size="sm" onClick={() => setCreating(true)}>
               <Plus size={16} className="mr-1" /> Tambah Komponen

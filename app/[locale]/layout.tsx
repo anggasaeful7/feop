@@ -5,6 +5,7 @@ import { QueryProvider } from "@/components/providers/query-provider";
 import { Toaster } from "sonner";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,6 +43,7 @@ export default async function RootLayout({
           <QueryProvider>{children}</QueryProvider>
         </NextIntlClientProvider>
         <Toaster />
+        <ConfirmDialog />
       </body>
     </html>
   );

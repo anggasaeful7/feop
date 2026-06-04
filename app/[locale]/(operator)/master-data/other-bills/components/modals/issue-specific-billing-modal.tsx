@@ -9,6 +9,7 @@ import { useUnits } from "@/hooks/api/use-unit";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Loader2 } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
+import { useConfirmStore } from "@/store/use-confirm-store";
 import type { SpecificBilling } from "@/types/specific-billing";
 import type { Unit } from "@/types/master-data";
 
@@ -40,24 +41,34 @@ export function IssueSpecificBillingModal({ onClose }: Props) {
   });
 
   const issueMutation = useIssueSpecificBilling();
+  const { confirm } = useConfirmStore();
 
   const billings = useMemo(() => billingsData?.items || [], [billingsData?.items]);
   const units = useMemo(() => unitsData?.items || [], [unitsData?.items]);
 
   const handleSave = () => {
-    issueMutation.mutate(
-      {
-        specific_billing_ids: Array.from(selectedBillings),
-        unit_ids: Array.from(selectedUnits),
-        month,
-        year,
-      },
-      {
-        onSuccess: () => {
-          onClose();
-        },
+    const monthName = new Date(year, month - 1).toLocaleDateString("id-ID", { month: "long" });
+    
+    confirm({
+      title: "Generate Tagihan Spesifik",
+      message: `Anda akan membuat ${selectedBillings.size} jenis tagihan untuk ${selectedUnits.size} unit pada periode ${monthName} ${year}.\n\nApakah Anda yakin?`,
+      confirmLabel: "Generate",
+      onConfirm: () => {
+        issueMutation.mutate(
+          {
+            specific_billing_ids: Array.from(selectedBillings),
+            unit_ids: Array.from(selectedUnits),
+            month,
+            year,
+          },
+          {
+            onSuccess: () => {
+              onClose();
+            },
+          }
+        );
       }
-    );
+    });
   };
 
   const toggleBilling = (id: string) => {
@@ -185,20 +196,6 @@ export function IssueSpecificBillingModal({ onClose }: Props) {
           </div>
         ),
       },
-      {
-        id: "komponen",
-        header: "Komponen Aktif",
-        cell: ({ row }) => {
-          const comps = row.original.active_components || [];
-          if (comps.length === 0) return <span className="text-zinc-500">-</span>;
-          const names = comps.map(c => c.name).join(", ");
-          return (
-            <span className="text-zinc-500 whitespace-nowrap">
-              {names}
-            </span>
-          );
-        }
-      }
     ];
   }, [units, selectedUnits]);
 

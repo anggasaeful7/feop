@@ -47,8 +47,15 @@ export function BillingDetails({ unit, year, handleTagih }: BillingDetailsProps)
                       <td className="px-4 py-2.5 font-mono text-rose-400">
                         {bIdx + 1}
                       </td>
-                      <td className="px-4 py-2.5 font-semibold text-zinc-800">
-                        {bill.title}
+                      <td className="px-4 py-2.5">
+                        <div className="font-semibold text-zinc-800">
+                          {bill.title}
+                        </div>
+                        {bill.kind === "specific" && bill.period_start && (
+                          <div className="text-[11px] text-zinc-500 font-medium mt-0.5">
+                            Periode: {new Date(bill.period_start).toLocaleDateString("id-ID", { month: "long", year: "numeric" })}
+                          </div>
+                        )}
                       </td>
                       <td className="px-4 py-2.5">
                         <span className="text-[11px] font-bold capitalize text-[#8A9582] italic">
@@ -139,8 +146,15 @@ export function BillingDetails({ unit, year, handleTagih }: BillingDetailsProps)
                     <td className="px-4 py-3 font-mono text-zinc-400">
                       {bIdx + 1}
                     </td>
-                    <td className="px-4 py-3 font-semibold text-zinc-800">
-                      {bill.title}
+                    <td className="px-4 py-3">
+                      <div className="font-semibold text-zinc-800">
+                        {bill.title}
+                      </div>
+                      {bill.kind === "specific" && bill.period_start && (
+                        <div className="text-[11px] text-zinc-500 font-medium mt-0.5">
+                          Periode: {new Date(bill.period_start).toLocaleDateString("id-ID", { month: "long", year: "numeric" })}
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <span className="text-[11px] font-bold capitalize text-[#8A9582] italic">
