@@ -8,14 +8,11 @@ import { usePersons, useDeletePerson } from "@/hooks/api/use-person";
 import type { Person } from "@/types/master-data";
 import { CSVTools } from "@/components/csv-import";
 import { ResidentFormModal } from "./modals/resident-form-modal";
-import { useDebounce } from "@/hooks/use-debounce";
+import { useDataTableState } from "@/hooks/use-data-table-state";
 import { baseColumns } from "./columns";
 
 export function ResidentList() {
-  const [search, setSearch] = useState("");
-  const debouncedSearch = useDebounce(search, 500);
-  const [page, setPage] = useState(1);
-  const perPage = 10;
+  const { search, setSearch, debouncedSearch, page, setPage, perPage } = useDataTableState();
 
   const { data, error, isLoading, refetch } = usePersons({
     search: debouncedSearch,
@@ -63,10 +60,7 @@ export function ResidentList() {
         columns={columns}
         isLoading={isLoading}
         search={search}
-        onSearchChange={(val) => {
-          setSearch(val);
-          setPage(1);
-        }}
+        onSearchChange={setSearch}
         total={total}
         page={page}
         perPage={perPage}

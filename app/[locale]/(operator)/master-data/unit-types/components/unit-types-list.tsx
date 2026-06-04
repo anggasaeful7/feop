@@ -9,15 +9,12 @@ import { UnitTypeFormModal } from "./modals/unit-type-form-modal";
 import { CSVTools } from "@/components/csv-import";
 import type { UnitType } from "@/types/master-data";
 import { useUnitTypes, useDeleteUnitType, unitTypeQK } from "@/hooks/api/use-unit-type";
-import { useDebounce } from "@/hooks/use-debounce";
+import { useDataTableState } from "@/hooks/use-data-table-state";
 import { baseColumns } from "./columns";
 
 export function UnitTypesList() {
   const queryClient = useQueryClient();
-  const [search, setSearch] = useState("");
-  const debouncedSearch = useDebounce(search, 500);
-  const [page, setPage] = useState(1);
-  const perPage = 10;
+  const { search, setSearch, debouncedSearch, page, setPage, perPage } = useDataTableState();
 
   const { data, isLoading } = useUnitTypes({
     search: debouncedSearch,
@@ -59,10 +56,7 @@ export function UnitTypesList() {
         columns={columns}
         isLoading={isLoading}
         search={search}
-        onSearchChange={(val) => {
-          setSearch(val);
-          setPage(1);
-        }}
+        onSearchChange={setSearch}
         total={data?.total || 0}
         page={page}
         perPage={perPage}

@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { Plus, Send } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button, DataTable, DataTableRowActions } from "@/components/ui";
-import { useDebounce } from "@/hooks/use-debounce";
+import { useDataTableState } from "@/hooks/use-data-table-state";
 import { baseColumns } from "./columns";
 import {
   useSpecificBillings,
@@ -15,10 +15,7 @@ import { SpecificBillingFormModal } from "./modals/specific-billing-form-modal";
 import { IssueSpecificBillingModal } from "./modals/issue-specific-billing-modal";
 
 export function BillingList() {
-  const [search, setSearch] = useState("");
-  const debouncedSearch = useDebounce(search, 500);
-  const [page, setPage] = useState(1);
-  const perPage = 10;
+  const { search, setSearch, debouncedSearch, page, setPage, perPage } = useDataTableState();
 
   const { data, error, isLoading } = useSpecificBillings({
     search: debouncedSearch,

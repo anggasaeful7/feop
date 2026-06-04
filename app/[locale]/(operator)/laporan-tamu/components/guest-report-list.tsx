@@ -6,15 +6,12 @@ import { Button, DataTable } from "@/components/ui";
 import { baseColumns } from "./columns";
 import type { GuestReport } from "@/types/guest-report";
 import { DetailModal } from "./modals/detail-modal";
-import { useDebounce } from "@/hooks/use-debounce";
+import { useDataTableState } from "@/hooks/use-data-table-state";
 import { Pencil } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 
 export function GuestReportList() {
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const debouncedSearch = useDebounce(search, 500);
-  const [perPage] = useState(10);
+  const { search, setSearch, debouncedSearch, page, setPage, perPage } = useDataTableState();
 
   const { data, isLoading } = useGuestReports({
     page,
@@ -64,10 +61,7 @@ export function GuestReportList() {
         perPage={perPage}
         onPageChange={setPage}
         search={search}
-        onSearchChange={(v) => {
-          setSearch(v);
-          setPage(1);
-        }}
+        onSearchChange={setSearch}
       />
 
       {selectedReport && (

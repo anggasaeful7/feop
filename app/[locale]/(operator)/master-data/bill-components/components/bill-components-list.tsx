@@ -8,14 +8,11 @@ import { BillComponentsFormModal } from "./modals/bill-components-form-modal";
 import { AssignComponentModal } from "./modals/assign-component-modal";
 import type { BillComponent } from "@/types/master-data";
 import { useBillComponents, useDeleteBillComponent } from "@/hooks/api/use-bill-component";
-import { useDebounce } from "@/hooks/use-debounce";
+import { useDataTableState } from "@/hooks/use-data-table-state";
 import { baseColumns } from "./columns";
 
 export function BillComponentsList() {
-  const [search, setSearch] = useState("");
-  const debouncedSearch = useDebounce(search, 500);
-  const [page, setPage] = useState(1);
-  const perPage = 10;
+  const { search, setSearch, debouncedSearch, page, setPage, perPage } = useDataTableState();
 
   const { data, isLoading } = useBillComponents({
     search: debouncedSearch,
@@ -57,10 +54,7 @@ export function BillComponentsList() {
         columns={columns}
         isLoading={isLoading}
         search={search}
-        onSearchChange={(val) => {
-          setSearch(val);
-          setPage(1);
-        }}
+        onSearchChange={setSearch}
         total={data?.total || 0}
         page={page}
         perPage={perPage}

@@ -9,16 +9,13 @@ import {
   useEmergencyContacts,
   useDeleteEmergencyContact,
 } from "@/hooks/api/use-emergency-contacts";
-import { useDebounce } from "@/hooks/use-debounce";
+import { useDataTableState } from "@/hooks/use-data-table-state";
 import { EmergencyContactFormModal } from "./modals/emergency-contacts-form-modal";
 
 import { baseColumns } from "./columns";
 
 export function EmergencyContactsList() {
-  const [search, setSearch] = useState("");
-  const debouncedSearch = useDebounce(search, 500);
-  const [page, setPage] = useState(1);
-  const perPage = 10;
+  const { search, setSearch, debouncedSearch, page, setPage, perPage } = useDataTableState();
 
   const { data: response, isLoading } = useEmergencyContacts({
     search: debouncedSearch,
@@ -61,10 +58,7 @@ export function EmergencyContactsList() {
         columns={columns}
         isLoading={isLoading}
         search={search}
-        onSearchChange={(val) => {
-          setSearch(val);
-          setPage(1);
-        }}
+        onSearchChange={setSearch}
         total={response?.total || 0}
         page={page}
         perPage={perPage}

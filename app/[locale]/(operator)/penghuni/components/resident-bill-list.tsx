@@ -5,7 +5,7 @@ import { Download, ChevronDown, ChevronUp } from "lucide-react";
 import { Button, DataTable } from "@/components/ui";
 import { ColumnDef } from "@tanstack/react-table";
 import { useResidentBillsByUnit } from "@/hooks/api/use-resident-bill";
-import { useDebounce } from "@/hooks/use-debounce";
+import { useDataTableState } from "@/hooks/use-data-table-state";
 import { idr } from "@/lib/format";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -24,13 +24,10 @@ const STATUS_TABS = [
 type StatusTab = (typeof STATUS_TABS)[number]["key"];
 
 export function ResidentBillList() {
+  const { search, setSearch, debouncedSearch, page, setPage, perPage } = useDataTableState();
   const [activeTab, setActiveTab] = useState<StatusTab>("all");
   const [kind, setKind] = useState<string>("all");
   const [year, setYear] = useState<number>(2026);
-  const [search, setSearch] = useState("");
-  const debouncedSearch = useDebounce(search, 500);
-  const [page, setPage] = useState(1);
-  const perPage = 10;
   const [isExporting, setIsExporting] = useState(false);
   const [expandedUnits, setExpandedUnits] = useState<Set<string>>(new Set());
 
@@ -104,7 +101,7 @@ export function ResidentBillList() {
         );
       },
     },
-  ], [page, expandedUnits]);
+  ], [page, perPage, expandedUnits]);
 
   // Nested row detail rendering inside DataTable
   const renderRowDetails = (unit: ResidentBillByUnitItem) => {
@@ -130,10 +127,7 @@ export function ResidentBillList() {
         columns={columns}
         isLoading={isLoading || isFetching}
         search={search}
-        onSearchChange={(val) => {
-          setSearch(val);
-          setPage(1);
-        }}
+        onSearchChange={setSearch}
         total={total}
         page={page}
         perPage={perPage}

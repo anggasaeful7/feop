@@ -8,17 +8,14 @@ import type { LetterRequest } from "@/types/letter-request";
 import { ApproveModal } from "./modals/approve-modal";
 import { RejectModal } from "./modals/reject-modal";
 import { DetailModal } from "./modals/detail-modal";
-import { useDebounce } from "@/hooks/use-debounce";
+import { useDataTableState } from "@/hooks/use-data-table-state";
 import { Pencil } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export function LetterRequestList() {
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const debouncedSearch = useDebounce(search, 500);
+  const { search, setSearch, debouncedSearch, page, setPage, perPage } = useDataTableState();
   const [status, setStatus] = useState<string>("all");
-  const [perPage] = useState(10);
 
   const { data, isLoading } = useLetterRequests({
     page,
@@ -78,10 +75,7 @@ export function LetterRequestList() {
         perPage={perPage}
         onPageChange={setPage}
         search={search}
-        onSearchChange={(v) => {
-          setSearch(v);
-          setPage(1);
-        }}
+        onSearchChange={setSearch}
         actions={
           <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1); }}>
             <SelectTrigger className="w-40 bg-[#FFFDF7]">

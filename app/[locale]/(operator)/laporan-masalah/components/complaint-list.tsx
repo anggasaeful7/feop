@@ -7,17 +7,14 @@ import { baseColumns } from "./columns";
 import type { Complaint } from "@/types/complaint";
 import { DetailModal } from "./modals/detail-modal";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useDebounce } from "@/hooks/use-debounce";
+import { useDataTableState } from "@/hooks/use-data-table-state";
 import { Pencil } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 
 export function ComplaintList() {
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const debouncedSearch = useDebounce(search, 500);
+  const { search, setSearch, debouncedSearch, page, setPage, perPage } = useDataTableState();
   const [status, setStatus] = useState<string>("all");
   const [category, setCategory] = useState<string>("all");
-  const [perPage] = useState(10);
 
   const { data, isLoading } = useComplaints({
     page,
@@ -69,10 +66,7 @@ export function ComplaintList() {
         perPage={perPage}
         onPageChange={setPage}
         search={search}
-        onSearchChange={(v) => {
-          setSearch(v);
-          setPage(1);
-        }}
+        onSearchChange={setSearch}
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1); }}>

@@ -8,17 +8,14 @@ import type { RenovationPermit, RenovationPermitStatus } from "@/types/renovatio
 import { DetailModal } from "./modals/detail-modal";
 import { ApproveModal } from "./modals/approve-modal";
 import { RejectModal } from "./modals/reject-modal";
-import { useDebounce } from "@/hooks/use-debounce";
+import { useDataTableState } from "@/hooks/use-data-table-state";
 import { Pencil } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export function RenovationPermitList() {
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const debouncedSearch = useDebounce(search, 500);
+  const { search, setSearch, debouncedSearch, page, setPage, perPage } = useDataTableState();
   const [status, setStatus] = useState<string>("all");
-  const [perPage] = useState(10);
 
   const { data, isLoading } = useRenovationPermits({
     page,
@@ -75,10 +72,7 @@ export function RenovationPermitList() {
         perPage={perPage}
         onPageChange={setPage}
         search={search}
-        onSearchChange={(v) => {
-          setSearch(v);
-          setPage(1);
-        }}
+        onSearchChange={setSearch}
         actions={
           <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1); }}>
             <SelectTrigger className="w-40 bg-[#FFFDF7]">

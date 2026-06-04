@@ -4,17 +4,14 @@ import { useState, useMemo } from "react";
 import { Settings2 } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button, DataTable } from "@/components/ui";
-import { useDebounce } from "@/hooks/use-debounce";
+import { useDataTableState } from "@/hooks/use-data-table-state";
 import { useUnits } from "@/hooks/api/use-unit";
 import type { Unit } from "@/types/master-data";
 import { baseColumns } from "../../units/components/columns";
 import { AssignComponentsModal } from "./modals/assign-components-modal";
 
 export function AssignComponentsList() {
-  const [search, setSearch] = useState("");
-  const debouncedSearch = useDebounce(search, 500);
-  const [page, setPage] = useState(1);
-  const perPage = 10;
+  const { search, setSearch, debouncedSearch, page, setPage, perPage } = useDataTableState();
 
   const { data, error, isLoading } = useUnits({
     search: debouncedSearch,
