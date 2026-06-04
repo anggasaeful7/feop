@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Combobox } from "@/components/ui/combobox";
+import { Checkbox } from "@/components/ui/checkbox";
 
 import type { Unit } from "@/types/master-data";
 import { unitSchema, type UnitFormValues } from "@/lib/validations/unit";
@@ -39,6 +41,11 @@ export function UnitFormModal({
 
   const unitTypes = unitTypesData?.items || [];
   const persons = personsData?.items || [];
+
+  const personOptions = [
+    { value: "", label: "— pilih —" },
+    ...persons.map((p) => ({ value: p.id, label: p.full_name })),
+  ];
 
   const form = useForm<UnitFormValues>({
     resolver: zodResolver(unitSchema),
@@ -269,33 +276,22 @@ export function UnitFormModal({
             control={form.control}
             name="owner_id"
             render={({ field }) => (
-              <FormItem className="col-span-2 sm:col-span-1">
+              <FormItem className="col-span-2 sm:col-span-1 flex flex-col pt-2 justify-end">
                 <FormLabel>Pemilik</FormLabel>
-                <Select
-                  onValueChange={(val) => {
-                    const mappedVal = val === "none" ? "" : val;
-                    field.onChange(mappedVal);
+                <Combobox
+                  options={personOptions}
+                  value={field.value || ""}
+                  onSelect={(val) => {
+                    field.onChange(val);
                     if (ownerIsResident) {
-                      form.setValue("resident_id", mappedVal, { shouldValidate: true });
+                      form.setValue("resident_id", val, { shouldValidate: true });
                     }
                   }}
-                  value={field.value || "none"}
+                  placeholder="— pilih pemilik —"
+                  searchPlaceholder="Cari pemilik..."
                   disabled={status === "vacant"}
-                >
-                  <FormControl>
-                    <SelectTrigger className="rounded-xl italic bg-transparent">
-                      <SelectValue placeholder="— belum ada —" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="none">— belum ada —</SelectItem>
-                    {persons.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>
-                        {p.full_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  className="rounded-xl italic bg-transparent border-[#E4DDCB]"
+                />
                 <FormMessage />
               </FormItem>
             )}
@@ -305,42 +301,35 @@ export function UnitFormModal({
             control={form.control}
             name="resident_id"
             render={({ field }) => (
-              <FormItem className="col-span-2 sm:col-span-1">
+              <FormItem className="col-span-2 sm:col-span-1 flex flex-col pt-2 justify-end">
                 <FormLabel>Penghuni</FormLabel>
-                <Select
-                  onValueChange={(val) => field.onChange(val === "none" ? null : val)}
-                  value={field.value || "none"}
+                <Combobox
+                  options={personOptions}
+                  value={field.value || ""}
+                  onSelect={(val) => field.onChange(val)}
+                  placeholder="— pilih penghuni —"
+                  searchPlaceholder="Cari penghuni..."
                   disabled={status === "vacant" || ownerIsResident}
-                >
-                  <FormControl>
-                    <SelectTrigger className="rounded-xl italic bg-transparent">
-                      <SelectValue placeholder="— belum ada —" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="none">— belum ada —</SelectItem>
-                    {persons.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>
-                        {p.full_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  className="rounded-xl italic bg-transparent border-[#E4DDCB]"
+                />
                 <FormMessage />
               </FormItem>
             )}
           />
 
           <div className="col-span-2 flex items-center gap-2 text-sm text-zinc-700">
-            <input
-              type="checkbox"
+            <Checkbox
               id="ownerIsResident"
               checked={ownerIsResident}
               disabled={status === "vacant" || !ownerId}
-              onChange={(e) => toggleOwnerIsResident(e.target.checked)}
-              className="h-4 w-4 rounded border-zinc-300 accent-brand"
+              onCheckedChange={(checked) => toggleOwnerIsResident(checked === true)}
             />
-            <label htmlFor="ownerIsResident">Pemilik tinggal sendiri di unit ini (penghuni = pemilik)</label>
+            <label
+              htmlFor="ownerIsResident"
+              className="cursor-pointer leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Pemilik tinggal sendiri di unit ini (penghuni = pemilik)
+            </label>
           </div>
 
           <FormField
