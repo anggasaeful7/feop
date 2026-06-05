@@ -38,6 +38,7 @@ export function IssueSpecificBillingModal({ onClose }: Props) {
     search: debouncedSearchUnit,
     per_page: 10,
     page: unitsPage,
+    exclude_vacant: true,
   });
 
   const issueMutation = useIssueSpecificBilling();
@@ -48,7 +49,7 @@ export function IssueSpecificBillingModal({ onClose }: Props) {
 
   const handleSave = () => {
     const monthName = new Date(year, month - 1).toLocaleDateString("id-ID", { month: "long" });
-    
+
     confirm({
       title: "Generate Tagihan Spesifik",
       message: `Anda akan membuat ${selectedBillings.size} jenis tagihan untuk ${selectedUnits.size} unit pada periode ${monthName} ${year}.\n\nApakah Anda yakin?`,

@@ -144,6 +144,7 @@ export type UnitQueryParams = {
   status?: UnitStatus;
   page?: number;
   per_page?: number;
+  exclude_vacant?: boolean;
 };
 
 export type PersonQueryParams = {

@@ -21,7 +21,7 @@ export function AssignComponentModal({ onClose }: { onClose: () => void }) {
   const [unitsPage, setUnitsPage] = useState(1);
 
   const { data: componentsData, isFetching: isFetchingComponents } = useBillComponents({ per_page: 10, page: componentsPage });
-  const { data: unitsData, isFetching: isFetchingUnits } = useUnits({ search: debouncedSearchUnit, per_page: 10, page: unitsPage });
+  const { data: unitsData, isFetching: isFetchingUnits } = useUnits({ search: debouncedSearchUnit, per_page: 10, page: unitsPage, exclude_vacant: true });
   const assignMutation = useAssignBillComponents();
   const { confirm } = useConfirmStore();
 
