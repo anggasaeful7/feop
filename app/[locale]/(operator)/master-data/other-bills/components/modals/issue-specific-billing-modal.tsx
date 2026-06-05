@@ -51,7 +51,7 @@ export function IssueSpecificBillingModal({ onClose }: Props) {
     const monthName = new Date(year, month - 1).toLocaleDateString("id-ID", { month: "long" });
 
     confirm({
-      title: "Generate Tagihan Spesifik",
+      title: "Generate Tagihan Lainnya",
       message: `Anda akan membuat ${selectedBillings.size} jenis tagihan untuk ${selectedUnits.size} unit pada periode ${monthName} ${year}.\n\nApakah Anda yakin?`,
       confirmLabel: "Generate",
       onConfirm: () => {
@@ -205,8 +205,8 @@ export function IssueSpecificBillingModal({ onClose }: Props) {
       open
       title={
         <div>
-          <div className="text-xl font-bold italic">Generate Tagihan Spesifik</div>
-          <div className="text-xs text-zinc-400 italic font-normal mt-1">Buat tagihan spesifik untuk beberapa unit sekaligus</div>
+          <div className="text-xl font-bold italic">Generate Tagihan Lainnya</div>
+          <div className="text-xs text-zinc-400 italic font-normal mt-1">Buat tagihan lainnya untuk beberapa unit sekaligus</div>
         </div>
       }
       onClose={onClose}
@@ -277,10 +277,10 @@ export function IssueSpecificBillingModal({ onClose }: Props) {
           />
         </div>
 
-        {/* Right Table: Tagihan Spesifik */}
+        {/* Right Table: Tagihan Lainnya */}
         <div className="flex flex-col h-full overflow-hidden [&_.overflow-x-auto]:max-h-[300px]">
           <DataTable
-            title="Daftar Tagihan Spesifik"
+            title="Daftar Tagihan Lainnya"
             data={billings}
             columns={billingsColumns}
             total={billingsData?.total || 0}

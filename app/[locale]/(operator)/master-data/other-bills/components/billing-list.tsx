@@ -85,7 +85,7 @@ export function BillingList() {
 
       {creating && (
         <SpecificBillingFormModal
-          title="Tambah Tagihan Spesifik"
+          title="Tambah Tagihan Lainnya"
           onClose={() => setCreating(false)}
         />
       )}
