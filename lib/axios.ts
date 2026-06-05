@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosResponse, AxiosRequestConfig } from "axios";
 import { env } from "./env";
-import { readToken } from "./auth-storage";
+import { readToken, clearAuth } from "./auth-storage";
 import type { ApiEnvelope, ApiErrorBody } from "@/types";
 
 export const API_URL = env.apiUrl;
@@ -40,6 +40,20 @@ axiosInstance.interceptors.request.use((config) => {
   return config;
 });
 
+// Response interceptor to handle 401 Unauthorized
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      if (typeof window !== "undefined") {
+        clearAuth();
+        window.location.href = "/login";
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 // Generic api function replacing the old fetch-based one
 export async function api<T>(path: string, init?: RequestInit): Promise<T> {
   try {
@@ -48,7 +62,7 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
       method: init?.method || "GET",
       headers: init?.headers as AxiosRequestConfig["headers"],
     };
-    
+
     if (init?.body) {
       if (typeof init.body === "string") {
         config.data = JSON.parse(init.body);
@@ -63,18 +77,18 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
 
     const body = res.data;
     if (body && "data" in body) return body.data;
-    
+
     return undefined as T;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       const axiosError = error as AxiosError<ApiErrorBody>;
       const status = axiosError.response?.status || 500;
       const body = axiosError.response?.data;
-      
+
       if (body && "error" in body) {
         throw new ApiError(status, body.error);
       }
-      
+
       throw new ApiError(status, {
         code: "unknown",
         message: axiosError.message || `Request failed (${status})`,
@@ -121,7 +135,7 @@ export async function uploadCSV<T>(path: string, file: File): Promise<T> {
   try {
     const fd = new FormData();
     fd.append("file", file);
-    
+
     const res = await axiosInstance.post<ApiEnvelope<T> | ApiErrorBody>(path, fd, {
       headers: {
         "Content-Type": "multipart/form-data",
@@ -130,7 +144,7 @@ export async function uploadCSV<T>(path: string, file: File): Promise<T> {
 
     const body = res.data;
     if (body && "data" in body) return body.data;
-    
+
     throw new ApiError(res.status, {
       code: "unknown",
       message: "missing response body",
@@ -140,11 +154,11 @@ export async function uploadCSV<T>(path: string, file: File): Promise<T> {
       const axiosError = error as AxiosError<ApiErrorBody>;
       const status = axiosError.response?.status || 500;
       const body = axiosError.response?.data;
-      
+
       if (body && "error" in body) {
         throw new ApiError(status, body.error);
       }
-      
+
       throw new ApiError(status, {
         code: "unknown",
         message: axiosError.message || `Upload failed (${status})`,
