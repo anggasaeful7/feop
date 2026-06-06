@@ -52,6 +52,9 @@ export function writeAuth(token: string, user: AuthUser, remember: boolean) {
   target.setItem(AUTH_KEYS.user, JSON.stringify(user));
   other.removeItem(AUTH_KEYS.token);
   other.removeItem(AUTH_KEYS.user);
+
+  const maxAge = remember ? 60 * 60 * 24 * 7 : 60 * 60 * 24;
+  document.cookie = `${AUTH_KEYS.token}=${encodeURIComponent(token)}; path=/; max-age=${maxAge}; samesite=lax`;
 }
 
 export function clearAuth() {
@@ -60,4 +63,5 @@ export function clearAuth() {
     s.removeItem(AUTH_KEYS.token);
     s.removeItem(AUTH_KEYS.user);
   }
+  document.cookie = `${AUTH_KEYS.token}=; path=/; max-age=0; samesite=lax`;
 }
