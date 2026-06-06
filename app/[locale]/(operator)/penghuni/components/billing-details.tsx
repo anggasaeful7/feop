@@ -59,7 +59,7 @@ export function BillingDetails({ unit, year, handleTagih }: BillingDetailsProps)
                       </td>
                       <td className="px-4 py-2.5">
                         <span className="text-[11px] font-bold capitalize text-[#8A9582] italic">
-                          {bill.kind === "monthly" ? "Bulanan" : "Spesifik"}
+                          {bill.kind === "monthly" ? "Bulanan" : "Lainnya"}
                         </span>
                       </td>
                       <td className="px-4 py-2.5 font-bold text-rose-700">
@@ -158,7 +158,7 @@ export function BillingDetails({ unit, year, handleTagih }: BillingDetailsProps)
                     </td>
                     <td className="px-4 py-3">
                       <span className="text-[11px] font-bold capitalize text-[#8A9582] italic">
-                        {bill.kind === "monthly" ? "Bulanan" : "Spesifik"}
+                        {bill.kind === "monthly" ? "Bulanan" : "Lainnya"}
                       </span>
                     </td>
                     <td className="px-4 py-3 font-bold text-zinc-900">

@@ -53,7 +53,7 @@ export function DetailModal({
   return (
     <Modal open title="Detail Laporan Tamu" onClose={onClose}>
       <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <div className="text-xs text-zinc-500">Tanggal Kunjungan</div>
             <div className="font-medium">{formatDate(report.visit_date)}</div>

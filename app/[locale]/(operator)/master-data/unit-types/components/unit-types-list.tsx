@@ -62,7 +62,7 @@ export function UnitTypesList() {
         perPage={perPage}
         onPageChange={setPage}
         actions={
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
             <CSVTools
               resourceLabel="Tipe Unit"
               templatePath="/api/v1/master/unit-types/csv-template"
@@ -70,7 +70,7 @@ export function UnitTypesList() {
               templateFilename="unit-types-template.csv"
               onAfterImport={() => queryClient.invalidateQueries({ queryKey: unitTypeQK.all })}
             />
-            <Button size="sm" onClick={() => setCreating(true)}>
+            <Button size="sm" onClick={() => setCreating(true)} className="w-full sm:w-auto">
               <Plus size={16} className="mr-1" /> Tambah Tipe
             </Button>
           </div>

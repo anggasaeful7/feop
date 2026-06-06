@@ -137,65 +137,70 @@ export function ResidentBillList() {
         onExpandedRowKeysChange={setExpandedUnits}
         renderRowDetails={renderRowDetails}
         actions={
-          <div className="flex flex-wrap items-center gap-2">
-            {STATUS_TABS.map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => {
-                  setActiveTab(tab.key);
-                  setPage(1);
-                }}
-                className={`h-9 rounded-full px-4 text-xs font-semibold transition ${activeTab === tab.key
-                  ? tab.key === "unpaid"
-                    ? "bg-rose-700 text-white"
-                    : "bg-brand-900 text-white"
-                  : "border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50"
-                  }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-            <div className="w-32">
-              <Select
-                value={kind}
-                onValueChange={(v) => {
-                  setKind(v);
-                  setPage(1);
-                }}
-              >
-                <SelectTrigger className="h-9 rounded-full border-zinc-300 text-xs font-semibold px-4 bg-white text-zinc-700">
-                  <SelectValue placeholder="Semua Jenis" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Semua Jenis</SelectItem>
-                  <SelectItem value="monthly">Bulanan</SelectItem>
-                  <SelectItem value="specific">Spesifik</SelectItem>
-                </SelectContent>
-              </Select>
+          <div className="flex flex-col sm:flex-row w-full sm:w-auto items-stretch sm:items-center gap-3">
+            <div className="flex overflow-x-auto gap-2 pb-1 sm:pb-0 w-full sm:w-auto hide-scrollbar">
+              {STATUS_TABS.map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => {
+                    setActiveTab(tab.key);
+                    setPage(1);
+                  }}
+                  className={`shrink-0 h-9 rounded-full px-4 text-xs font-semibold transition ${activeTab === tab.key
+                    ? tab.key === "unpaid"
+                      ? "bg-rose-700 text-white"
+                      : "bg-brand-900 text-white"
+                    : "border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50"
+                    }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
             </div>
-            <div className="w-28">
-              <Select
-                value={year.toString()}
-                onValueChange={(v) => {
-                  setYear(Number(v));
-                  setPage(1);
-                }}
-              >
-                <SelectTrigger className="h-9 rounded-full border-zinc-300 text-xs font-semibold px-4 bg-white text-zinc-700">
-                  <SelectValue placeholder="Tahun" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="2026">2026</SelectItem>
-                  <SelectItem value="2025">2025</SelectItem>
-                  <SelectItem value="2024">2024</SelectItem>
-                  <SelectItem value="2023">2023</SelectItem>
-                </SelectContent>
-              </Select>
+
+            <div className="flex gap-2 w-full sm:w-auto">
+              <div className="flex-1 sm:flex-none sm:w-32">
+                <Select
+                  value={kind}
+                  onValueChange={(v) => {
+                    setKind(v);
+                    setPage(1);
+                  }}
+                >
+                  <SelectTrigger className="w-full h-9 rounded-full border-zinc-300 text-xs font-semibold px-4 bg-white text-zinc-700">
+                    <SelectValue placeholder="Semua Jenis" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Semua Jenis</SelectItem>
+                    <SelectItem value="monthly">Bulanan</SelectItem>
+                    <SelectItem value="specific">Lainnya</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex-1 sm:flex-none sm:w-28">
+                <Select
+                  value={year.toString()}
+                  onValueChange={(v) => {
+                    setYear(Number(v));
+                    setPage(1);
+                  }}
+                >
+                  <SelectTrigger className="w-full h-9 rounded-full border-zinc-300 text-xs font-semibold px-4 bg-white text-zinc-700">
+                    <SelectValue placeholder="Tahun" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="2026">2026</SelectItem>
+                    <SelectItem value="2025">2025</SelectItem>
+                    <SelectItem value="2024">2024</SelectItem>
+                    <SelectItem value="2023">2023</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <Button
               variant="secondary"
               size="sm"
-              className="font-bold italic"
+              className="font-bold italic w-full sm:w-auto"
               onClick={handleExport}
               disabled={isExporting}
             >

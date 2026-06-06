@@ -12,12 +12,12 @@ export const baseColumns: ColumnDef<ResidentBillByUnitItem>[] = [
     cell: ({ row }) => {
       const unit = row.original;
       return (
-        <div className="flex items-center gap-1.5">
-          <span className="font-mono text-sm font-semibold text-zinc-900 bg-white px-2.5 py-1 rounded-md border border-[#E4DDCB]">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="whitespace-nowrap font-mono text-sm font-semibold text-zinc-900 bg-white px-2.5 py-1 rounded-md border border-[#E4DDCB]">
             {unit.unit_code}
           </span>
           {unit.unit_block && (
-            <span className="text-[10px] text-zinc-500 font-semibold bg-zinc-200/60 px-1.5 py-0.5 rounded uppercase">
+            <span className="whitespace-nowrap text-[10px] text-zinc-500 font-semibold bg-zinc-200/60 px-1.5 py-0.5 rounded uppercase">
               Blok {unit.unit_block}
             </span>
           )}

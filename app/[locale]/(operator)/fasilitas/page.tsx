@@ -150,11 +150,11 @@ export default function FasilitasPage() {
         title="Fasilitas — Approvals & Booking"
         subtitle="Review request booking dari penghuni & atur jadwal"
         actions={
-          <div className="flex items-center gap-2">
-            <Button variant="secondary" onClick={() => setCreatingBooking(true)}>
+          <div className="flex w-full flex-col sm:flex-row gap-2">
+            <Button variant="secondary" onClick={() => setCreatingBooking(true)} className="w-full sm:w-auto">
               <CalendarPlus size={16} /> Tambah Booking
             </Button>
-            <Button onClick={() => setCreatingFacility(true)}>
+            <Button onClick={() => setCreatingFacility(true)} className="w-full sm:w-auto">
               <Plus size={16} /> Tambah Fasilitas
             </Button>
           </div>
@@ -167,14 +167,14 @@ export default function FasilitasPage() {
         </div>
       )}
 
-      <div className="mb-4 grid grid-cols-4 gap-4">
+      <div className="mb-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {facilities === null && (
-          <div className="col-span-4 rounded-2xl border border-zinc-200/70 bg-white p-6 text-center text-sm text-zinc-500">
+          <div className="col-span-1 md:col-span-2 lg:col-span-4 rounded-2xl border border-zinc-200/70 bg-white p-6 text-center text-sm text-zinc-500">
             Memuat fasilitas…
           </div>
         )}
         {facilities !== null && facilities.length === 0 && (
-          <div className="col-span-4 rounded-2xl border border-dashed border-zinc-300 bg-white p-6 text-center text-sm text-zinc-500">
+          <div className="col-span-1 md:col-span-2 lg:col-span-4 rounded-2xl border border-dashed border-zinc-300 bg-white p-6 text-center text-sm text-zinc-500">
             Belum ada fasilitas. Klik “Tambah Fasilitas”.
           </div>
         )}

@@ -71,7 +71,7 @@ export function DetailModal({ permit, onClose, onApprove, onReject }: DetailModa
           {/* Informasi Pemohon */}
           <div>
             <h4 className="text-sm font-semibold text-zinc-900 border-b pb-2 mb-3">Informasi Pemohon</h4>
-            <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
               <div>
                 <p className="text-zinc-500">Nama Pemohon</p>
                 <p className="font-medium text-zinc-900">{permit.resident_name}</p>
@@ -101,7 +101,7 @@ export function DetailModal({ permit, onClose, onApprove, onReject }: DetailModa
                   {permit.description}
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <p className="text-zinc-500">Kendaraan Material</p>
                   <p className="font-medium text-zinc-900">{permit.material_vehicle || "-"}</p>
@@ -131,7 +131,7 @@ export function DetailModal({ permit, onClose, onApprove, onReject }: DetailModa
           {/* Informasi Kontraktor */}
           <div>
             <h4 className="text-sm font-semibold text-zinc-900 border-b pb-2 mb-3">Informasi Kontraktor</h4>
-            <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
               <div>
                 <p className="text-zinc-500">Penanggung Jawab (PIC)</p>
                 <p className="font-medium text-zinc-900">{permit.contractor_pic_name}</p>

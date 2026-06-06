@@ -56,8 +56,8 @@ export function CSVTools({
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <Button variant="secondary" size="sm" onClick={handleDownload}>
+    <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
+      <Button variant="secondary" size="sm" onClick={handleDownload} className="w-full sm:w-auto">
         <Download size={14} /> Template
       </Button>
       <Button
@@ -65,6 +65,7 @@ export function CSVTools({
         size="sm"
         onClick={() => inputRef.current?.click()}
         disabled={busy}
+        className="w-full sm:w-auto"
       >
         <Upload size={14} /> {busy ? "Mengimpor…" : "Impor CSV"}
       </Button>

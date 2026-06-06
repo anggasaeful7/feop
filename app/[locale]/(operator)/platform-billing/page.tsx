@@ -111,7 +111,7 @@ export default function PlatformBillingPage() {
           </Badge>
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Stat label="Biaya Aktif" value={idr(fee.effective_platform_fee)} highlight />
           <Stat label="Default Platform" value={idr(fee.default_platform_fee)} />
           <Stat label="Minimum" value={idr(fee.min_platform_fee)} />

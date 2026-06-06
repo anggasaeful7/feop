@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth";
 import { useLogout } from "@/hooks/use-logout";
+import { cn } from "@/lib/utils";
 import { initials } from "@/lib/format";
 
 type NavItem = {
@@ -130,13 +131,13 @@ function NavGroup({ item, pathname }: { item: NavItem; pathname: string }) {
   );
 }
 
-export function Sidebar() {
+export function Sidebar({ className }: { className?: string }) {
   const pathname = usePathname();
   const user = useAuthUser();
   const logout = useLogout();
 
   return (
-    <aside className="flex w-64 shrink-0 flex-col border-r border-zinc-200/60 bg-cream-50">
+    <aside className={cn("sticky top-0 h-screen flex w-64 shrink-0 flex-col border-r border-zinc-200/60 bg-cream-50", className)}>
       <div className="flex items-center gap-3 px-6 pt-6 pb-8">
         <Image
           src="/logo-icon.png"
@@ -156,7 +157,7 @@ export function Sidebar() {
         WORKSPACE
       </div>
 
-      <nav className="flex-1 space-y-1 px-3">
+      <nav className="flex-1 overflow-y-auto space-y-1 px-3 custom-scrollbar">
         {NAV.map((item) => {
           if (item.children) {
             return <NavGroup key={item.label} item={item} pathname={pathname} />;

@@ -67,18 +67,18 @@ export default function DashboardPage() {
         title={t("header.title")}
         subtitle={t("header.subtitle")}
         actions={
-          <>
-            <Button variant="secondary">
+          <div className="flex w-full flex-wrap sm:flex-nowrap gap-2">
+            <Button variant="secondary" className="w-full sm:w-auto">
               <Calendar size={16} /> April 2026 <ChevronDown size={14} />
             </Button>
-            <Button>
+            <Button className="w-full sm:w-auto">
               <Plus size={16} /> {t("header.createBill")}
             </Button>
-          </>
+          </div>
         }
       />
 
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <Stat
           label={t("stats.billed")}
           value="Rp 54,0jt"
@@ -121,8 +121,8 @@ export default function DashboardPage() {
         />
       </div>
 
-      <div className="mt-4 grid grid-cols-3 gap-4">
-        <Card className="col-span-2">
+      <div className="mt-4 grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <Card className="xl:col-span-2">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-lg font-bold text-zinc-900">
               {t("charts.billingTrend")}
@@ -170,7 +170,7 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-4">
+      <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card>
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-lg font-bold text-zinc-900">{t("recentActivity.title")}</h3>
