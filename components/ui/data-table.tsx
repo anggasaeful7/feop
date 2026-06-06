@@ -87,9 +87,9 @@ export function DataTable<TData, TValue>({
     <Card className="p-0">
       <div className={`${size === 'sm' ? 'my-2 px-3' : 'my-4 px-4'} flex flex-col md:flex-row md:items-center justify-between gap-4`}>
         {title && <h3 className={`${size === 'sm' ? 'text-lg' : 'text-2xl'} font-bold text-zinc-900 italic`}>{title}</h3>}
-        <div className="flex flex-col sm:flex-row items-center gap-2">
+        <div className="flex w-full md:w-auto flex-col sm:flex-row items-start sm:items-center gap-3">
           {onSearchChange && (
-            <div className="relative">
+            <div className="relative w-full sm:w-auto">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A9582]" size={size === 'sm' ? 14 : 16} />
               <input
                 type="text"
@@ -100,7 +100,9 @@ export function DataTable<TData, TValue>({
               />
             </div>
           )}
-          {actions}
+          <div className="w-full overflow-x-auto sm:w-auto pb-1 sm:pb-0 hide-scrollbar">
+            {actions}
+          </div>
         </div>
       </div>
 
@@ -151,9 +153,8 @@ export function DataTable<TData, TValue>({
                           onRowClick?.(row.original);
                         }
                       }}
-                      className={`border-b border-zinc-200 transition-colors ${
-                        onRowClick || rowKey ? 'cursor-pointer hover:bg-zinc-50' : 'hover:bg-zinc-50'
-                      } ${isExpanded ? 'bg-zinc-50/50' : ''}`}
+                      className={`border-b border-zinc-200 transition-colors ${onRowClick || rowKey ? 'cursor-pointer hover:bg-zinc-50' : 'hover:bg-zinc-50'
+                        } ${isExpanded ? 'bg-zinc-50/50' : ''}`}
                     >
                       {row.getVisibleCells().map((cell) => (
                         <td key={cell.id} className={`${size === 'sm' ? 'px-3 py-2' : 'px-4 py-4'}`}>
@@ -188,7 +189,7 @@ export function DataTable<TData, TValue>({
           pagination
         ) : onPageChange && total > 0 ? (
           <div className="flex items-center gap-2 not-italic">
-            <button 
+            <button
               className="p-1 hover:text-zinc-900 disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={() => onPageChange(page - 1)}
               disabled={page === 1}
@@ -200,7 +201,7 @@ export function DataTable<TData, TValue>({
               .map((p, i, arr) => (
                 <React.Fragment key={p}>
                   {i > 0 && arr[i - 1] !== p - 1 && <span>...</span>}
-                  <button 
+                  <button
                     className={`w-6 h-6 rounded flex items-center justify-center ${p === page ? 'bg-zinc-800 text-white' : 'hover:bg-zinc-100 text-zinc-700'}`}
                     onClick={() => onPageChange(p)}
                   >
@@ -208,7 +209,7 @@ export function DataTable<TData, TValue>({
                   </button>
                 </React.Fragment>
               ))}
-            <button 
+            <button
               className="p-1 hover:text-zinc-900 disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={() => onPageChange(page + 1)}
               disabled={page === totalPages}

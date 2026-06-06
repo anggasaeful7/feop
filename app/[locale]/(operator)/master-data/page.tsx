@@ -1,6 +1,6 @@
-import { redirect } from "next/navigation";
+import { redirect } from "@/i18n/routing";
 
 export default async function MasterDataPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  redirect(`/${locale}/master-data/units`);
+  redirect({ href: "/master-data/units", locale });
 }

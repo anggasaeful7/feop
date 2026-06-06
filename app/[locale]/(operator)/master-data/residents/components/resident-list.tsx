@@ -66,7 +66,7 @@ export function ResidentList() {
         perPage={perPage}
         onPageChange={setPage}
         actions={
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
             <CSVTools
               resourceLabel="Warga"
               templatePath="/api/v1/master/persons/csv-template"
@@ -74,7 +74,7 @@ export function ResidentList() {
               templateFilename="persons-template.csv"
               onAfterImport={() => { refetch(); }}
             />
-            <Button size="sm" onClick={() => setCreating(true)}>
+            <Button size="sm" onClick={() => setCreating(true)} className="w-full sm:w-auto">
               <Plus size={16} className="mr-1" /> Tambah Warga
             </Button>
           </div>

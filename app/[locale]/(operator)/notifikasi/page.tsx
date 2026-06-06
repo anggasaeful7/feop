@@ -61,8 +61,8 @@ export default function NotifikasiPage() {
         subtitle="Atur template push + WhatsApp dan jadwal blast"
       />
 
-      <div className="grid grid-cols-3 gap-4">
-        <Card className="col-span-2">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="md:col-span-2">
           <h3 className="text-xl font-bold text-zinc-900">Auto-Reminder Bulanan</h3>
           <p className="mb-4 text-xs italic text-zinc-500">
             Kirim otomatis ke penghuni yang belum bayar

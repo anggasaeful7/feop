@@ -47,7 +47,7 @@ export const baseColumns: ColumnDef<Person>[] = [
               {owned.map((u) => (
                 <span
                   key={u.id}
-                  className="rounded-md bg-sky-50 border border-sky-200 px-2 py-0.5 text-xs font-medium text-sky-700"
+                  className="whitespace-nowrap rounded-md bg-sky-50 border border-sky-200 px-2 py-0.5 text-xs font-medium text-sky-700"
                 >
                   {u.code}
                 </span>
@@ -73,7 +73,7 @@ export const baseColumns: ColumnDef<Person>[] = [
               {resided.map((u) => (
                 <span
                   key={u.id}
-                  className="rounded-md bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-xs font-medium text-emerald-700"
+                  className="whitespace-nowrap rounded-md bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-xs font-medium text-emerald-700"
                 >
                   {u.code}
                 </span>

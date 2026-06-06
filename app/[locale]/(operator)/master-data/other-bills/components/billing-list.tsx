@@ -72,11 +72,11 @@ export function BillingList() {
         onPageChange={setPage}
         emptyMessage="Belum ada tagihan lainnya. Klik 'Tambah Tagihan' untuk membuat baru."
         actions={
-          <div className="flex gap-2">
-            <Button size="sm" variant="secondary" onClick={() => setIssuing(true)}>
+          <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
+            <Button size="sm" variant="secondary" onClick={() => setIssuing(true)} className="w-full sm:w-auto">
               <Send size={16} className="mr-1" /> Generate Tagihan
             </Button>
-            <Button size="sm" onClick={() => setCreating(true)}>
+            <Button size="sm" onClick={() => setCreating(true)} className="w-full sm:w-auto">
               <Plus size={16} className="mr-1" /> Tambah Tagihan
             </Button>
           </div>

@@ -60,14 +60,14 @@ export function BillComponentsList() {
         perPage={perPage}
         onPageChange={setPage}
         actions={
-          <>
-            <Button size="sm" variant="secondary" onClick={() => setAssigning(true)}>
+          <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
+            <Button size="sm" variant="secondary" onClick={() => setAssigning(true)} className="w-full sm:w-auto">
               <Link size={16} className="mr-1" /> Assign ke unit
             </Button>
-            <Button size="sm" onClick={() => setCreating(true)}>
+            <Button size="sm" onClick={() => setCreating(true)} className="w-full sm:w-auto">
               <Plus size={16} className="mr-1" /> Tambah Komponen
             </Button>
-          </>
+          </div>
         }
       />
 

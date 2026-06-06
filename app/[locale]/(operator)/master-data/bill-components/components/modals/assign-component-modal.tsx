@@ -195,16 +195,16 @@ export function AssignComponentModal({ onClose }: { onClose: () => void }) {
       onClose={onClose}
       className="max-w-4xl"
       footer={
-        <div className="w-full flex items-center justify-between">
+        <div className="w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="text-xs text-zinc-500 flex flex-col gap-1 font-bold">
             <div>{selectedComponents.size} dari {componentsData?.total || 0} Komponen dipilih</div>
             <div>{selectedUnits.size} dari {unitsData?.total || 0} Unit dipilih</div>
           </div>
-          <div className="flex gap-2">
-            <Button variant="danger" onClick={onClose} className="rounded-full px-6" disabled={assignMutation.isPending}>
+          <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
+            <Button variant="danger" onClick={onClose} className="w-full sm:w-auto rounded-full px-6" disabled={assignMutation.isPending}>
               ✕ Batal
             </Button>
-            <Button onClick={handleSave} className="rounded-full px-6" disabled={assignMutation.isPending || selectedComponents.size === 0 || selectedUnits.size === 0}>
+            <Button onClick={handleSave} className="w-full sm:w-auto rounded-full px-6" disabled={assignMutation.isPending || selectedComponents.size === 0 || selectedUnits.size === 0}>
               {assignMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : "✓ "} Assign Komponen
             </Button>
           </div>

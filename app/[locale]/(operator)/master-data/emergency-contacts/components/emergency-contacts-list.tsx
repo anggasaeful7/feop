@@ -64,7 +64,7 @@ export function EmergencyContactsList() {
         perPage={perPage}
         onPageChange={setPage}
         actions={
-          <Button size="sm" onClick={() => setCreating(true)}>
+          <Button size="sm" onClick={() => setCreating(true)} className="w-full sm:w-auto">
             <Plus size={16} className="mr-1" /> Tambah Kontak
           </Button>
         }

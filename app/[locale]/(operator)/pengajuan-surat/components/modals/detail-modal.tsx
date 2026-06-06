@@ -49,7 +49,7 @@ export function DetailModal({ request, onClose, onApprove, onReject }: DetailMod
   return (
     <Modal open title="Detail Pengajuan Surat" onClose={onClose}>
       <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <div className="text-xs text-zinc-500">Tanggal Pengajuan</div>
             <div className="font-medium">{formatDate(request.created_at)}</div>
