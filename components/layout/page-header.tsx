@@ -12,7 +12,7 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <header className="mb-6 flex items-start justify-between gap-6 border-b border-zinc-200/70 pb-6">
+    <header className="mb-6 flex flex-col md:flex-row md:items-start justify-between gap-4 md:gap-6 border-b border-zinc-200/70 pb-6">
       <div>
         {eyebrow && (
           <div className="mb-1 text-xs italic text-zinc-500">{eyebrow}</div>
@@ -24,7 +24,7 @@ export function PageHeader({
           <p className="mt-1 text-sm text-zinc-500">{subtitle}</p>
         )}
       </div>
-      {actions && <div className="flex shrink-0 items-center gap-3">{actions}</div>}
+      {actions && <div className="flex w-full md:w-auto shrink-0 items-center gap-3">{actions}</div>}
     </header>
   );
 }
