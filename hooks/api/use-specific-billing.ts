@@ -8,8 +8,10 @@ import {
   deleteSpecificBilling,
   toggleSpecificBillingActive,
   issueSpecificBilling,
+  bulkDeleteSpecificBillingGeneratedBills,
 } from "@/services/specific-billing.service";
 import type { SpecificBillingQueryParams } from "@/types/specific-billing";
+import { residentBillQK } from "./use-resident-bill";
 
 export const specificBillingQK = {
   all: ["specific-billings"] as const,
@@ -104,3 +106,19 @@ export function useIssueSpecificBilling() {
     },
   });
 }
+
+export function useBulkDeleteSpecificBillingGeneratedBills() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: bulkDeleteSpecificBillingGeneratedBills,
+    onSuccess: () => {
+      toast.success("Tagihan terpilih berhasil dihapus");
+      qc.invalidateQueries({ queryKey: residentBillQK.lists() });
+      qc.invalidateQueries({ queryKey: residentBillQK.byUnits() });
+    },
+    onError: (error) => {
+      toast.error(error.message || "Gagal menghapus tagihan secara masal");
+    },
+  });
+}
+
