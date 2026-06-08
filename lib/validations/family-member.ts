@@ -1,7 +1,15 @@
 import * as z from "zod";
+import { env } from "@/lib/env";
 
-const MAX_FILE_SIZE = 8 * 1024 * 1024; // 8MB
-const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+const MAX_FILE_SIZE = env.maxFileSize;
+const ACCEPTED_IMAGE_TYPES = env.acceptedImageTypes;
+
+const maxFileSizeMB = MAX_FILE_SIZE / (1024 * 1024);
+const formattedExtensions = ACCEPTED_IMAGE_TYPES.map((t) => "." + t.split("/")[1]);
+const acceptedExtensionsString =
+  formattedExtensions.length > 1
+    ? `${formattedExtensions.slice(0, -1).join(", ")}, atau ${formattedExtensions[formattedExtensions.length - 1]}`
+    : formattedExtensions[0] || "";
 
 export const familyMemberSchema = z.object({
   name: z.string().min(1, "Nama harus diisi"),
@@ -18,14 +26,14 @@ export const familyMemberSchema = z.object({
         return file.size <= MAX_FILE_SIZE;
       }
       return true;
-    }, "Ukuran maksimal file adalah 8MB.")
+    }, `Ukuran maksimal file adalah ${maxFileSizeMB}MB.`)
     .refine((file) => {
       if (!file) return true;
       if (file instanceof File) {
         return ACCEPTED_IMAGE_TYPES.includes(file.type);
       }
       return true;
-    }, "Format file harus .jpg, .jpeg, .png, atau .webp."),
+    }, `Format file harus ${acceptedExtensionsString}.`),
 });
 
 export type FamilyMemberFormValues = z.infer<typeof familyMemberSchema>;

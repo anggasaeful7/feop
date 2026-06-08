@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { env } from "@/lib/env";
 
 import { useForm, ControllerRenderProps } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -148,7 +149,7 @@ export function FamilyMemberFormModal({
                   <FormControl>
                     <input
                       type="file"
-                      accept="image/jpeg, image/png, image/webp"
+                      accept={env.acceptedImageTypes.join(", ")}
                       className="hidden"
                       onChange={(e) => handleFileChange(e, field)}
                     />
