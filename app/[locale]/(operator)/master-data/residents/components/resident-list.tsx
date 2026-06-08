@@ -8,6 +8,7 @@ import { usePersons, useDeletePerson } from "@/hooks/api/use-person";
 import type { Person } from "@/types/master-data";
 import { CSVTools } from "@/components/csv-import";
 import { ResidentFormModal } from "./modals/resident-form-modal";
+import { FamilyMemberListModal } from "./family-members/family-member-list-modal";
 import { useDataTableState } from "@/hooks/use-data-table-state";
 import { baseColumns } from "./columns";
 
@@ -24,6 +25,7 @@ export function ResidentList() {
 
   const [editing, setEditing] = useState<Person | null>(null);
   const [creating, setCreating] = useState(false);
+  const [viewingFamily, setViewingFamily] = useState<Person | null>(null);
 
   const deletePerson = useDeletePerson();
 
@@ -40,6 +42,15 @@ export function ResidentList() {
             onDelete={() => deletePerson.mutate(p.id)}
             isDeleting={deletePerson.isPending && deletePerson.variables === p.id}
             deleteConfirmMessage={`Hapus warga ${p.full_name}?`}
+            extraActions={
+              <button
+                onClick={() => setViewingFamily(p)}
+                className="hover:text-purple-600 transition"
+                title="Anggota Keluarga"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-users"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </button>
+            }
           />
         );
       },
@@ -93,6 +104,13 @@ export function ResidentList() {
           title={`Edit ${editing.full_name}`}
           initial={editing}
           onClose={() => setEditing(null)}
+        />
+      )}
+
+      {viewingFamily && (
+        <FamilyMemberListModal
+          person={viewingFamily}
+          onClose={() => setViewingFamily(null)}
         />
       )}
     </>

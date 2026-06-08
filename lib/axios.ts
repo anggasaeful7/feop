@@ -23,7 +23,7 @@ export function authHeaders(): Record<string, string> {
 }
 
 // Create an Axios instance
-const axiosInstance = axios.create({
+export const axiosInstance = axios.create({
   baseURL: API_URL,
   withCredentials: true,
   headers: {
