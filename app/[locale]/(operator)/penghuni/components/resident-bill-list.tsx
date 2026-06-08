@@ -10,7 +10,9 @@ import { idr } from "@/lib/format";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ApiError, downloadCSV } from "@/lib/axios";
-import { ResidentBillByUnitItem } from "@/types/billing";
+import { ResidentBillByUnitItem, ResidentBill } from "@/types/billing";
+import { useBulkDeleteSpecificBillingGeneratedBills } from "@/hooks/api/use-specific-billing";
+import { Trash } from "lucide-react";
 import { BillingDetails } from "./billing-details";
 import { baseColumns } from "./columns";
 
@@ -30,6 +32,40 @@ export function ResidentBillList() {
   const [year, setYear] = useState<number>(2026);
   const [isExporting, setIsExporting] = useState(false);
   const [expandedUnits, setExpandedUnits] = useState<Set<string>>(new Set());
+
+  const [selectedBills, setSelectedBills] = useState<Set<string>>(new Set());
+  const bulkDelete = useBulkDeleteSpecificBillingGeneratedBills();
+
+  const handleSelectBill = (id: string, checked: boolean) => {
+    setSelectedBills((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  };
+
+  const handleSelectAll = (checked: boolean, bills: ResidentBill[]) => {
+    setSelectedBills((prev) => {
+      const next = new Set(prev);
+      bills.forEach((b) => {
+        if (b.kind === "specific" && b.status !== "paid") {
+          if (checked) next.add(b.id);
+          else next.delete(b.id);
+        }
+      });
+      return next;
+    });
+  };
+
+  const handleDeleteSelected = () => {
+    if (selectedBills.size === 0) return;
+    if (confirm(`Yakin ingin menghapus ${selectedBills.size} tagihan terpilih?`)) {
+      bulkDelete.mutate({ bill_ids: Array.from(selectedBills) }, {
+        onSuccess: () => setSelectedBills(new Set()),
+      });
+    }
+  };
 
   const exportUrl = useMemo(() => {
     const qs = new URLSearchParams();
@@ -110,6 +146,9 @@ export function ResidentBillList() {
         unit={unit}
         year={year}
         handleTagih={handleTagih}
+        selectedBills={selectedBills}
+        handleSelectBill={handleSelectBill}
+        handleSelectAll={handleSelectAll}
       />
     );
   };
@@ -209,6 +248,33 @@ export function ResidentBillList() {
           </div>
         }
       />
+
+      {/* Floating Bulk Action Bar */}
+      {selectedBills.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
+          <div className="flex items-center gap-4 rounded-full bg-zinc-900 px-6 py-3 text-sm shadow-xl border border-zinc-700">
+            <span className="font-semibold text-white">
+              {selectedBills.size} tagihan terpilih
+            </span>
+            <div className="h-4 w-px bg-zinc-700" />
+            <Button
+              variant="danger"
+              size="sm"
+              className="h-8 rounded-full px-4 font-semibold"
+              onClick={handleDeleteSelected}
+              disabled={bulkDelete.isPending}
+            >
+              <Trash size={14} className="mr-2" /> {bulkDelete.isPending ? "Menghapus..." : "Hapus Tagihan"}
+            </Button>
+            <button
+              className="text-zinc-400 hover:text-white transition-colors p-1"
+              onClick={() => setSelectedBills(new Set())}
+            >
+              Batalkan
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -67,9 +67,18 @@ export type UnitBillComponentsMatrixResponse = {
 export type UnitRef = { id: string; code: string };
 
 export type FamilyMember = {
-  id?: string;
+  id: string;
+  workspace_id: string;
+  person_id: string;
   name: string;
+  nik_no_kk: string;
   relationship: string;
+  contact: string;
+  gender: string;
+  has_picture: boolean;
+  picture_file_name?: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 export type Person = {
@@ -95,7 +104,6 @@ export type PersonPayload = {
   email?: string | null;
   id_card_no?: string | null;
   notes?: string | null;
-  family_members?: FamilyMember[];
 };
 
 export type UnitStatus = "occupied" | "vacant" | "maintenance";

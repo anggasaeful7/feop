@@ -1,11 +1,9 @@
 "use client";
 
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, Trash2 } from "lucide-react";
 
 import { Modal, ModalFormFooter } from "@/components/ui/modal";
-import { Button } from "@/components/ui";
 import {
   Form,
   FormControl,
@@ -39,13 +37,7 @@ export function ResidentFormModal({
       email: initial?.email || "",
       id_card_no: initial?.id_card_no || "",
       notes: initial?.notes || "",
-      family_members: initial?.family_members || [],
     },
-  });
-
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: "family_members",
   });
 
   const createMut = useCreatePerson();
@@ -59,7 +51,6 @@ export function ResidentFormModal({
       email: values.email === "" ? null : values.email,
       id_card_no: values.id_card_no === "" ? null : values.id_card_no,
       notes: values.notes === "" ? null : values.notes,
-      family_members: values.family_members,
     };
 
     if (isEditing) {
@@ -171,80 +162,6 @@ export function ResidentFormModal({
               </FormItem>
             )}
           />
-
-          <div className="col-span-2 border-t border-zinc-100 pt-4 mt-2">
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <h4 className="text-sm font-semibold text-zinc-900">Anggota Keluarga</h4>
-                <p className="text-xs text-zinc-500">Daftar anggota keluarga yang tinggal bersama</p>
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="text-xs rounded-xl"
-                onClick={() => append({ name: "", relationship: "" })}
-              >
-                <Plus size={14} className="mr-1" /> Tambah Anggota
-              </Button>
-            </div>
-
-            {fields.length === 0 ? (
-              <div className="text-center py-6 border border-dashed border-zinc-200 rounded-xl text-zinc-400 text-xs">
-                Belum ada anggota keluarga ditambahkan.
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {fields.map((item, index) => (
-                  <div key={item.id} className="flex items-start gap-3">
-                    <FormField
-                      control={form.control}
-                      name={`family_members.${index}.name`}
-                      render={({ field: inputField }) => (
-                        <FormItem className="flex-1">
-                          <FormControl>
-                            <Input
-                              placeholder="Nama Anggota"
-                              className="rounded-xl bg-transparent"
-                              {...inputField}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name={`family_members.${index}.relationship`}
-                      render={({ field: inputField }) => (
-                        <FormItem className="w-1/3">
-                          <FormControl>
-                            <Input
-                              placeholder="Hubungan (cth: Istri, Anak)"
-                              className="rounded-xl bg-transparent"
-                              {...inputField}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-xl shrink-0"
-                      onClick={() => remove(index)}
-                    >
-                      <Trash2 size={16} />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
         </form>
       </Form>
     </Modal>

@@ -16,4 +16,12 @@ export const env = {
   apiUrl: read("NEXT_PUBLIC_API_URL", process.env.NEXT_PUBLIC_API_URL, ""),
   appName: read("NEXT_PUBLIC_APP_NAME", process.env.NEXT_PUBLIC_APP_NAME, "IPL Sistem"),
   appEnv: read("NEXT_PUBLIC_APP_ENV", process.env.NEXT_PUBLIC_APP_ENV, "development"),
+  maxFileSize: Number(read("NEXT_PUBLIC_MAX_FILE_SIZE", process.env.NEXT_PUBLIC_MAX_FILE_SIZE, String(8 * 1024 * 1024))),
+  acceptedImageTypes: read(
+    "NEXT_PUBLIC_ACCEPTED_IMAGE_TYPES",
+    process.env.NEXT_PUBLIC_ACCEPTED_IMAGE_TYPES,
+    "image/jpeg,image/jpg,image/png,image/webp"
+  )
+    .split(",")
+    .map((t) => t.trim()),
 } as const;

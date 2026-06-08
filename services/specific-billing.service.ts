@@ -55,3 +55,10 @@ export async function issueSpecificBilling(payload: BulkIssueSpecificBillingPayl
   });
 }
 
+export async function bulkDeleteSpecificBillingGeneratedBills(payload: { bill_ids: string[] }) {
+  return api(`${BASE_URL}/generated-bills/bulk-delete`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+

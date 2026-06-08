@@ -4,16 +4,27 @@ import React from "react";
 import Link from "next/link";
 import { MessageCircle } from "lucide-react";
 import { Badge, Button } from "@/components/ui";
+import { Checkbox } from "@/components/ui/checkbox";
 import { idr } from "@/lib/format";
-import { ResidentBillByUnitItem } from "@/types/billing";
+import { ResidentBillByUnitItem, ResidentBill } from "@/types/billing";
 
 interface BillingDetailsProps {
   unit: ResidentBillByUnitItem;
   year: number;
   handleTagih: (unitCode: string, title: string, amount: number) => void;
+  selectedBills: Set<string>;
+  handleSelectBill: (id: string, checked: boolean) => void;
+  handleSelectAll: (checked: boolean, bills: ResidentBill[]) => void;
 }
 
-export function BillingDetails({ unit, year, handleTagih }: BillingDetailsProps) {
+export function BillingDetails({ 
+  unit, 
+  year, 
+  handleTagih,
+  selectedBills,
+  handleSelectBill,
+  handleSelectAll
+}: BillingDetailsProps) {
   const hasDebt = unit.bills_debt && unit.bills_debt.length > 0;
 
   return (
@@ -30,6 +41,15 @@ export function BillingDetails({ unit, year, handleTagih }: BillingDetailsProps)
             <table className="w-full text-xs text-left">
               <thead>
                 <tr className="bg-rose-50/50 text-rose-800 font-semibold border-b border-rose-100 uppercase tracking-wider text-[10px]">
+                  <th className="px-4 py-2 w-8">
+                    <Checkbox
+                      checked={
+                        unit.bills_debt!.filter((b) => b.kind === "specific" && b.status !== "paid").length > 0 &&
+                        unit.bills_debt!.filter((b) => b.kind === "specific" && b.status !== "paid").every((b) => selectedBills.has(b.id))
+                      }
+                      onCheckedChange={(c) => handleSelectAll(!!c, unit.bills_debt!)}
+                    />
+                  </th>
                   <th className="px-4 py-2 w-12">No</th>
                   <th className="px-4 py-2">Judul Tagihan</th>
                   <th className="px-4 py-2 w-24">Jenis</th>
@@ -44,6 +64,14 @@ export function BillingDetails({ unit, year, handleTagih }: BillingDetailsProps)
                 {unit.bills_debt!.map((bill, bIdx) => {
                   return (
                     <tr key={bill.id} className="bg-rose-50/10 hover:bg-rose-50/20 transition-colors">
+                      <td className="px-4 py-2.5">
+                        {bill.kind === "specific" && bill.status !== "paid" ? (
+                          <Checkbox
+                            checked={selectedBills.has(bill.id)}
+                            onCheckedChange={(c) => handleSelectBill(bill.id, !!c)}
+                          />
+                        ) : null}
+                      </td>
                       <td className="px-4 py-2.5 font-mono text-rose-400">
                         {bIdx + 1}
                       </td>
@@ -127,6 +155,15 @@ export function BillingDetails({ unit, year, handleTagih }: BillingDetailsProps)
           <table className="w-full text-xs text-left">
             <thead>
               <tr className="bg-zinc-50 text-zinc-600 font-semibold border-b border-zinc-200 uppercase tracking-wider text-[10px]">
+                <th className="px-4 py-2 w-8">
+                  <Checkbox
+                    checked={
+                      unit.bills.filter((b) => b.kind === "specific" && b.status !== "paid").length > 0 &&
+                      unit.bills.filter((b) => b.kind === "specific" && b.status !== "paid").every((b) => selectedBills.has(b.id))
+                    }
+                    onCheckedChange={(c) => handleSelectAll(!!c, unit.bills)}
+                  />
+                </th>
                 <th className="px-4 py-2 w-12">No</th>
                 <th className="px-4 py-2">Judul Tagihan</th>
                 <th className="px-4 py-2 w-24">Jenis</th>
@@ -143,6 +180,14 @@ export function BillingDetails({ unit, year, handleTagih }: BillingDetailsProps)
 
                 return (
                   <tr key={bill.id} className="hover:bg-zinc-50/50 transition-colors">
+                    <td className="px-4 py-3">
+                      {bill.kind === "specific" && bill.status !== "paid" ? (
+                        <Checkbox
+                          checked={selectedBills.has(bill.id)}
+                          onCheckedChange={(c) => handleSelectBill(bill.id, !!c)}
+                        />
+                      ) : null}
+                    </td>
                     <td className="px-4 py-3 font-mono text-zinc-400">
                       {bIdx + 1}
                     </td>
@@ -229,7 +274,7 @@ export function BillingDetails({ unit, year, handleTagih }: BillingDetailsProps)
               })}
               {unit.bills.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-6 text-center text-zinc-400 italic">
+                  <td colSpan={9} className="px-4 py-6 text-center text-zinc-400 italic">
                     Tidak ada data tagihan untuk unit ini.
                   </td>
                 </tr>
