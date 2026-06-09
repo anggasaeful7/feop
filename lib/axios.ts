@@ -3,7 +3,7 @@ import { env } from "./env";
 import { readToken, clearAuth } from "./auth-storage";
 import type { ApiEnvelope, ApiErrorBody } from "@/types";
 
-export const API_URL = env.apiUrl;
+export const API_URL = typeof window !== "undefined" ? "/api" : `${env.apiUrl.replace(/\/$/, '')}/api/v1`;
 
 export class ApiError extends Error {
   code: string;
@@ -32,10 +32,23 @@ export const axiosInstance = axios.create({
 });
 
 // Request interceptor to attach the token
-axiosInstance.interceptors.request.use((config) => {
-  const token = readToken();
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+axiosInstance.interceptors.request.use(async (config) => {
+  if (typeof window !== "undefined") {
+    const token = readToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  } else {
+    try {
+      const { cookies } = await import("next/headers");
+      const cookieStore = await cookies();
+      const token = cookieStore.get("ipl_access_token")?.value;
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch {
+      // ignore error if cookies cannot be read
+    }
   }
   return config;
 });

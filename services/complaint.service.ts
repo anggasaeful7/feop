@@ -16,15 +16,15 @@ export const ComplaintService = {
     } else {
       searchParams.append("per_page", "100");
     }
-    return api<Paged<Complaint>>(`/api/v1/complaints?${searchParams.toString()}`);
+    return api<Paged<Complaint>>(`/complaints?${searchParams.toString()}`);
   },
 
   getComplaintDetail: async (id: string) => {
-    return api<Complaint>(`/api/v1/complaints/${id}`);
+    return api<Complaint>(`/complaints/${id}`);
   },
 
   updateComplaint: async (id: string, payload: UpdateComplaintPayload) => {
-    return api<Complaint>(`/api/v1/complaints/${id}`, {
+    return api<Complaint>(`/complaints/${id}`, {
       method: "PATCH",
       body: JSON.stringify(payload),
     });
@@ -32,7 +32,7 @@ export const ComplaintService = {
 
   getPhotoUrl: async (id: string) => {
     return api<{ url: string; expires_at: string; file_name: string }>(
-      `/api/v1/complaints/${id}/photo-url`
+      `/complaints/${id}/photo-url`
     );
   },
 };

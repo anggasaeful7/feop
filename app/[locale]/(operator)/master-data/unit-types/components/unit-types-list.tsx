@@ -65,8 +65,8 @@ export function UnitTypesList() {
           <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
             <CSVTools
               resourceLabel="Tipe Unit"
-              templatePath="/api/v1/master/unit-types/csv-template"
-              importPath="/api/v1/master/unit-types/import"
+              templatePath="/master/unit-types/csv-template"
+              importPath="/master/unit-types/import"
               templateFilename="unit-types-template.csv"
               onAfterImport={() => queryClient.invalidateQueries({ queryKey: unitTypeQK.all })}
             />

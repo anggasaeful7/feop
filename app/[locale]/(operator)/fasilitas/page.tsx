@@ -58,7 +58,7 @@ export default function FasilitasPage() {
 
   const loadFacilities = useCallback(async () => {
     try {
-      const out = await api<Paged<Facility>>("/api/v1/facilities?per_page=100");
+      const out = await api<Paged<Facility>>("/facilities?per_page=100");
       setFacilities(out.items);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Gagal memuat fasilitas");
@@ -70,7 +70,7 @@ export default function FasilitasPage() {
       const qs = new URLSearchParams({ per_page: "100" });
       if (statusFilter !== "all") qs.set("status", statusFilter);
       const out = await api<Paged<Booking>>(
-        `/api/v1/facilities/bookings?${qs.toString()}`,
+        `/facilities/bookings?${qs.toString()}`,
       );
       setBookings(out.items);
     } catch (e) {
@@ -99,7 +99,7 @@ export default function FasilitasPage() {
 
   async function approveBooking(id: string) {
     try {
-      await api(`/api/v1/facilities/bookings/${id}/approve`, {
+      await api(`/facilities/bookings/${id}/approve`, {
         method: "POST",
         body: JSON.stringify({}),
       });
@@ -112,7 +112,7 @@ export default function FasilitasPage() {
   async function rejectBooking(id: string) {
     const note = window.prompt("Alasan penolakan (opsional):") ?? undefined;
     try {
-      await api(`/api/v1/facilities/bookings/${id}/reject`, {
+      await api(`/facilities/bookings/${id}/reject`, {
         method: "POST",
         body: JSON.stringify(note ? { note } : {}),
       });
@@ -129,7 +129,7 @@ export default function FasilitasPage() {
     );
     if (next === null) return;
     try {
-      await api(`/api/v1/facilities/bookings/${b.id}/proof`, {
+      await api(`/facilities/bookings/${b.id}/proof`, {
         method: "PATCH",
         body: JSON.stringify({ proof_url: next.trim() === "" ? null : next.trim() }),
       });
@@ -347,7 +347,7 @@ export default function FasilitasPage() {
           initial={emptyFacility}
           onClose={() => setCreatingFacility(false)}
           onSubmit={async (payload) => {
-            await api<Facility>("/api/v1/facilities", {
+            await api<Facility>("/facilities", {
               method: "POST",
               body: JSON.stringify(payload),
             });
@@ -371,14 +371,14 @@ export default function FasilitasPage() {
           onClose={() => setEditingFacility(null)}
           onDelete={async () => {
             if (!confirm(`Hapus fasilitas ${editingFacility.name}?`)) return;
-            await api(`/api/v1/facilities/${editingFacility.id}`, {
+            await api(`/facilities/${editingFacility.id}`, {
               method: "DELETE",
             });
             setEditingFacility(null);
             await loadFacilities();
           }}
           onSubmit={async (payload) => {
-            await api<Facility>(`/api/v1/facilities/${editingFacility.id}`, {
+            await api<Facility>(`/facilities/${editingFacility.id}`, {
               method: "PUT",
               body: JSON.stringify(payload),
             });
@@ -395,7 +395,7 @@ export default function FasilitasPage() {
           facilities={facilities ?? []}
           onClose={() => setCreatingBooking(false)}
           onSubmit={async (payload) => {
-            await api<Booking>("/api/v1/facilities/bookings", {
+            await api<Booking>("/facilities/bookings", {
               method: "POST",
               body: JSON.stringify(payload),
             });
@@ -422,7 +422,7 @@ export default function FasilitasPage() {
           onClose={() => setEditingBooking(null)}
           onSubmit={async (payload) => {
             await api<Booking>(
-              `/api/v1/facilities/bookings/${editingBooking.id}`,
+              `/facilities/bookings/${editingBooking.id}`,
               {
                 method: "PUT",
                 body: JSON.stringify(payload),

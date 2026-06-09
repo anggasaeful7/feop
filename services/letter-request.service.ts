@@ -18,33 +18,33 @@ export const LetterRequestService = {
     } else {
       searchParams.append("per_page", "100");
     }
-    return api<Paged<LetterRequest>>(`/api/v1/letter-requests?${searchParams.toString()}`);
+    return api<Paged<LetterRequest>>(`/letter-requests?${searchParams.toString()}`);
   },
 
   getLetterRequestDetail: async (id: string) => {
-    return api<LetterRequest>(`/api/v1/letter-requests/${id}`);
+    return api<LetterRequest>(`/letter-requests/${id}`);
   },
 
   approveLetterRequest: async (id: string, formData: FormData) => {
     // FormData expects "result_file" as File
-    return api<LetterRequest>(`/api/v1/letter-requests/${id}/approve`, {
+    return api<LetterRequest>(`/letter-requests/${id}/approve`, {
       method: "PATCH",
       body: formData as unknown as BodyInit,
     });
   },
 
   rejectLetterRequest: async (id: string, payload: RejectLetterRequestPayload) => {
-    return api<LetterRequest>(`/api/v1/letter-requests/${id}/reject`, {
+    return api<LetterRequest>(`/letter-requests/${id}/reject`, {
       method: "PATCH",
       body: JSON.stringify(payload),
     });
   },
 
   getAttachmentUrl: async (id: string, attachmentId: string) => {
-    return api<{ url: string }>(`/api/v1/letter-requests/${id}/attachments/${attachmentId}/url`);
+    return api<{ url: string }>(`/letter-requests/${id}/attachments/${attachmentId}/url`);
   },
 
   getResultUrl: async (id: string) => {
-    return api<{ url: string }>(`/api/v1/letter-requests/${id}/result-url`);
+    return api<{ url: string }>(`/letter-requests/${id}/result-url`);
   },
 };

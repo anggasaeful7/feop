@@ -23,7 +23,7 @@ export function LoginForm() {
     setSubmitting(true);
 
     try {
-      const out = await api<LoginResponse>("/api/v1/auth/login", {
+      const out = await api<LoginResponse>("/auth/login", {
         method: "POST",
         body: JSON.stringify({ email, password }),
       });

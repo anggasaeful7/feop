@@ -23,7 +23,7 @@ export default function PlatformBillingPage() {
     let cancelled = false;
     (async () => {
       try {
-        const f = await api<WorkspaceFee>("/api/v1/platform-billing/fee");
+        const f = await api<WorkspaceFee>("/platform-billing/fee");
         if (cancelled) return;
         setFee(f);
         setOverride(f.override_platform_fee != null);
@@ -64,7 +64,7 @@ export default function PlatformBillingPage() {
       const payload: WorkspaceFeePayload = {
         platform_fee: override ? Number(feeInput) : null,
       };
-      const next = await api<WorkspaceFee>("/api/v1/platform-billing/fee", {
+      const next = await api<WorkspaceFee>("/platform-billing/fee", {
         method: "PUT",
         body: JSON.stringify(payload),
       });

@@ -72,8 +72,8 @@ export function UnitsList() {
           <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
             <CSVTools
               resourceLabel="Unit"
-              templatePath="/api/v1/master/units/csv-template"
-              importPath="/api/v1/master/units/import"
+              templatePath="/master/units/csv-template"
+              importPath="/master/units/import"
               templateFilename="units-template.csv"
               onAfterImport={() => { refetch(); }}
             />

@@ -10,31 +10,31 @@ export const BillComponentService = {
     if (page !== undefined) searchParams.append("page", page.toString());
     if (per_page !== undefined) searchParams.append("per_page", per_page.toString());
     else searchParams.append("per_page", "100");
-    return api<Paged<BillComponent>>(`/api/v1/master/bill-components?${searchParams.toString()}`);
+    return api<Paged<BillComponent>>(`/master/bill-components?${searchParams.toString()}`);
   },
 
   createBillComponent: async (payload: BillComponentPayload) => {
-    return api<BillComponent>("/api/v1/master/bill-components", {
+    return api<BillComponent>("/master/bill-components", {
       method: "POST",
       body: JSON.stringify(payload),
     });
   },
 
   updateBillComponent: async (id: string, payload: BillComponentPayload) => {
-    return api<BillComponent>(`/api/v1/master/bill-components/${id}`, {
+    return api<BillComponent>(`/master/bill-components/${id}`, {
       method: "PUT",
       body: JSON.stringify(payload),
     });
   },
 
   deleteBillComponent: async (id: string) => {
-    return api(`/api/v1/master/bill-components/${id}`, {
+    return api(`/master/bill-components/${id}`, {
       method: "DELETE",
     });
   },
 
   assignComponents: async (payload: { component_ids: string[], unit_ids: string[] }) => {
-    return api(`/api/v1/master/units/bill-components/assign`, {
+    return api(`/master/units/bill-components/assign`, {
       method: "POST",
       body: JSON.stringify(payload),
     });

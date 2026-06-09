@@ -13,26 +13,26 @@ export const PersonService = {
       });
     }
     const query = searchParams.toString();
-    const path = `/api/v1/master/persons${query ? `?${query}` : ""}`;
+    const path = `/master/persons${query ? `?${query}` : ""}`;
     return api<Paged<Person>>(path);
   },
 
   createPerson: async (payload: PersonPayload) => {
-    return api<Person>("/api/v1/master/persons", {
+    return api<Person>("/master/persons", {
       method: "POST",
       body: JSON.stringify(payload),
     });
   },
 
   updatePerson: async (id: string, payload: PersonPayload) => {
-    return api<Person>(`/api/v1/master/persons/${id}`, {
+    return api<Person>(`/master/persons/${id}`, {
       method: "PUT",
       body: JSON.stringify(payload),
     });
   },
 
   deletePerson: async (id: string) => {
-    return api(`/api/v1/master/persons/${id}`, {
+    return api(`/master/persons/${id}`, {
       method: "DELETE",
     });
   },

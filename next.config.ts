@@ -5,14 +5,6 @@ const withNextIntl = createNextIntlPlugin();
 
 const nextConfig: NextConfig = {
   output: "standalone",
-  async rewrites() {
-    return [
-      {
-        source: "/api/:path*",
-        destination: "https://ipl-v2-dev-operator.nuratech.id/api/:path*",
-      },
-    ];
-  },
 };
 
 export default withNextIntl(nextConfig);
