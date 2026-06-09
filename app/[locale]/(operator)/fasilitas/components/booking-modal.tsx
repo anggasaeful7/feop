@@ -56,7 +56,7 @@ export function BookingFormModal({
     (async () => {
       try {
         const out = await api<Paged<Unit>>(
-          "/api/v1/master/units?per_page=200",
+          "/master/units?per_page=200",
         );
         if (!cancelled) setUnits(out.items);
       } catch {

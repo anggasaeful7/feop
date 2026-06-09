@@ -15,37 +15,37 @@ export const RenovationPermitService = {
     if (params?.status) searchParams.set("status", params.status);
 
     const qs = searchParams.toString();
-    const url = `/api/v1/renovation-permits${qs ? `?${qs}` : ""}`;
+    const url = `/renovation-permits${qs ? `?${qs}` : ""}`;
 
     return api<Paged<RenovationPermit>>(url);
   },
 
   getRenovationPermitDetail: async (id: string) => {
-    return api<RenovationPermit>(`/api/v1/renovation-permits/${id}`);
+    return api<RenovationPermit>(`/renovation-permits/${id}`);
   },
 
   approveRenovationPermit: async (id: string, file: File) => {
     const formData = new FormData();
     formData.append("result_file", file);
 
-    return api<void>(`/api/v1/renovation-permits/${id}/approve`, {
+    return api<void>(`/renovation-permits/${id}/approve`, {
       method: "PATCH",
       body: formData,
     });
   },
 
   rejectRenovationPermit: async (id: string, payload: RejectRenovationPermitPayload) => {
-    return api<void>(`/api/v1/renovation-permits/${id}/reject`, {
+    return api<void>(`/renovation-permits/${id}/reject`, {
       method: "PATCH",
       body: JSON.stringify(payload)
     });
   },
 
   getDocumentUrl: async (id: string, documentId: string) => {
-    return api<{ url: string }>(`/api/v1/renovation-permits/${id}/documents/${documentId}/url`);
+    return api<{ url: string }>(`/renovation-permits/${id}/documents/${documentId}/url`);
   },
 
   getResultUrl: async (id: string) => {
-    return api<{ url: string }>(`/api/v1/renovation-permits/${id}/result-url`);
+    return api<{ url: string }>(`/renovation-permits/${id}/result-url`);
   }
 };

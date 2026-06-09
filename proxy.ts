@@ -10,6 +10,11 @@ export default function proxy(request: NextRequest) {
   const token = request.cookies.get('ipl_access_token')?.value;
   const pathname = request.nextUrl.pathname;
 
+  // Bypass /api routes so they are handled by Next.js rewrites
+  if (pathname.startsWith('/api')) {
+    return NextResponse.next();
+  }
+
   const isPublicPage = publicPages.some(
     (page) => pathname === page || pathname.startsWith(`/id${page}`) || pathname.startsWith(`/en${page}`)
   );

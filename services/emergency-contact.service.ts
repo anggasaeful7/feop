@@ -13,30 +13,30 @@ export const EmergencyContactService = {
       });
     }
     const query = searchParams.toString();
-    const path = `/api/v1/workspace/contacts${query ? `?${query}` : ""}`;
+    const path = `/workspace/contacts${query ? `?${query}` : ""}`;
     return api<Paged<EmergencyContact>>(path);
   },
 
   getContact: async (id: string) => {
-    return api<EmergencyContact>(`/api/v1/workspace/contacts/${id}`);
+    return api<EmergencyContact>(`/workspace/contacts/${id}`);
   },
 
   createContact: async (payload: EmergencyContactPayload) => {
-    return api<EmergencyContact>("/api/v1/workspace/contacts", {
+    return api<EmergencyContact>("/workspace/contacts", {
       method: "POST",
       body: JSON.stringify(payload),
     });
   },
 
   updateContact: async (id: string, payload: EmergencyContactPayload) => {
-    return api<EmergencyContact>(`/api/v1/workspace/contacts/${id}`, {
+    return api<EmergencyContact>(`/workspace/contacts/${id}`, {
       method: "PUT",
       body: JSON.stringify(payload),
     });
   },
 
   deleteContact: async (id: string) => {
-    return api(`/api/v1/workspace/contacts/${id}`, {
+    return api(`/workspace/contacts/${id}`, {
       method: "DELETE",
     });
   },

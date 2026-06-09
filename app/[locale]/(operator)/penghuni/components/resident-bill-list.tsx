@@ -74,7 +74,7 @@ export function ResidentBillList() {
     if (kind !== "all") qs.set("kind", kind);
     if (debouncedSearch) qs.set("search", debouncedSearch);
     const query = qs.toString();
-    return `/api/v1/resident-bills/export.xlsx${query ? `?${query}` : ""}`;
+    return `/resident-bills/export.xlsx${query ? `?${query}` : ""}`;
   }, [activeTab, kind, debouncedSearch, year]);
 
   const handleExport = async () => {

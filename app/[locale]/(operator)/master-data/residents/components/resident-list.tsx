@@ -80,8 +80,8 @@ export function ResidentList() {
           <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
             <CSVTools
               resourceLabel="Warga"
-              templatePath="/api/v1/master/persons/csv-template"
-              importPath="/api/v1/master/persons/import"
+              templatePath="/master/persons/csv-template"
+              importPath="/master/persons/import"
               templateFilename="persons-template.csv"
               onAfterImport={() => { refetch(); }}
             />

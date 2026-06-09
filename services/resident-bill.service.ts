@@ -8,7 +8,7 @@ import type {
   ResidentBillByUnitItem,
 } from "@/types/billing";
 
-const BASE_URL = "/api/v1/resident-bills";
+const BASE_URL = "/resident-bills";
 
 export async function getResidentBills(params?: ResidentBillQueryParams) {
   const qs = new URLSearchParams();

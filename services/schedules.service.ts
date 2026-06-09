@@ -28,37 +28,37 @@ export const SchedulesService = {
       });
     }
     const query = searchParams.toString();
-    const path = `/api/v1/schedules/cleaning${query ? `?${query}` : ""}`;
+    const path = `/schedules/cleaning${query ? `?${query}` : ""}`;
     return api<Paged<CleaningSchedule>>(path);
   },
 
   getCleaningScheduleById: async (id: string) => {
-    return api<CleaningSchedule>(`/api/v1/schedules/cleaning/${id}`);
+    return api<CleaningSchedule>(`/schedules/cleaning/${id}`);
   },
 
   createCleaningSchedule: async (payload: CleaningSchedulePayload) => {
-    return api<CleaningSchedule>("/api/v1/schedules/cleaning", {
+    return api<CleaningSchedule>("/schedules/cleaning", {
       method: "POST",
       body: JSON.stringify(payload),
     });
   },
 
   createBulkCleaningSchedules: async (payload: BulkCleaningSchedulePayload) => {
-    return api<CleaningSchedule[]>("/api/v1/schedules/cleaning/bulk", {
+    return api<CleaningSchedule[]>("/schedules/cleaning/bulk", {
       method: "POST",
       body: JSON.stringify(payload),
     });
   },
 
   updateCleaningSchedule: async (id: string, payload: CleaningSchedulePayload) => {
-    return api<CleaningSchedule>(`/api/v1/schedules/cleaning/${id}`, {
+    return api<CleaningSchedule>(`/schedules/cleaning/${id}`, {
       method: "PUT",
       body: JSON.stringify(payload),
     });
   },
 
   deleteCleaningSchedule: async (id: string) => {
-    return api(`/api/v1/schedules/cleaning/${id}`, {
+    return api(`/schedules/cleaning/${id}`, {
       method: "DELETE",
     });
   },
@@ -74,37 +74,37 @@ export const SchedulesService = {
       });
     }
     const query = searchParams.toString();
-    const path = `/api/v1/schedules/security${query ? `?${query}` : ""}`;
+    const path = `/schedules/security${query ? `?${query}` : ""}`;
     return api<Paged<SecuritySchedule>>(path);
   },
 
   getSecurityScheduleById: async (id: string) => {
-    return api<SecuritySchedule>(`/api/v1/schedules/security/${id}`);
+    return api<SecuritySchedule>(`/schedules/security/${id}`);
   },
 
   createSecuritySchedule: async (payload: SecuritySchedulePayload) => {
-    return api<SecuritySchedule>("/api/v1/schedules/security", {
+    return api<SecuritySchedule>("/schedules/security", {
       method: "POST",
       body: JSON.stringify(payload),
     });
   },
 
   createBulkSecuritySchedules: async (payload: BulkSecuritySchedulePayload) => {
-    return api<SecuritySchedule[]>("/api/v1/schedules/security/bulk", {
+    return api<SecuritySchedule[]>("/schedules/security/bulk", {
       method: "POST",
       body: JSON.stringify(payload),
     });
   },
 
   updateSecuritySchedule: async (id: string, payload: SecuritySchedulePayload) => {
-    return api<SecuritySchedule>(`/api/v1/schedules/security/${id}`, {
+    return api<SecuritySchedule>(`/schedules/security/${id}`, {
       method: "PUT",
       body: JSON.stringify(payload),
     });
   },
 
   deleteSecuritySchedule: async (id: string) => {
-    return api(`/api/v1/schedules/security/${id}`, {
+    return api(`/schedules/security/${id}`, {
       method: "DELETE",
     });
   },

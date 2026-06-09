@@ -11,40 +11,40 @@ export const UnitService = {
       });
     }
     const query = searchParams.toString();
-    const path = `/api/v1/master/units${query ? `?${query}` : ""}`;
+    const path = `/master/units${query ? `?${query}` : ""}`;
     return api<Paged<Unit>>(path);
   },
 
   getUnit: async (id: string) => {
-    return api<Unit>(`/api/v1/master/units/${id}`);
+    return api<Unit>(`/master/units/${id}`);
   },
 
   createUnit: async (payload: UnitPayload) => {
-    return api<Unit>("/api/v1/master/units", {
+    return api<Unit>("/master/units", {
       method: "POST",
       body: JSON.stringify(payload),
     });
   },
 
   updateUnit: async (id: string, payload: UnitPayload) => {
-    return api<Unit>(`/api/v1/master/units/${id}`, {
+    return api<Unit>(`/master/units/${id}`, {
       method: "PUT",
       body: JSON.stringify(payload),
     });
   },
 
   deleteUnit: async (id: string) => {
-    return api(`/api/v1/master/units/${id}`, {
+    return api(`/master/units/${id}`, {
       method: "DELETE",
     });
   },
 
   getUnitBillComponentsMatrix: async (id: string) => {
-    return api<UnitBillComponentsMatrixResponse>(`/api/v1/master/units/${id}/bill-components/matrix`);
+    return api<UnitBillComponentsMatrixResponse>(`/master/units/${id}/bill-components/matrix`);
   },
 
   assignUnitBillComponents: async (id: string, payload: AssignBillComponentPayload) => {
-    return api(`/api/v1/master/units/${id}/bill-components`, {
+    return api(`/master/units/${id}/bill-components`, {
       method: "PUT",
       body: JSON.stringify(payload),
     });

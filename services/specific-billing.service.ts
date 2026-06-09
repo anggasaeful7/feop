@@ -7,7 +7,7 @@ import type {
   BulkIssueSpecificBillingPayload,
 } from "@/types/specific-billing";
 
-const BASE_URL = "/api/v1/master/specific-billings";
+const BASE_URL = "/master/specific-billings";
 
 export async function getSpecificBillings(params?: SpecificBillingQueryParams) {
   const qs = new URLSearchParams();
