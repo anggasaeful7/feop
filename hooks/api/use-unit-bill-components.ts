@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { UnitService } from "@/services/unit.service";
 import type { AssignBillComponentPayload } from "@/types/master-data";
+import { unitQK } from "./use-unit";
 
 export const unitBillComponentsQK = {
   all: ["unit-bill-components"] as const,
@@ -24,7 +25,7 @@ export function useAssignUnitBillComponents(id: string) {
       UnitService.assignUnitBillComponents(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: unitBillComponentsQK.matrix(id) });
-      queryClient.invalidateQueries({ queryKey: ["units"] });
+      queryClient.invalidateQueries({ queryKey: unitQK.all });
       toast.success("Berhasil mengatur komponen tagihan");
     },
     onError: (err) => {

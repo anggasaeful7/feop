@@ -96,10 +96,12 @@ export function useDeleteSpecificBilling() {
 }
 
 export function useIssueSpecificBilling() {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: issueSpecificBilling,
     onSuccess: () => {
       toast.success("Berhasil men-generate tagihan");
+      qc.invalidateQueries({ queryKey: residentBillQK.all });
     },
     onError: (error) => {
       toast.error(error.message || "Gagal men-generate tagihan");
