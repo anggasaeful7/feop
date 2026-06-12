@@ -85,16 +85,16 @@ export function DataTable<TData, TValue>({
 
   return (
     <Card className="p-0">
-      <div className={`${size === 'sm' ? 'my-2 px-3' : 'my-4 px-4'} flex flex-col md:flex-row md:items-center justify-between gap-4`}>
-        {title && <h3 className={`${size === 'sm' ? 'text-lg' : 'text-2xl'} font-bold text-zinc-900 italic`}>{title}</h3>}
+      <div className={`${size === 'sm' ? 'my-2 px-3 gap-2' : 'my-4 px-4 gap-4'} flex flex-col md:flex-row md:items-center justify-between`}>
+        {title && <h3 className={`${size === 'sm' ? 'text-lg whitespace-nowrap' : 'text-2xl'} font-bold text-zinc-900 italic`}>{title}</h3>}
         <div className="flex w-full md:w-auto flex-col sm:flex-row items-start sm:items-center gap-3">
           {onSearchChange && (
-            <div className="relative w-full sm:w-auto">
+            <div className={`relative w-full ${size === 'sm' ? 'sm:w-48' : 'sm:w-auto'}`}>
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A9582]" size={size === 'sm' ? 14 : 16} />
               <input
                 type="text"
                 placeholder={searchPlaceholder}
-                className={`w-full sm:w-72 pl-10 pr-4 rounded-full border border-[#E4DDCB] bg-transparent italic text-zinc-700 placeholder:text-[#8A9582] focus:outline-none focus:ring-1 focus:ring-[#E4DDCB] transition-shadow ${size === 'sm' ? 'h-8 text-xs' : 'h-9 text-sm'}`}
+                className={`w-full ${size === 'sm' ? 'sm:w-48 h-8 text-xs' : 'sm:w-72 h-9 text-sm'} pl-10 pr-4 rounded-full border border-[#E4DDCB] bg-transparent italic text-zinc-700 placeholder:text-[#8A9582] focus:outline-none focus:ring-1 focus:ring-[#E4DDCB] transition-shadow`}
                 value={search || ""}
                 onChange={(e) => onSearchChange(e.target.value)}
               />

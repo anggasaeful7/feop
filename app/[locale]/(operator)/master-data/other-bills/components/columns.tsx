@@ -17,7 +17,7 @@ export const baseColumns: ColumnDef<SpecificBilling>[] = [
     ),
   },
   {
-    header: "Nominal",
+    header: "Harga",
     accessorKey: "amount",
     cell: ({ row }) => (
       <span className="font-medium text-zinc-900">{idr(row.original.amount)}</span>

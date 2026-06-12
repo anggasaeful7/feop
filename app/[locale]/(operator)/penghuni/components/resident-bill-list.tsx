@@ -30,7 +30,8 @@ export function ResidentBillList() {
   const [activeTab, setActiveTab] = useState<StatusTab>("all");
   const [kind, setKind] = useState<string>("all");
   const [year, setYear] = useState<number>(2026);
-  const [isExporting, setIsExporting] = useState(false);
+  const [isExportingExcel, setIsExportingExcel] = useState(false);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [expandedUnits, setExpandedUnits] = useState<Set<string>>(new Set());
 
   const [selectedBills, setSelectedBills] = useState<Set<string>>(new Set());
@@ -67,25 +68,27 @@ export function ResidentBillList() {
     }
   };
 
-  const exportUrl = useMemo(() => {
-    const qs = new URLSearchParams();
-    qs.set("year", year.toString());
-    if (activeTab !== "all") qs.set("status", activeTab);
-    if (kind !== "all") qs.set("kind", kind);
-    if (debouncedSearch) qs.set("search", debouncedSearch);
-    const query = qs.toString();
-    return `/resident-bills/export.xlsx${query ? `?${query}` : ""}`;
-  }, [activeTab, kind, debouncedSearch, year]);
-
-  const handleExport = async () => {
-    setIsExporting(true);
+  const handleExportExcel = async () => {
+    setIsExportingExcel(true);
     try {
-      await downloadCSV(exportUrl, "billing-penghuni.xlsx");
-      toast.success("Berhasil mengekspor data billing");
+      await downloadCSV("/resident-bills/export-billing.xlsx", "billing-penghuni.xlsx");
+      toast.success("Berhasil mengekspor data billing Excel");
     } catch (e) {
-      toast.error(e instanceof ApiError ? e.message : "Gagal mengekspor data");
+      toast.error(e instanceof ApiError ? e.message : "Gagal mengekspor data Excel");
     } finally {
-      setIsExporting(false);
+      setIsExportingExcel(false);
+    }
+  };
+
+  const handleExportPdf = async () => {
+    setIsExportingPdf(true);
+    try {
+      await downloadCSV("/resident-bills/export-overdue.pdf?min_months=3", "penghuni-menunggak.pdf");
+      toast.success("Berhasil mengekspor PDF penghuni menunggak");
+    } catch (e) {
+      toast.error(e instanceof ApiError ? e.message : "Gagal mengekspor data PDF");
+    } finally {
+      setIsExportingPdf(false);
     }
   };
 
@@ -236,15 +239,26 @@ export function ResidentBillList() {
                 </Select>
               </div>
             </div>
-            <Button
-              variant="secondary"
-              size="sm"
-              className="font-bold italic w-full sm:w-auto"
-              onClick={handleExport}
-              disabled={isExporting}
-            >
-              <Download size={14} className="mr-1" /> {isExporting ? "Mengekspor..." : "CSV / Excel"}
-            </Button>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Button
+                variant="secondary"
+                size="sm"
+                className="font-bold italic flex-1 sm:flex-none"
+                onClick={handleExportExcel}
+                disabled={isExportingExcel}
+              >
+                <Download size={14} className="mr-1" /> {isExportingExcel ? "..." : "Excel"}
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="font-bold italic flex-1 sm:flex-none"
+                onClick={handleExportPdf}
+                disabled={isExportingPdf}
+              >
+                <Download size={14} className="mr-1" /> {isExportingPdf ? "..." : "PDF (Menunggak)"}
+              </Button>
+            </div>
           </div>
         }
       />

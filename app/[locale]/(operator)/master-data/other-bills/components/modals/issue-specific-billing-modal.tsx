@@ -23,6 +23,9 @@ export function IssueSpecificBillingModal({ onClose }: Props) {
   const [searchUnit, setSearchUnit] = useState("");
   const debouncedSearchUnit = useDebounce(searchUnit, 500);
 
+  const [searchBilling, setSearchBilling] = useState("");
+  const debouncedSearchBilling = useDebounce(searchBilling, 500);
+
   const [billingsPage, setBillingsPage] = useState(1);
   const [unitsPage, setUnitsPage] = useState(1);
 
@@ -30,6 +33,7 @@ export function IssueSpecificBillingModal({ onClose }: Props) {
   const [year, setYear] = useState(new Date().getFullYear());
 
   const { data: billingsData, isFetching: isFetchingBillings } = useSpecificBillings({
+    search: debouncedSearchBilling,
     per_page: 10,
     page: billingsPage,
   });
@@ -129,7 +133,7 @@ export function IssueSpecificBillingModal({ onClose }: Props) {
       },
       {
         accessorKey: "amount",
-        header: "Nominal",
+        header: "Harga",
         cell: ({ row }) => (
           <span className="text-zinc-600">
             {new Intl.NumberFormat("id-ID", {
@@ -214,8 +218,8 @@ export function IssueSpecificBillingModal({ onClose }: Props) {
       footer={
         <div className="w-full flex items-center justify-between">
           <div className="text-xs text-zinc-500 flex flex-col gap-1 font-bold">
-            <div>{selectedBillings.size} dari {billingsData?.total || 0} Tagihan dipilih</div>
             <div>{selectedUnits.size} dari {unitsData?.total || 0} Unit dipilih</div>
+            <div>{selectedBillings.size} dari {billingsData?.total || 0} Tagihan dipilih</div>
           </div>
           <div className="flex gap-2">
             <Button variant="danger" onClick={onClose} className="rounded-full px-6" disabled={issueMutation.isPending}>
@@ -267,7 +271,6 @@ export function IssueSpecificBillingModal({ onClose }: Props) {
               setSearchUnit(val);
               setUnitsPage(1);
             }}
-            searchPlaceholder="Search"
             onRowClick={(row) => toggleUnit(row.id)}
             size="sm"
             page={unitsPage}
@@ -280,10 +283,15 @@ export function IssueSpecificBillingModal({ onClose }: Props) {
         {/* Right Table: Tagihan Lainnya */}
         <div className="flex flex-col h-full overflow-hidden [&_.overflow-x-auto]:max-h-[300px]">
           <DataTable
-            title="Daftar Tagihan Lainnya"
+            title="Tagihan Lainnya"
             data={billings}
             columns={billingsColumns}
             total={billingsData?.total || 0}
+            search={searchBilling}
+            onSearchChange={(val) => {
+              setSearchBilling(val);
+              setBillingsPage(1);
+            }}
             onRowClick={(row) => toggleBilling(row.id)}
             size="sm"
             page={billingsPage}
