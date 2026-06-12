@@ -19,7 +19,7 @@ export type WorkspaceFeePayload = {
   platform_fee: number | null;
 };
 
-export type PaymentQuote = {
+export type PlatformPaymentQuote = {
   base_amount: number;
   platform_fee: number;
   total_amount: number;

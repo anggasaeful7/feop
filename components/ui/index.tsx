@@ -9,3 +9,5 @@ export * from "./modal";
 export * from "./skeleton";
 export * from "./textarea";
 export * from "./row-actions";
+export * from "./input";
+export * from "./label";

@@ -1,6 +1,20 @@
 // Shared API and auth types. Keep this file pure — no React or runtime code,
 // so it can be imported from anywhere (server, client, route handlers).
 
+export * from "./master-data";
+export * from "./schedules";
+export * from "./complaint";
+export * from "./guest-report";
+export * from "./facility";
+export * from "./billing";
+export * from "./specific-billing";
+export * from "./renovation-permit";
+export * from "./platform-billing";
+export * from "./letter-request";
+export * from "./financial-report";
+export * from "./general-facility";
+export * from "./punishment";
+
 export type ApiEnvelope<T> = { data: T };
 
 export type ApiErrorBody = {

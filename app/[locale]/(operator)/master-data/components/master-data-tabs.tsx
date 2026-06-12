@@ -10,6 +10,7 @@ const TABS = [
   { label: "Komponen Tagihan", href: "bill-components" },
   { label: "Tagihan Lainnya", href: "other-bills" },
   { label: "Assign Komponen", href: "assign-components" },
+  { label: "Fasilitas", href: "general-facilities" },
   { label: "Kontak Darurat", href: "emergency-contacts" },
 ];
 
