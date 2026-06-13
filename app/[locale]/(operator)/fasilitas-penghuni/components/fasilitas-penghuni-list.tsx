@@ -1,22 +1,84 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { DataTable } from "@/components/ui";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { ChevronDown, ChevronUp, Download } from "lucide-react";
+import { DataTable, Button } from "@/components/ui";
 import { ColumnDef } from "@tanstack/react-table";
+import { ApiError, downloadCSV } from "@/lib/axios";
+import { toast } from "sonner";
 import { useGeneralFacilitiesByUnit } from "@/hooks/api/use-general-facility";
 import { useDataTableState } from "@/hooks/use-data-table-state";
 import { UnitWithGeneralFacilities } from "@/types";
 import { Badge } from "@/components/ui/badge";
 
+const LATE_TABS = [
+  { key: "all", label: "Semua" },
+  { key: "true", label: "Menunggak" },
+] as const;
+
 export function FasilitasPenghuniList() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const urlYear = searchParams.get("year") || undefined;
+  const urlUnitId = searchParams.get("unit_id") || undefined;
+  const urlUnit = searchParams.get("unit") || undefined;
+  const urlName = searchParams.get("name") || undefined;
+  const urlIsLate = searchParams.get("is_late") || "all";
+
   const { search, setSearch, debouncedSearch, page, setPage, perPage } = useDataTableState();
   const [expandedUnits, setExpandedUnits] = useState<Set<string>>(new Set());
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const [lateFilter, setLateFilter] = useState<string>(urlIsLate);
+  const [prevUrlIsLate, setPrevUrlIsLate] = useState(urlIsLate);
+
+  // Sync state during render
+  if (urlIsLate !== prevUrlIsLate) {
+    setPrevUrlIsLate(urlIsLate);
+    setLateFilter(urlIsLate);
+  }
+
+  const changeLateFilter = (val: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (val === "all") {
+      params.delete("is_late");
+    } else {
+      params.set("is_late", val);
+    }
+    params.delete("page"); // Reset page on filter change
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
+  const handleExportPdf = async () => {
+    setIsExportingPdf(true);
+    try {
+      const exportParams = new URLSearchParams();
+      exportParams.set("min_months", "3");
+      if (urlYear) exportParams.set("year", urlYear);
+      if (urlUnitId) exportParams.set("unit_id", urlUnitId);
+      if (urlUnit) exportParams.set("unit", urlUnit);
+      if (urlName) exportParams.set("name", urlName);
+      if (lateFilter !== "all") exportParams.set("is_late", lateFilter);
+
+      await downloadCSV(`/resident-bills/export-overdue.pdf?${exportParams.toString()}`, "penghuni-menunggak.pdf");
+      toast.success("Berhasil mengekspor PDF penghuni menunggak");
+    } catch (e) {
+      toast.error(e instanceof ApiError ? e.message : "Gagal mengekspor data PDF");
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
 
   const { data, isLoading, isFetching, error } = useGeneralFacilitiesByUnit({
     search: debouncedSearch,
     page,
     per_page: perPage,
+    year: urlYear,
+    unit_id: urlUnitId,
+    unit: urlUnit,
+    name: urlName,
+    is_late: lateFilter === "all" ? undefined : lateFilter,
   });
 
   const units = data?.items || [];
@@ -93,7 +155,6 @@ export function FasilitasPenghuniList() {
                 <th className="px-4 py-2 w-12">No</th>
                 <th className="px-4 py-2">Nama Fasilitas</th>
                 <th className="px-4 py-2 w-32">Status</th>
-                <th className="px-4 py-2 w-48">Diassign Oleh</th>
                 <th className="px-4 py-2 w-48">Tanggal Assign</th>
               </tr>
             </thead>
@@ -107,7 +168,6 @@ export function FasilitasPenghuniList() {
                       {fac.is_active ? "Aktif" : "Non-Aktif"}
                     </Badge>
                   </td>
-                  <td className="px-4 py-3 text-zinc-600">{fac.assigned_by || "-"}</td>
                   <td className="px-4 py-3 text-zinc-500">
                     {fac.assigned_at ? new Date(fac.assigned_at).toLocaleDateString("id-ID") : "-"}
                   </td>
@@ -150,6 +210,36 @@ export function FasilitasPenghuniList() {
         expandedRowKeys={expandedUnits}
         onExpandedRowKeysChange={setExpandedUnits}
         renderRowDetails={renderRowDetails}
+        actions={
+          <div className="flex flex-col sm:flex-row w-full sm:w-auto items-stretch sm:items-center gap-3">
+            <div className="flex overflow-x-auto gap-2 pb-1 sm:pb-0 w-full sm:w-auto hide-scrollbar">
+              {LATE_TABS.map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => changeLateFilter(tab.key)}
+                  className={`shrink-0 h-9 rounded-full px-4 text-xs font-semibold transition ${
+                    lateFilter === tab.key
+                      ? tab.key === "true"
+                        ? "bg-rose-700 text-white"
+                        : "bg-brand-900 text-white"
+                      : "border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="font-bold italic w-full sm:w-auto"
+              onClick={handleExportPdf}
+              disabled={isExportingPdf}
+            >
+              <Download size={14} className="mr-1" /> {isExportingPdf ? "..." : "PDF Fasilitas"}
+            </Button>
+          </div>
+        }
       />
     </div>
   );

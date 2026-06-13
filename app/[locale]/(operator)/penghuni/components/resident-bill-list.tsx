@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import { Download, ChevronDown, ChevronUp } from "lucide-react";
 import { Button, DataTable } from "@/components/ui";
 import { ColumnDef } from "@tanstack/react-table";
@@ -19,20 +20,32 @@ import { baseColumns } from "./columns";
 const STATUS_TABS = [
   { key: "all", label: "Semua" },
   { key: "paid", label: "Lunas" },
-  { key: "pending_verification", label: "Pending" },
   { key: "unpaid", label: "Belum Bayar" },
 ] as const;
 
 type StatusTab = (typeof STATUS_TABS)[number]["key"];
 
 export function ResidentBillList() {
+  const searchParams = useSearchParams();
+  const urlYear = searchParams.get("year");
+  const urlUnitId = searchParams.get("unit_id") || undefined;
+  const urlUnit = searchParams.get("unit") || undefined;
+  const urlName = searchParams.get("name") || undefined;
+  const urlIsLate = searchParams.get("is_late") || undefined;
+
   const { search, setSearch, debouncedSearch, page, setPage, perPage } = useDataTableState();
   const [activeTab, setActiveTab] = useState<StatusTab>("all");
   const [kind, setKind] = useState<string>("all");
-  const [year, setYear] = useState<number>(2026);
+  const [year, setYear] = useState<number>(urlYear ? Number(urlYear) : 2026);
+  const [prevUrlYear, setPrevUrlYear] = useState(urlYear);
   const [isExportingExcel, setIsExportingExcel] = useState(false);
-  const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [expandedUnits, setExpandedUnits] = useState<Set<string>>(new Set());
+
+  // Sync year state when urlYear parameter changes
+  if (urlYear !== prevUrlYear) {
+    setPrevUrlYear(urlYear);
+    setYear(urlYear ? Number(urlYear) : 2026);
+  }
 
   const [selectedBills, setSelectedBills] = useState<Set<string>>(new Set());
   const bulkDelete = useBulkDeleteSpecificBillingGeneratedBills();
@@ -71,24 +84,22 @@ export function ResidentBillList() {
   const handleExportExcel = async () => {
     setIsExportingExcel(true);
     try {
-      await downloadCSV("/resident-bills/export-billing.xlsx", "billing-penghuni.xlsx");
+      const exportParams = new URLSearchParams();
+      if (year) exportParams.set("year", year.toString());
+      if (activeTab !== "all") exportParams.set("status", activeTab);
+      if (kind !== "all") exportParams.set("kind", kind);
+      if (debouncedSearch) exportParams.set("search", debouncedSearch);
+      if (urlUnitId) exportParams.set("unit_id", urlUnitId);
+      if (urlUnit) exportParams.set("unit", urlUnit);
+      if (urlName) exportParams.set("name", urlName);
+      if (urlIsLate) exportParams.set("is_late", urlIsLate);
+
+      await downloadCSV(`/resident-bills/export-billing.xlsx?${exportParams.toString()}`, "billing-penghuni.xlsx");
       toast.success("Berhasil mengekspor data billing Excel");
     } catch (e) {
       toast.error(e instanceof ApiError ? e.message : "Gagal mengekspor data Excel");
     } finally {
       setIsExportingExcel(false);
-    }
-  };
-
-  const handleExportPdf = async () => {
-    setIsExportingPdf(true);
-    try {
-      await downloadCSV("/resident-bills/export-overdue.pdf?min_months=3", "penghuni-menunggak.pdf");
-      toast.success("Berhasil mengekspor PDF penghuni menunggak");
-    } catch (e) {
-      toast.error(e instanceof ApiError ? e.message : "Gagal mengekspor data PDF");
-    } finally {
-      setIsExportingPdf(false);
     }
   };
 
@@ -100,6 +111,10 @@ export function ResidentBillList() {
     search: debouncedSearch,
     page,
     per_page: perPage,
+    unit_id: urlUnitId,
+    unit: urlUnit,
+    name: urlName,
+    is_late: urlIsLate,
   });
 
   const units = billsData?.items || [];
@@ -247,16 +262,7 @@ export function ResidentBillList() {
                 onClick={handleExportExcel}
                 disabled={isExportingExcel}
               >
-                <Download size={14} className="mr-1" /> {isExportingExcel ? "..." : "Excel"}
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                className="font-bold italic flex-1 sm:flex-none"
-                onClick={handleExportPdf}
-                disabled={isExportingPdf}
-              >
-                <Download size={14} className="mr-1" /> {isExportingPdf ? "..." : "PDF (Menunggak)"}
+                <Download size={14} className="mr-1" /> {isExportingExcel ? "..." : "Excel Billing"}
               </Button>
             </div>
           </div>

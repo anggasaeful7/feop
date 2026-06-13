@@ -11,7 +11,16 @@ export function useGeneralFacilities(params?: { page?: number; per_page?: number
   });
 }
 
-export function useGeneralFacilitiesByUnit(params?: { page?: number; per_page?: number; search?: string }) {
+export function useGeneralFacilitiesByUnit(params?: {
+  page?: number;
+  per_page?: number;
+  search?: string;
+  year?: number | string;
+  unit_id?: string;
+  unit?: string;
+  name?: string;
+  is_late?: boolean | string;
+}) {
   return useQuery({
     queryKey: ["general-facilities", "by-unit", params],
     queryFn: () => GeneralFacilityService.getGeneralFacilitiesByUnit(params),
