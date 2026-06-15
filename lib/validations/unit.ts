@@ -9,6 +9,10 @@ export const unitSchema = z.object({
   bill_payer: z.enum(["owner", "resident"]).nullable().optional(),
   owner_id: z.string().nullable().optional(),
   resident_id: z.string().nullable().optional(),
+  rt: z.string().nullable().optional(),
+  rw: z.string().nullable().optional(),
+  occupancy_month: z.string().nullable().optional(),
+  occupancy_year: z.string().nullable().optional(),
   notes: z.string().nullable().optional(),
 }).superRefine((data, ctx) => {
   if (data.status !== "vacant") {
@@ -19,13 +23,6 @@ export const unitSchema = z.object({
         path: ["bill_payer"],
       });
     }
-    // if (data.bill_payer === "owner" && !data.owner_id) {
-    //   ctx.addIssue({
-    //     code: "custom",
-    //     message: "Pemilik wajib diisi bila bayar iuran = pemilik",
-    //     path: ["owner_id"],
-    //   });
-    // }
     if (data.bill_payer === "resident" && !data.resident_id) {
       ctx.addIssue({
         code: "custom",

@@ -124,6 +124,10 @@ export type Unit = {
   owner_name?: string | null;
   resident_id?: string | null;
   resident_name?: string | null;
+  rt?: string | null;
+  rw?: string | null;
+  occupancy_month?: string | null;
+  occupancy_year?: string | null;
   notes?: string | null;
   active_components?: {
     id: string;
@@ -143,6 +147,10 @@ export type UnitPayload = {
   bill_payer: BillPayer | null;
   owner_id?: string | null;
   resident_id?: string | null;
+  rt?: string | null;
+  rw?: string | null;
+  occupancy_month?: string | null;
+  occupancy_year?: string | null;
   notes?: string | null;
 };
 
@@ -150,6 +158,8 @@ export type UnitQueryParams = {
   search?: string;
   unit_type_id?: string;
   status?: UnitStatus;
+  rt?: string;
+  rw?: string;
   page?: number;
   per_page?: number;
   exclude_vacant?: boolean;

@@ -23,6 +23,15 @@ const STATUS_TABS = [
   { key: "unpaid", label: "Belum Bayar" },
 ] as const;
 
+const RT_OPTIONS = [
+  { value: "all", label: "Semua RT" },
+  { value: "001", label: "RT 001" },
+  { value: "002", label: "RT 002" },
+  { value: "003", label: "RT 003" },
+  { value: "004", label: "RT 004" },
+  { value: "005", label: "RT 005" },
+];
+
 type StatusTab = (typeof STATUS_TABS)[number]["key"];
 
 export function ResidentBillList() {
@@ -36,6 +45,7 @@ export function ResidentBillList() {
   const { search, setSearch, debouncedSearch, page, setPage, perPage } = useDataTableState();
   const [activeTab, setActiveTab] = useState<StatusTab>("all");
   const [kind, setKind] = useState<string>("all");
+  const [rtFilter, setRtFilter] = useState<string>("all");
   const [year, setYear] = useState<number>(urlYear ? Number(urlYear) : 2026);
   const [prevUrlYear, setPrevUrlYear] = useState(urlYear);
   const [isExportingExcel, setIsExportingExcel] = useState(false);
@@ -88,6 +98,7 @@ export function ResidentBillList() {
       if (year) exportParams.set("year", year.toString());
       if (activeTab !== "all") exportParams.set("status", activeTab);
       if (kind !== "all") exportParams.set("kind", kind);
+      if (rtFilter !== "all") exportParams.set("rt", rtFilter);
       if (debouncedSearch) exportParams.set("search", debouncedSearch);
       if (urlUnitId) exportParams.set("unit_id", urlUnitId);
       if (urlUnit) exportParams.set("unit", urlUnit);
@@ -108,6 +119,7 @@ export function ResidentBillList() {
     year,
     status: activeTab === "all" ? undefined : activeTab,
     kind: kind === "all" ? undefined : kind,
+    rt: rtFilter === "all" ? undefined : rtFilter,
     search: debouncedSearch,
     page,
     per_page: perPage,
@@ -216,6 +228,26 @@ export function ResidentBillList() {
             </div>
 
             <div className="flex gap-2 w-full sm:w-auto">
+              <div className="flex-1 sm:flex-none sm:w-28">
+                <Select
+                  value={rtFilter}
+                  onValueChange={(v) => {
+                    setRtFilter(v);
+                    setPage(1);
+                  }}
+                >
+                  <SelectTrigger className="w-full h-9 rounded-full border-zinc-300 text-xs font-semibold px-4 bg-white text-zinc-700">
+                    <SelectValue placeholder="Semua RT" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {RT_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="flex-1 sm:flex-none sm:w-32">
                 <Select
                   value={kind}

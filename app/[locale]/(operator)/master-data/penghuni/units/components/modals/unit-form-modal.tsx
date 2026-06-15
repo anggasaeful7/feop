@@ -23,6 +23,7 @@ import { unitSchema, type UnitFormValues } from "@/lib/validations/unit";
 import { useCreateUnit, useUpdateUnit } from "@/hooks/api/use-unit";
 import { useUnitTypes } from "@/hooks/api/use-unit-type";
 import { usePersons } from "@/hooks/api/use-person";
+import { useAuthUser } from "@/hooks/use-auth";
 import { UNIT_STATUS_LABEL, BILL_PAYER_LABEL } from "@/lib/constants";
 
 export function UnitFormModal({
@@ -35,6 +36,7 @@ export function UnitFormModal({
   onClose: () => void;
 }) {
   const isEditing = !!initial;
+  const authUser = useAuthUser();
 
   const { data: unitTypesData } = useUnitTypes({ per_page: 200 });
   const { data: personsData } = usePersons();
@@ -58,6 +60,10 @@ export function UnitFormModal({
       bill_payer: initial?.bill_payer || null,
       owner_id: initial?.owner_id || "",
       resident_id: initial?.resident_id || "",
+      rt: initial?.rt || "",
+      rw: initial?.rw || authUser?.rw || "",
+      occupancy_month: initial?.occupancy_month || "",
+      occupancy_year: initial?.occupancy_year || "",
       notes: initial?.notes || "",
     },
   });
@@ -74,6 +80,10 @@ export function UnitFormModal({
       bill_payer: values.status === "vacant" ? null : (values.bill_payer || null),
       owner_id: values.status === "vacant" || values.owner_id === "" ? null : values.owner_id,
       resident_id: values.status === "vacant" || values.resident_id === "" ? null : values.resident_id,
+      rt: values.rt === "" ? null : values.rt,
+      rw: values.rw === "" ? null : values.rw,
+      occupancy_month: values.occupancy_month === "" ? null : values.occupancy_month,
+      occupancy_year: values.occupancy_year === "" ? null : values.occupancy_year,
       notes: values.notes === "" ? null : values.notes,
     };
 
@@ -104,6 +114,12 @@ export function UnitFormModal({
       form.setValue("resident_id", "");
     }
   }, [status, form]);
+
+  useEffect(() => {
+    if (!initial && authUser?.rw) {
+      form.setValue("rw", authUser.rw);
+    }
+  }, [authUser, initial, form]);
 
   const toggleOwnerIsResident = (checked: boolean) => {
     if (checked && ownerId) {
@@ -171,6 +187,34 @@ export function UnitFormModal({
                     ))}
                   </SelectContent>
                 </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="rw"
+            render={({ field }) => (
+              <FormItem className="col-span-2 sm:col-span-1">
+                <FormLabel>RW</FormLabel>
+                <FormControl>
+                  <Input readOnly placeholder="002" {...field} value={field.value || ""} className="rounded-xl italic bg-zinc-100/50 text-zinc-500 cursor-not-allowed border-[#E4DDCB]" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="rt"
+            render={({ field }) => (
+              <FormItem className="col-span-2 sm:col-span-1">
+                <FormLabel>RT</FormLabel>
+                <FormControl>
+                  <Input placeholder="001" {...field} value={field.value || ""} className="rounded-xl italic bg-transparent" />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -331,6 +375,34 @@ export function UnitFormModal({
               Pemilik tinggal sendiri di unit ini (penghuni = pemilik)
             </label>
           </div>
+
+          <FormField
+            control={form.control}
+            name="occupancy_month"
+            render={({ field }) => (
+              <FormItem className="col-span-2 sm:col-span-1">
+                <FormLabel>Bulan Menempati (1-12)</FormLabel>
+                <FormControl>
+                  <Input placeholder="1" {...field} value={field.value || ""} className="rounded-xl italic bg-transparent" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="occupancy_year"
+            render={({ field }) => (
+              <FormItem className="col-span-2 sm:col-span-1">
+                <FormLabel>Tahun Menempati</FormLabel>
+                <FormControl>
+                  <Input placeholder="2024" {...field} value={field.value || ""} className="rounded-xl italic bg-transparent" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <FormField
             control={form.control}
