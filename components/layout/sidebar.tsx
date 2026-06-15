@@ -60,10 +60,12 @@ const NAV: NavItem[] = [
     ],
   },
   {
-    href: "/master-data/units",
-    activePath: "/master-data",
     label: "Master Data",
     Icon: Database,
+    children: [
+      { href: "/master-data/penghuni/units", label: "Data Penghuni" },
+      { href: "/master-data/petugas", label: "Data Petugas" },
+    ],
   },
   {
     label: "Pengaturan & Lainnya",
@@ -150,7 +152,10 @@ export function Sidebar({ className }: { className?: string }) {
         />
         <div className="leading-tight">
           <div className="text-sm font-semibold text-zinc-900">IPL Sistem</div>
-          <div className="text-xs text-zinc-500">Cluster Mawar</div>
+          <div className="text-xs text-zinc-500">
+            {user?.workspace_name || "Cluster Mawar"}
+          </div>
+          <div className="text-xs text-zinc-500">{user?.rw ? `RW ${user.rw}` : ""}</div>
         </div>
       </div>
 

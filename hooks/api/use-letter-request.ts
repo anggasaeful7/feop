@@ -35,8 +35,8 @@ export function useApproveLetterRequest(id: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (formData: FormData) =>
-      LetterRequestService.approveLetterRequest(id, formData),
+    mutationFn: (file?: File | null) =>
+      LetterRequestService.approveLetterRequest(id, file),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: letterRequestQK.all });
       toast.success("Pengajuan surat berhasil disetujui");

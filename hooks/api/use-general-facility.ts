@@ -20,6 +20,7 @@ export function useGeneralFacilitiesByUnit(params?: {
   unit?: string;
   name?: string;
   is_late?: boolean | string;
+  rt?: string;
 }) {
   return useQuery({
     queryKey: ["general-facilities", "by-unit", params],

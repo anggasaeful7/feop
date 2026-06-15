@@ -14,18 +14,18 @@ const TABS = [
   { label: "Kontak Darurat", href: "emergency-contacts" },
 ];
 
-export function MasterDataTabs() {
+export function PenghuniTabs() {
   const pathname = usePathname();
   const params = useParams();
   const locale = params.locale || "id"; // fallback to id if not found
 
-  const basePath = `/${locale}/master-data`;
+  const basePath = `/${locale}/master-data/penghuni`;
 
   return (
     <div className="mb-4 flex items-center gap-2 overflow-x-auto pb-2">
       {TABS.map((t) => {
         const fullPath = `${basePath}/${t.href}`;
-        const isActive = pathname.includes(`/master-data/${t.href}`);
+        const isActive = pathname.includes(`/master-data/penghuni/${t.href}`);
 
         return (
           <Link

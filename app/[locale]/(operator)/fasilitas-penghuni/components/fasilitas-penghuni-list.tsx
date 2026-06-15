@@ -11,6 +11,16 @@ import { useGeneralFacilitiesByUnit } from "@/hooks/api/use-general-facility";
 import { useDataTableState } from "@/hooks/use-data-table-state";
 import { UnitWithGeneralFacilities } from "@/types";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const RT_OPTIONS = [
+  { value: "all", label: "Semua RT" },
+  { value: "001", label: "RT 001" },
+  { value: "002", label: "RT 002" },
+  { value: "003", label: "RT 003" },
+  { value: "004", label: "RT 004" },
+  { value: "005", label: "RT 005" },
+];
 
 const LATE_TABS = [
   { key: "all", label: "Semua" },
@@ -31,6 +41,7 @@ export function FasilitasPenghuniList() {
   const [expandedUnits, setExpandedUnits] = useState<Set<string>>(new Set());
   const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [lateFilter, setLateFilter] = useState<string>(urlIsLate);
+  const [rtFilter, setRtFilter] = useState<string>("all");
   const [prevUrlIsLate, setPrevUrlIsLate] = useState(urlIsLate);
 
   // Sync state during render
@@ -60,6 +71,7 @@ export function FasilitasPenghuniList() {
       if (urlUnit) exportParams.set("unit", urlUnit);
       if (urlName) exportParams.set("name", urlName);
       if (lateFilter !== "all") exportParams.set("is_late", lateFilter);
+      if (rtFilter !== "all") exportParams.set("rt", rtFilter);
 
       await downloadCSV(`/resident-bills/export-overdue.pdf?${exportParams.toString()}`, "penghuni-menunggak.pdf");
       toast.success("Berhasil mengekspor PDF penghuni menunggak");
@@ -78,6 +90,7 @@ export function FasilitasPenghuniList() {
     unit_id: urlUnitId,
     unit: urlUnit,
     name: urlName,
+    rt: rtFilter === "all" ? undefined : rtFilter,
     is_late: lateFilter === "all" ? undefined : lateFilter,
   });
 
@@ -217,17 +230,36 @@ export function FasilitasPenghuniList() {
                 <button
                   key={tab.key}
                   onClick={() => changeLateFilter(tab.key)}
-                  className={`shrink-0 h-9 rounded-full px-4 text-xs font-semibold transition ${
-                    lateFilter === tab.key
+                  className={`shrink-0 h-9 rounded-full px-4 text-xs font-semibold transition ${lateFilter === tab.key
                       ? tab.key === "true"
                         ? "bg-rose-700 text-white"
                         : "bg-brand-900 text-white"
                       : "border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50"
-                  }`}
+                    }`}
                 >
                   {tab.label}
                 </button>
               ))}
+            </div>
+            <div className="w-full sm:w-32">
+              <Select
+                value={rtFilter}
+                onValueChange={(val) => {
+                  setRtFilter(val);
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="w-full h-9 rounded-full border-zinc-300 text-xs font-semibold px-4 bg-white text-zinc-700">
+                  <SelectValue placeholder="Semua RT" />
+                </SelectTrigger>
+                <SelectContent>
+                  {RT_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <Button
               variant="secondary"

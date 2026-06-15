@@ -36,7 +36,7 @@ export function useApproveRenovationPermit() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, file }: { id: string; file: File }) =>
+    mutationFn: ({ id, file }: { id: string; file?: File | null }) =>
       RenovationPermitService.approveRenovationPermit(id, file),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: renovationPermitQK.all });

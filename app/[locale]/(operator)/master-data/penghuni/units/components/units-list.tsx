@@ -12,13 +12,26 @@ import type { Unit } from "@/types/master-data";
 import { CSVTools } from "@/components/csv-import";
 import { UnitFormModal } from "./modals/unit-form-modal";
 import { useDataTableState } from "@/hooks/use-data-table-state";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { baseColumns } from "./columns";
+
+const RT_OPTIONS = [
+  { value: "all", label: "Semua RT" },
+  { value: "001", label: "RT 001" },
+  { value: "002", label: "RT 002" },
+  { value: "003", label: "RT 003" },
+  { value: "004", label: "RT 004" },
+  { value: "005", label: "RT 005" },
+];
 
 export function UnitsList() {
   const { search, setSearch, debouncedSearch, page, setPage, perPage } = useDataTableState();
 
+  const [rtFilter, setRtFilter] = useState<string>("all");
+
   const { data, error, isLoading, refetch } = useUnits({
     search: debouncedSearch,
+    rt: rtFilter === "all" ? undefined : rtFilter,
     page,
     per_page: perPage,
   });
@@ -70,6 +83,26 @@ export function UnitsList() {
         onPageChange={setPage}
         actions={
           <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
+            <div className="w-full sm:w-32">
+              <Select
+                value={rtFilter}
+                onValueChange={(val) => {
+                  setRtFilter(val);
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="w-full h-9 rounded-full border-zinc-300 text-xs font-semibold px-4 bg-white text-zinc-700">
+                  <SelectValue placeholder="Semua RT" />
+                </SelectTrigger>
+                <SelectContent>
+                  {RT_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <CSVTools
               resourceLabel="Unit"
               templatePath="/master/units/csv-template"

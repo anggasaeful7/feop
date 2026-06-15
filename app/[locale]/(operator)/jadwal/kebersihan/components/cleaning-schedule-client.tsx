@@ -4,11 +4,13 @@ import { useState, useMemo } from "react";
 import { Plus, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui";
-import { useCleaningSchedules } from "@/hooks/api/use-schedules";
+import { useCleaningSchedules, useDeleteCleaningSchedule } from "@/hooks/api/use-schedules";
 import type { CleaningSchedule } from "@/types/schedules";
 import { CleaningScheduleFormModal } from "./cleaning-schedule-modal";
+import { BaseScheduleDetailModal } from "../../components/base-schedule-detail-modal";
 import { CalendarView, type CalendarEvent } from "@/components/ui/calendar-view";
-import { categoryColorMap, getMonthDateRange } from "@/lib/utils";
+import { getMonthDateRange } from "@/lib/utils";
+import { useScheduleCalendarEvents } from "../../hooks/use-schedule-calendar";
 
 export function CleaningScheduleClient() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -23,21 +25,14 @@ export function CleaningScheduleClient() {
 
   const loading = isLoading || isFetching;
 
+  const [viewing, setViewing] = useState<CleaningSchedule | null>(null);
   const [editing, setEditing] = useState<CleaningSchedule | null>(null);
   const [creatingDate, setCreatingDate] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
 
-  const calendarEvents: CalendarEvent[] = useMemo(() => {
-    const items = data?.items || [];
-    return items.map((item) => ({
-      id: item.id,
-      date: item.scheduled_date,
-      title: item.worker_name ? `${item.activity} (${item.worker_name})` : item.activity,
-      time: item.scheduled_time ? item.scheduled_time.slice(0, 5) : "",
-      colorClass: categoryColorMap[item.category] || "bg-zinc-50 text-zinc-700 border-zinc-200 border",
-      raw: item,
-    }));
-  }, [data?.items]);
+  const deleteMut = useDeleteCleaningSchedule();
+
+  const calendarEvents = useScheduleCalendarEvents(data?.items || [], "cleaning");
 
   const handlePrevMonth = () => {
     setCurrentDate((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
@@ -53,7 +48,7 @@ export function CleaningScheduleClient() {
   };
 
   const handleEventClick = (event: CalendarEvent) => {
-    setEditing(event.raw as CleaningSchedule);
+    setViewing(event.raw as CleaningSchedule);
   };
 
   return (
@@ -123,6 +118,26 @@ export function CleaningScheduleClient() {
             setCreating(false);
             setCreatingDate(null);
           }}
+        />
+      )}
+
+      {viewing && (
+        <BaseScheduleDetailModal
+          title="Detail Jadwal Kebersihan"
+          scheduleId={viewing.id}
+          initialSchedule={viewing}
+          division="cleaning"
+          onClose={() => setViewing(null)}
+          onEdit={() => {
+            setEditing(viewing);
+            setViewing(null);
+          }}
+          onDelete={() => {
+             if (confirm("Yakin hapus jadwal ini?")) {
+               deleteMut.mutate(viewing.id, { onSuccess: () => setViewing(null) });
+             }
+          }}
+          isDeleting={deleteMut.isPending}
         />
       )}
 

@@ -73,6 +73,7 @@ export type ResidentBillByUnitQueryParams = {
   unit?: string;
   name?: string;
   is_late?: boolean | string;
+  rt?: string;
 };
 
 export type ResidentBillByUnitItem = {

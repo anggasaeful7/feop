@@ -20,7 +20,7 @@ export function ApproveModal({ permit, onClose, onBack }: ApproveModalProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file || fileError) return;
+    if (fileError) return;
 
     approve(
       { id: permit.id, file },
@@ -43,7 +43,7 @@ export function ApproveModal({ permit, onClose, onBack }: ApproveModalProps) {
           Anda akan menyetujui izin renovasi untuk <strong>{permit.resident_name}</strong> (Unit: {permit.unit_code}).
         </div>
 
-        <Field label="Surat Izin (PDF)" hint="Maksimal 5MB">
+        <Field label="Surat Izin (PDF)" hint="Maksimal 5MB (Opsional)">
           <input
             type="file"
             accept="application/pdf"
@@ -68,7 +68,6 @@ export function ApproveModal({ permit, onClose, onBack }: ApproveModalProps) {
               file:text-sm
               file:bg-brand file:text-zinc-100
               hover:file:bg-brand-100 mt-2"
-            required
           />
           {fileError && <p className="text-[0.8rem] font-medium text-destructive mt-1">{fileError}</p>}
         </Field>
@@ -77,8 +76,8 @@ export function ApproveModal({ permit, onClose, onBack }: ApproveModalProps) {
           <Button type="button" variant="ghost" onClick={onBack} disabled={isPending}>
             Batal
           </Button>
-          <Button type="submit" disabled={!file || !!fileError || isPending}>
-            {isPending ? <Loader2 size={16} className="animate-spin" /> : "Setujui & Upload"}
+          <Button type="submit" disabled={!!fileError || isPending}>
+            {isPending ? <Loader2 size={16} className="animate-spin" /> : file ? "Setujui & Upload" : "Setujui"}
           </Button>
         </div>
       </form>

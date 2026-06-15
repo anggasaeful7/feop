@@ -25,8 +25,11 @@ export const LetterRequestService = {
     return api<LetterRequest>(`/letter-requests/${id}`);
   },
 
-  approveLetterRequest: async (id: string, formData: FormData) => {
-    // FormData expects "result_file" as File
+  approveLetterRequest: async (id: string, file?: File | null) => {
+    const formData = new FormData();
+    if (file) {
+      formData.append("result_file", file);
+    }
     return api<LetterRequest>(`/letter-requests/${id}/approve`, {
       method: "PATCH",
       body: formData as unknown as BodyInit,

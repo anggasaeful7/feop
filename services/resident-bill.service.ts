@@ -77,6 +77,7 @@ export async function getResidentBillsByUnit(params?: ResidentBillByUnitQueryPar
   if (params?.unit_id) qs.set("unit_id", params.unit_id);
   if (params?.unit) qs.set("unit", params.unit);
   if (params?.name) qs.set("name", params.name);
+  if (params?.rt) qs.set("rt", params.rt);
   if (params?.is_late !== undefined) qs.set("is_late", params.is_late.toString());
 
   const query = qs.toString();

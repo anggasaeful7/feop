@@ -15,16 +15,14 @@ interface ApproveModalProps {
 
 export function ApproveModal({ request, onClose, onBack }: ApproveModalProps) {
   const [file, setFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState("");
   const { mutate, isPending } = useApproveLetterRequest(request.id);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file) return;
+    if (fileError) return;
 
-    const fd = new FormData();
-    fd.append("result_file", file);
-
-    mutate(fd, {
+    mutate(file, {
       onSuccess: () => {
         toast.success("Pengajuan surat berhasil disetujui");
         onClose();
@@ -42,27 +40,41 @@ export function ApproveModal({ request, onClose, onBack }: ApproveModalProps) {
           Anda akan menyetujui pengajuan surat <strong>{request.subject}</strong> dari <strong>{request.resident_name}</strong>.
         </div>
 
-        <Field label="Upload Surat Jadi (PDF)" hint="Maksimal 25MB">
+        <Field label="Upload Surat Jadi (PDF)" hint="Maksimal 5MB (Opsional)">
           <input
             type="file"
             accept="application/pdf"
-            onChange={(e) => setFile(e.target.files?.[0] || null)}
+            onChange={(e) => {
+              const selectedFile = e.target.files?.[0];
+              if (selectedFile) {
+                if (selectedFile.size > 5 * 1024 * 1024) {
+                  setFileError("Ukuran file maksimal 5MB");
+                  setFile(null);
+                } else {
+                  setFileError("");
+                  setFile(selectedFile);
+                }
+              } else {
+                setFile(null);
+                setFileError("");
+              }
+            }}
             className="block w-full text-sm text-zinc-500
               file:mr-4 file:py-2 file:px-4
               file:rounded-full file:border-0
               file:text-sm
               file:bg-brand file:text-zinc-100
               hover:file:bg-brand-100 mt-2"
-            required
           />
+          {fileError && <p className="text-[0.8rem] font-medium text-destructive mt-1">{fileError}</p>}
         </Field>
 
         <div className="mt-6 flex justify-end gap-2">
           <Button type="button" variant="ghost" onClick={onBack} disabled={isPending}>
             Batal
           </Button>
-          <Button type="submit" disabled={!file || isPending}>
-            {isPending ? <Loader2 size={16} className="animate-spin" /> : "Setujui & Upload"}
+          <Button type="submit" disabled={!!fileError || isPending}>
+            {isPending ? <Loader2 size={16} className="animate-spin" /> : file ? "Setujui & Upload" : "Setujui"}
           </Button>
         </div>
       </form>

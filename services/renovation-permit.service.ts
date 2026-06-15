@@ -24,13 +24,15 @@ export const RenovationPermitService = {
     return api<RenovationPermit>(`/renovation-permits/${id}`);
   },
 
-  approveRenovationPermit: async (id: string, file: File) => {
+  approveRenovationPermit: async (id: string, file?: File | null) => {
     const formData = new FormData();
-    formData.append("result_file", file);
+    if (file) {
+      formData.append("result_file", file);
+    }
 
     return api<void>(`/renovation-permits/${id}/approve`, {
       method: "PATCH",
-      body: formData,
+      body: formData as unknown as BodyInit,
     });
   },
 

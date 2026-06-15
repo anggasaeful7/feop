@@ -124,6 +124,10 @@ export type Unit = {
   owner_name?: string | null;
   resident_id?: string | null;
   resident_name?: string | null;
+  rt?: string | null;
+  rw?: string | null;
+  occupancy_month?: string | null;
+  occupancy_year?: string | null;
   notes?: string | null;
   active_components?: {
     id: string;
@@ -143,6 +147,10 @@ export type UnitPayload = {
   bill_payer: BillPayer | null;
   owner_id?: string | null;
   resident_id?: string | null;
+  rt?: string | null;
+  rw?: string | null;
+  occupancy_month?: string | null;
+  occupancy_year?: string | null;
   notes?: string | null;
 };
 
@@ -150,6 +158,8 @@ export type UnitQueryParams = {
   search?: string;
   unit_type_id?: string;
   status?: UnitStatus;
+  rt?: string;
+  rw?: string;
   page?: number;
   per_page?: number;
   exclude_vacant?: boolean;
@@ -158,6 +168,64 @@ export type UnitQueryParams = {
 export type PersonQueryParams = {
   search?: string;
   role?: string;
+  page?: number;
+  per_page?: number;
+};
+
+export type OfficerDivision = "cleaning" | "security";
+
+export type Officer = {
+  id: string;
+  workspace_id: string;
+  name: string;
+  division: OfficerDivision;
+  contact: string;
+  email: string;
+  is_active: boolean;
+  account_type?: string;
+  login_username?: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type OfficerPayload = {
+  name: string;
+  division: OfficerDivision;
+  contact: string;
+  email: string;
+  is_active: boolean;
+};
+
+export type OfficerQueryParams = {
+  search?: string;
+  division?: OfficerDivision;
+  page?: number;
+  per_page?: number;
+};
+
+export type Shift = {
+  id: string;
+  workspace_id: string;
+  name: string;
+  division: OfficerDivision;
+  time_start: string;
+  time_end: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ShiftPayload = {
+  name: string;
+  division: OfficerDivision;
+  time_start: string;
+  time_end: string;
+  is_active: boolean;
+};
+
+export type ShiftQueryParams = {
+  search?: string;
+  division?: OfficerDivision;
   page?: number;
   per_page?: number;
 };
