@@ -193,3 +193,29 @@ export type OfficerQueryParams = {
   per_page?: number;
 };
 
+export type Shift = {
+  id: string;
+  workspace_id: string;
+  name: string;
+  division: OfficerDivision;
+  time_start: string;
+  time_end: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ShiftPayload = {
+  name: string;
+  division: OfficerDivision;
+  time_start: string;
+  time_end: string;
+  is_active: boolean;
+};
+
+export type ShiftQueryParams = {
+  search?: string;
+  division?: OfficerDivision;
+  page?: number;
+  per_page?: number;
+};
