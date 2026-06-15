@@ -36,6 +36,7 @@ const NAV: NavItem[] = [
     Icon: Receipt,
     children: [
       { href: "/penghuni", label: "Billing Penghuni" },
+      { href: "/fasilitas-penghuni", label: "Fasilitas Penghuni" },
       { href: "/laporan", label: "Upload Laporan" },
     ],
   },
@@ -53,7 +54,7 @@ const NAV: NavItem[] = [
     label: "Fasilitas & Jadwal",
     Icon: Building2,
     children: [
-      { href: "/fasilitas", label: "Fasilitas" },
+      { href: "/fasilitas", label: "Fasilitas Umum" },
       { href: "/jadwal/keamanan", label: "Jadwal Keamanan" },
       { href: "/jadwal/kebersihan", label: "Jadwal Kebersihan" },
     ],

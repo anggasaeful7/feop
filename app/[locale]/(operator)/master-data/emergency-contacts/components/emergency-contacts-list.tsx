@@ -53,7 +53,7 @@ export function EmergencyContactsList() {
   return (
     <>
       <DataTable
-        title="Kontak Darurat"
+        title="Daftar Kontak Darurat"
         data={contacts}
         columns={columns}
         isLoading={isLoading}

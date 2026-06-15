@@ -63,6 +63,10 @@ export function DetailModal({
             <div className="font-medium">{report.duration_days} Hari</div>
           </div>
           <div>
+            <div className="text-xs text-zinc-500">Menginap</div>
+            <div className="font-medium">{report.is_menginap ? "Ya" : "Tidak"}</div>
+          </div>
+          <div>
             <div className="text-xs text-zinc-500">Unit</div>
             <div className="font-medium">{report.unit_code}</div>
           </div>

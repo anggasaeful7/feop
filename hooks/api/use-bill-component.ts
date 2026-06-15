@@ -3,6 +3,9 @@ import { BillComponentService } from "@/services/bill-component.service";
 import type { BillComponentPayload } from "@/types/master-data";
 import { toast } from "sonner";
 import { ApiError } from "@/lib/axios";
+import { unitQK } from "./use-unit";
+import { unitBillComponentsQK } from "./use-unit-bill-components";
+import { residentBillQK } from "./use-resident-bill";
 
 export const billComponentQK = {
   all: ["bill-components"] as const,
@@ -74,8 +77,9 @@ export function useAssignBillComponents() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: billComponentQK.all });
-      queryClient.invalidateQueries({ queryKey: ["units"] });
-      queryClient.invalidateQueries({ queryKey: ["resident-bills"] });
+      queryClient.invalidateQueries({ queryKey: unitQK.all });
+      queryClient.invalidateQueries({ queryKey: unitBillComponentsQK.all });
+      queryClient.invalidateQueries({ queryKey: residentBillQK.all });
       toast.success("Berhasil assign komponen ke unit");
     },
     onError: (error) => {

@@ -16,11 +16,13 @@ export function AssignComponentModal({ onClose }: { onClose: () => void }) {
   const [selectedUnits, setSelectedUnits] = useState<Set<string>>(new Set());
   const [searchUnit, setSearchUnit] = useState("");
   const debouncedSearchUnit = useDebounce(searchUnit, 500);
+  const [searchComponent, setSearchComponent] = useState("");
+  const debouncedSearchComponent = useDebounce(searchComponent, 500);
 
   const [componentsPage, setComponentsPage] = useState(1);
   const [unitsPage, setUnitsPage] = useState(1);
 
-  const { data: componentsData, isFetching: isFetchingComponents } = useBillComponents({ per_page: 10, page: componentsPage });
+  const { data: componentsData, isFetching: isFetchingComponents } = useBillComponents({ search: debouncedSearchComponent, per_page: 10, page: componentsPage });
   const { data: unitsData, isFetching: isFetchingUnits } = useUnits({ search: debouncedSearchUnit, per_page: 10, page: unitsPage, exclude_vacant: true });
   const assignMutation = useAssignBillComponents();
   const { confirm } = useConfirmStore();
@@ -103,6 +105,15 @@ export function AssignComponentModal({ onClose }: { onClose: () => void }) {
         accessorKey: "name",
         header: "Nama",
         cell: ({ row }) => <span className="font-bold">{row.original.name}</span>,
+      },
+      {
+        accessorKey: "amount",
+        header: "Harga",
+        cell: ({ row }) => {
+          const amount = row.original.amount;
+          if (amount === undefined || amount === null) return <span className="text-zinc-500">-</span>;
+          return <span className="text-zinc-500">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount)}</span>;
+        },
       },
       {
         accessorKey: "description",
@@ -197,8 +208,8 @@ export function AssignComponentModal({ onClose }: { onClose: () => void }) {
       footer={
         <div className="w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="text-xs text-zinc-500 flex flex-col gap-1 font-bold">
-            <div>{selectedComponents.size} dari {componentsData?.total || 0} Komponen dipilih</div>
             <div>{selectedUnits.size} dari {unitsData?.total || 0} Unit dipilih</div>
+            <div>{selectedComponents.size} dari {componentsData?.total || 0} Komponen dipilih</div>
           </div>
           <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
             <Button variant="danger" onClick={onClose} className="w-full sm:w-auto rounded-full px-6" disabled={assignMutation.isPending}>
@@ -224,7 +235,6 @@ export function AssignComponentModal({ onClose }: { onClose: () => void }) {
               setSearchUnit(val);
               setUnitsPage(1);
             }}
-            searchPlaceholder="Search"
             onRowClick={(row) => toggleUnit(row.id)}
             size="sm"
             page={unitsPage}
@@ -241,6 +251,11 @@ export function AssignComponentModal({ onClose }: { onClose: () => void }) {
             data={components}
             columns={componentsColumns}
             total={componentsData?.total || 0}
+            search={searchComponent}
+            onSearchChange={(val) => {
+              setSearchComponent(val);
+              setComponentsPage(1);
+            }}
             onRowClick={(row) => toggleComponent(row.id)}
             size="sm"
             page={componentsPage}

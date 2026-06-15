@@ -5,6 +5,7 @@ export interface GuestReport {
   has_ktp: boolean;
   id: string;
   ktp_file_name: string | null;
+  is_menginap: boolean;
   notes: string | null;
   operator_note: string | null;
   resident_name: string;

@@ -51,7 +51,7 @@ export function UnitTypesList() {
   return (
     <>
       <DataTable
-        title="Tipe Unit"
+        title="Daftar Tipe Unit"
         data={items}
         columns={columns}
         isLoading={isLoading}

@@ -49,7 +49,7 @@ export function BillComponentsList() {
   return (
     <>
       <DataTable
-        title="Komponen Tagihan"
+        title="Daftar Komponen Tagihan"
         data={items}
         columns={columns}
         isLoading={isLoading}

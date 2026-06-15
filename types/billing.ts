@@ -69,6 +69,10 @@ export type ResidentBillByUnitQueryParams = {
   search?: string;
   page?: number;
   per_page?: number;
+  unit_id?: string;
+  unit?: string;
+  name?: string;
+  is_late?: boolean | string;
 };
 
 export type ResidentBillByUnitItem = {

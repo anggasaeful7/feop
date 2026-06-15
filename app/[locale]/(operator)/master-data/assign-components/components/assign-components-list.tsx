@@ -58,7 +58,7 @@ export function AssignComponentsList() {
       )}
 
       <DataTable
-        title="Assign Komponen Tagihan"
+        title="Daftar Assign Komponen"
         data={items}
         columns={columns}
         isLoading={isLoading}
