@@ -4,11 +4,13 @@ import { useState, useMemo } from "react";
 import { Plus, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui";
-import { useSecuritySchedules } from "@/hooks/api/use-schedules";
+import { useSecuritySchedules, useDeleteSecuritySchedule } from "@/hooks/api/use-schedules";
 import type { SecuritySchedule } from "@/types/schedules";
 import { SecurityScheduleFormModal } from "./security-schedule-modal";
+import { BaseScheduleDetailModal } from "../../components/base-schedule-detail-modal";
 import { CalendarView, type CalendarEvent } from "@/components/ui/calendar-view";
-import { categoryColorMap, getMonthDateRange } from "@/lib/utils";
+import { getMonthDateRange } from "@/lib/utils";
+import { useScheduleCalendarEvents } from "../../hooks/use-schedule-calendar";
 
 export function SecurityScheduleClient() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -23,21 +25,14 @@ export function SecurityScheduleClient() {
 
   const loading = isLoading || isFetching;
 
+  const [viewing, setViewing] = useState<SecuritySchedule | null>(null);
   const [editing, setEditing] = useState<SecuritySchedule | null>(null);
   const [creatingDate, setCreatingDate] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
 
-  const calendarEvents: CalendarEvent[] = useMemo(() => {
-    const items = data?.items || [];
-    return items.map((item) => ({
-      id: item.id,
-      date: item.scheduled_date,
-      title: `${item.officer_name} (${item.shift_name})`,
-      time: `${item.start_time ? item.start_time.slice(0, 5) : ""}-${item.end_time ? item.end_time.slice(0, 5) : ""}`,
-      colorClass: categoryColorMap[item.category] || "bg-zinc-50 text-zinc-700 border-zinc-200 border",
-      raw: item,
-    }));
-  }, [data?.items]);
+  const deleteMut = useDeleteSecuritySchedule();
+
+  const calendarEvents = useScheduleCalendarEvents(data?.items || [], "security");
 
   const handlePrevMonth = () => {
     setCurrentDate((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
@@ -53,7 +48,7 @@ export function SecurityScheduleClient() {
   };
 
   const handleEventClick = (event: CalendarEvent) => {
-    setEditing(event.raw as SecuritySchedule);
+    setViewing(event.raw as SecuritySchedule);
   };
 
   return (
@@ -123,6 +118,26 @@ export function SecurityScheduleClient() {
             setCreating(false);
             setCreatingDate(null);
           }}
+        />
+      )}
+
+      {viewing && (
+        <BaseScheduleDetailModal
+          title="Detail Jadwal Keamanan"
+          scheduleId={viewing.id}
+          initialSchedule={viewing}
+          division="security"
+          onClose={() => setViewing(null)}
+          onEdit={() => {
+            setEditing(viewing);
+            setViewing(null);
+          }}
+          onDelete={() => {
+             if (confirm("Yakin hapus jadwal ini?")) {
+               deleteMut.mutate(viewing.id, { onSuccess: () => setViewing(null) });
+             }
+          }}
+          isDeleting={deleteMut.isPending}
         />
       )}
 
