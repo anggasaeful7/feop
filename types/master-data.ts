@@ -161,3 +161,35 @@ export type PersonQueryParams = {
   page?: number;
   per_page?: number;
 };
+
+export type OfficerDivision = "cleaning" | "security";
+
+export type Officer = {
+  id: string;
+  workspace_id: string;
+  name: string;
+  division: OfficerDivision;
+  contact: string;
+  email: string;
+  is_active: boolean;
+  account_type?: string;
+  login_username?: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type OfficerPayload = {
+  name: string;
+  division: OfficerDivision;
+  contact: string;
+  email: string;
+  is_active: boolean;
+};
+
+export type OfficerQueryParams = {
+  search?: string;
+  division?: OfficerDivision;
+  page?: number;
+  per_page?: number;
+};
+

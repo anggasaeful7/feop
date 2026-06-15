@@ -21,6 +21,8 @@ export function MasterDataTabs() {
 
   const basePath = `/${locale}/master-data`;
 
+  if (pathname.includes("/petugas")) return null;
+
   return (
     <div className="mb-4 flex items-center gap-2 overflow-x-auto pb-2">
       {TABS.map((t) => {

@@ -60,10 +60,12 @@ const NAV: NavItem[] = [
     ],
   },
   {
-    href: "/master-data/units",
-    activePath: "/master-data",
     label: "Master Data",
     Icon: Database,
+    children: [
+      { href: "/master-data/units", label: "Data Penghuni" },
+      { href: "/master-data/petugas", label: "Data Petugas" },
+    ],
   },
   {
     label: "Pengaturan & Lainnya",
