@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -25,7 +25,8 @@ import { useUnitTypes } from "@/hooks/api/use-unit-type";
 import { usePersons } from "@/hooks/api/use-person";
 import { useAuthUser } from "@/hooks/use-auth";
 import { UNIT_STATUS_LABEL, BILL_PAYER_LABEL } from "@/lib/constants";
-import { useMyRts } from "@/hooks/api/use-rts";
+import { useMyRts } from "@/hooks/api/use-rt";
+import { useRws } from "@/hooks/api/use-rw";
 
 export function UnitFormModal({
   title,
@@ -38,14 +39,16 @@ export function UnitFormModal({
 }) {
   const isEditing = !!initial;
   const authUser = useAuthUser();
+  const isAdminWorkspace = authUser?.role === "admin_workspace";
 
   const { data: unitTypesData } = useUnitTypes({ per_page: 200 });
   const { data: personsData } = usePersons();
   const { data: rtsData } = useMyRts();
+  const { data: rwsData } = useRws({ per_page: 500 });
 
   const unitTypes = unitTypesData?.items || [];
   const persons = personsData?.items || [];
-  const rts = rtsData || [];
+  const rws = useMemo(() => rwsData?.items || [], [rwsData?.items]);
 
   const personOptions = [
     { value: "", label: "— pilih —" },
@@ -70,6 +73,28 @@ export function UnitFormModal({
       notes: initial?.notes || "",
     },
   });
+
+  const selectedRwCode = useWatch({ control: form.control, name: "rw" });
+
+  const rts = useMemo(() => {
+    const data = rtsData || [];
+    const selectedRwObj = rws.find((r) => r.code === selectedRwCode);
+    const targetRwId = selectedRwObj?.id;
+
+    const seen = new Set<string>();
+    const res: typeof data = [];
+    data.forEach((r) => {
+      const val = typeof r === "string" ? r : r.code;
+      if (selectedRwCode && typeof r !== "string" && r.rw_id !== targetRwId) {
+        return;
+      }
+      if (val && !seen.has(val)) {
+        seen.add(val);
+        res.push(r);
+      }
+    });
+    return res;
+  }, [rtsData, selectedRwCode, rws]);
 
   const createMut = useCreateUnit();
   const updateMut = useUpdateUnit(initial?.id || "");
@@ -108,6 +133,21 @@ export function UnitFormModal({
   const status = useWatch({ control: form.control, name: "status" });
   const ownerId = useWatch({ control: form.control, name: "owner_id" });
   const residentId = useWatch({ control: form.control, name: "resident_id" });
+
+  useEffect(() => {
+    if (selectedRwCode) {
+      const currentRt = form.getValues("rt");
+      if (currentRt) {
+        const isValid = rts.some((r) => {
+          const val = typeof r === "string" ? r : r.code;
+          return val === currentRt;
+        });
+        if (!isValid) {
+          form.setValue("rt", "");
+        }
+      }
+    }
+  }, [selectedRwCode, rts, form]);
   const ownerIsResident = !!ownerId && ownerId === residentId;
 
   useEffect(() => {
@@ -195,19 +235,49 @@ export function UnitFormModal({
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="rw"
-            render={({ field }) => (
-              <FormItem className="col-span-2 sm:col-span-1">
-                <FormLabel>RW</FormLabel>
-                <FormControl>
-                  <Input readOnly placeholder="002" {...field} value={field.value || ""} className="rounded-xl italic bg-zinc-100/50 text-zinc-500 cursor-not-allowed border-[#E4DDCB]" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {isAdminWorkspace ? (
+            <FormField
+              control={form.control}
+              name="rw"
+              render={({ field }) => (
+                <FormItem className="col-span-2 sm:col-span-1">
+                  <FormLabel>RW</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value || undefined}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="rounded-xl italic bg-transparent border-[#E4DDCB]">
+                        <SelectValue placeholder="— pilih RW —" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {rws.map((r) => (
+                        <SelectItem key={r.id} value={r.code}>
+                          {r.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ) : (
+            <FormField
+              control={form.control}
+              name="rw"
+              render={({ field }) => (
+                <FormItem className="col-span-2 sm:col-span-1">
+                  <FormLabel>RW</FormLabel>
+                  <FormControl>
+                    <Input readOnly placeholder="002" {...field} value={field.value || ""} className="rounded-xl italic bg-zinc-100/50 text-zinc-500 cursor-not-allowed border-[#E4DDCB]" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
 
           <FormField
             control={form.control}

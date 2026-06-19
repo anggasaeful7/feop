@@ -24,7 +24,7 @@ const STATUS_TABS = [
   { key: "unpaid", label: "Belum Bayar" },
 ] as const;
 
-import { useMyRts } from "@/hooks/api/use-rts";
+import { useMyRts } from "@/hooks/api/use-rt";
 
 
 type StatusTab = (typeof STATUS_TABS)[number]["key"];
@@ -54,12 +54,17 @@ export function ResidentBillList() {
   const rtOptions = useMemo(() => {
     const base = [{ value: "all", label: "Semua RT" }];
     if (!rtsData) return base;
-    const loaded = rtsData.map((item) => {
-      if (typeof item === "string") {
-        return { value: item, label: `RT ${item}` };
+    const seen = new Set<string>();
+    const loaded: { value: string; label: string }[] = [];
+    rtsData.forEach((item) => {
+      const val = typeof item === "string" ? item : (item?.code || item?.name || item?.id || "");
+      if (val && !seen.has(val)) {
+        seen.add(val);
+        loaded.push({
+          value: val,
+          label: val.startsWith("RT") ? val : `RT ${val}`,
+        });
       }
-      const val = item?.name || item?.code || item?.id || "";
-      return { value: val, label: `RT ${val}` };
     });
     return [...base, ...loaded];
   }, [rtsData]);
@@ -249,7 +254,7 @@ export function ResidentBillList() {
                     setPage(1);
                   }}
                 >
-                  <SelectTrigger className="w-full h-9 rounded-full border-zinc-300 text-xs font-semibold px-4 bg-white text-zinc-700">
+                  <SelectTrigger className="w-full h-8 rounded-full border-zinc-300 text-xs font-semibold px-4 py-1 bg-white text-zinc-700">
                     <SelectValue placeholder="Semua RT" />
                   </SelectTrigger>
                   <SelectContent>
@@ -269,7 +274,7 @@ export function ResidentBillList() {
                     setPage(1);
                   }}
                 >
-                  <SelectTrigger className="w-full h-9 rounded-full border-zinc-300 text-xs font-semibold px-4 bg-white text-zinc-700">
+                  <SelectTrigger className="w-full h-8 rounded-full border-zinc-300 text-xs font-semibold px-4 py-1 bg-white text-zinc-700">
                     <SelectValue placeholder="Semua Jenis" />
                   </SelectTrigger>
                   <SelectContent>
