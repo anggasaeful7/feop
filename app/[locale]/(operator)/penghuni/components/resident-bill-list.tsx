@@ -24,14 +24,8 @@ const STATUS_TABS = [
   { key: "unpaid", label: "Belum Bayar" },
 ] as const;
 
-const RT_OPTIONS = [
-  { value: "all", label: "Semua RT" },
-  { value: "001", label: "RT 001" },
-  { value: "002", label: "RT 002" },
-  { value: "003", label: "RT 003" },
-  { value: "004", label: "RT 004" },
-  { value: "005", label: "RT 005" },
-];
+import { useMyRts } from "@/hooks/api/use-rts";
+
 
 type StatusTab = (typeof STATUS_TABS)[number]["key"];
 
@@ -53,8 +47,22 @@ export function ResidentBillList() {
   const [expandedUnits, setExpandedUnits] = useState<Set<string>>(new Set());
 
   const { data: permissions } = usePermissions();
+  const { data: rtsData } = useMyRts();
   const canExport = hasPermission(permissions, "resident_bills", "export");
   const canDelete = hasPermission(permissions, "resident_bills", "delete");
+
+  const rtOptions = useMemo(() => {
+    const base = [{ value: "all", label: "Semua RT" }];
+    if (!rtsData) return base;
+    const loaded = rtsData.map((item) => {
+      if (typeof item === "string") {
+        return { value: item, label: `RT ${item}` };
+      }
+      const val = item?.name || item?.code || item?.id || "";
+      return { value: val, label: `RT ${val}` };
+    });
+    return [...base, ...loaded];
+  }, [rtsData]);
 
   // Sync year state when urlYear parameter changes
   if (urlYear !== prevUrlYear) {
@@ -245,7 +253,7 @@ export function ResidentBillList() {
                     <SelectValue placeholder="Semua RT" />
                   </SelectTrigger>
                   <SelectContent>
-                    {RT_OPTIONS.map((opt) => (
+                    {rtOptions.map((opt) => (
                       <SelectItem key={opt.value} value={opt.value}>
                         {opt.label}
                       </SelectItem>

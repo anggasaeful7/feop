@@ -14,14 +14,8 @@ import { UnitWithGeneralFacilities } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-const RT_OPTIONS = [
-  { value: "all", label: "Semua RT" },
-  { value: "001", label: "RT 001" },
-  { value: "002", label: "RT 002" },
-  { value: "003", label: "RT 003" },
-  { value: "004", label: "RT 004" },
-  { value: "005", label: "RT 005" },
-];
+import { useMyRts } from "@/hooks/api/use-rts";
+
 
 const LATE_TABS = [
   { key: "all", label: "Semua" },
@@ -46,7 +40,21 @@ export function FasilitasPenghuniList() {
   const [prevUrlIsLate, setPrevUrlIsLate] = useState(urlIsLate);
 
   const { data: permissions } = usePermissions();
+  const { data: rtsData } = useMyRts();
   const canExport = hasPermission(permissions, "resident_bills", "export");
+
+  const rtOptions = useMemo(() => {
+    const base = [{ value: "all", label: "Semua RT" }];
+    if (!rtsData) return base;
+    const loaded = rtsData.map((item) => {
+      if (typeof item === "string") {
+        return { value: item, label: `RT ${item}` };
+      }
+      const val = item?.name || item?.code || item?.id || "";
+      return { value: val, label: `RT ${val}` };
+    });
+    return [...base, ...loaded];
+  }, [rtsData]);
 
   // Sync state during render
   if (urlIsLate !== prevUrlIsLate) {
@@ -257,7 +265,7 @@ export function FasilitasPenghuniList() {
                   <SelectValue placeholder="Semua RT" />
                 </SelectTrigger>
                 <SelectContent>
-                  {RT_OPTIONS.map((opt) => (
+                  {rtOptions.map((opt) => (
                     <SelectItem key={opt.value} value={opt.value}>
                       {opt.label}
                     </SelectItem>

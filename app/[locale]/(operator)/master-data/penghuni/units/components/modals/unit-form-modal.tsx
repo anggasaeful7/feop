@@ -25,6 +25,7 @@ import { useUnitTypes } from "@/hooks/api/use-unit-type";
 import { usePersons } from "@/hooks/api/use-person";
 import { useAuthUser } from "@/hooks/use-auth";
 import { UNIT_STATUS_LABEL, BILL_PAYER_LABEL } from "@/lib/constants";
+import { useMyRts } from "@/hooks/api/use-rts";
 
 export function UnitFormModal({
   title,
@@ -40,9 +41,11 @@ export function UnitFormModal({
 
   const { data: unitTypesData } = useUnitTypes({ per_page: 200 });
   const { data: personsData } = usePersons();
+  const { data: rtsData } = useMyRts();
 
   const unitTypes = unitTypesData?.items || [];
   const persons = personsData?.items || [];
+  const rts = rtsData || [];
 
   const personOptions = [
     { value: "", label: "— pilih —" },
@@ -212,9 +215,26 @@ export function UnitFormModal({
             render={({ field }) => (
               <FormItem className="col-span-2 sm:col-span-1">
                 <FormLabel>RT</FormLabel>
-                <FormControl>
-                  <Input placeholder="001" {...field} value={field.value || ""} className="rounded-xl italic bg-transparent" />
-                </FormControl>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value || undefined}
+                >
+                  <FormControl>
+                    <SelectTrigger className="rounded-xl italic bg-transparent border-[#E4DDCB]">
+                      <SelectValue placeholder="— pilih RT —" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {rts.map((r) => {
+                      const val = typeof r === "string" ? r : r.name || r.code || r.id || "";
+                      return (
+                        <SelectItem key={val} value={val}>
+                          RT {val}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}

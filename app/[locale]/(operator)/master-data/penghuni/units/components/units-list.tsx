@@ -16,20 +16,28 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { baseColumns } from "./columns";
 import { usePermissions, hasPermission } from "@/hooks/api/use-permissions";
 
-const RT_OPTIONS = [
-  { value: "all", label: "Semua RT" },
-  { value: "001", label: "RT 001" },
-  { value: "002", label: "RT 002" },
-  { value: "003", label: "RT 003" },
-  { value: "004", label: "RT 004" },
-  { value: "005", label: "RT 005" },
-];
+import { useMyRts } from "@/hooks/api/use-rts";
+
 
 export function UnitsList() {
   const { data: permissions } = usePermissions();
+  const { data: rtsData } = useMyRts();
   const canCreate = hasPermission(permissions, "units", "create");
   const canUpdate = hasPermission(permissions, "units", "update");
   const canDelete = hasPermission(permissions, "units", "delete");
+
+  const rtOptions = useMemo(() => {
+    const base = [{ value: "all", label: "Semua RT" }];
+    if (!rtsData) return base;
+    const loaded = rtsData.map((item) => {
+      if (typeof item === "string") {
+        return { value: item, label: `RT ${item}` };
+      }
+      const val = item?.name || item?.code || item?.id || "";
+      return { value: val, label: `RT ${val}` };
+    });
+    return [...base, ...loaded];
+  }, [rtsData]);
 
   const { search, setSearch, debouncedSearch, page, setPage, perPage } = useDataTableState();
 
@@ -104,7 +112,7 @@ export function UnitsList() {
                   <SelectValue placeholder="Semua RT" />
                 </SelectTrigger>
                 <SelectContent>
-                  {RT_OPTIONS.map((opt) => (
+                  {rtOptions.map((opt) => (
                     <SelectItem key={opt.value} value={opt.value}>
                       {opt.label}
                     </SelectItem>
