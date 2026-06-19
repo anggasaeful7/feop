@@ -46,13 +46,10 @@ export function FasilitasPenghuniList() {
   const rtOptions = useMemo(() => {
     const base = [{ value: "all", label: "Semua RT" }];
     if (!rtsData) return base;
-    const loaded = rtsData.map((item) => {
-      if (typeof item === "string") {
-        return { value: item, label: `RT ${item}` };
-      }
-      const val = item?.name || item?.code || item?.id || "";
-      return { value: val, label: `RT ${val}` };
-    });
+    const loaded = rtsData.map((item) => ({
+      value: item.code,
+      label: item.name,
+    }));
     return [...base, ...loaded];
   }, [rtsData]);
 

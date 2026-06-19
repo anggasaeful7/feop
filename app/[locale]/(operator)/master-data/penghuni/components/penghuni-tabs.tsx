@@ -1,8 +1,11 @@
 "use client";
 
 import { Link, usePathname } from "@/i18n/routing";
+import { usePermissions } from "@/hooks/api/use-permissions";
 
 const TABS = [
+  { label: "Data RW", href: "rws", requiredRole: "admin_workspace" },
+  { label: "Data RT", href: "rts", requiredRole: "admin_workspace" },
   { label: "Unit", href: "units" },
   { label: "Warga", href: "residents" },
   { label: "Tipe Unit", href: "unit-types" },
@@ -15,12 +18,20 @@ const TABS = [
 
 export function PenghuniTabs() {
   const pathname = usePathname();
+  const { data: permissions } = usePermissions();
 
   const basePath = `/master-data/penghuni`;
 
+  const filteredTabs = TABS.filter((t) => {
+    if (t.requiredRole && permissions?.role !== t.requiredRole) {
+      return false;
+    }
+    return true;
+  });
+
   return (
     <div className="mb-4 flex items-center gap-2 overflow-x-auto pb-2">
-      {TABS.map((t) => {
+      {filteredTabs.map((t) => {
         const fullPath = `${basePath}/${t.href}`;
         const isActive = pathname === fullPath || pathname.startsWith(fullPath + "/");
 

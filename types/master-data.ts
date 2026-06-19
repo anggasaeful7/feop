@@ -229,3 +229,50 @@ export type ShiftQueryParams = {
   page?: number;
   per_page?: number;
 };
+
+export type RW = {
+  id: string;
+  workspace_id: string;
+  code: string;
+  name: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type RWPayload = {
+  code: string;
+  name: string;
+  is_active: boolean;
+};
+
+export type RWQueryParams = {
+  search?: string;
+  page?: number;
+  per_page?: number;
+};
+
+export type RT = {
+  id: string;
+  workspace_id: string;
+  rw_id: string;
+  code: string;
+  name: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type RTPayload = {
+  rw_id: string;
+  code: string;
+  name: string;
+  is_active: boolean;
+};
+
+export type RTQueryParams = {
+  search?: string;
+  rw_id?: string;
+  page?: number;
+  per_page?: number;
+};

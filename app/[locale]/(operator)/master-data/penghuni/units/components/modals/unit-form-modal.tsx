@@ -226,10 +226,12 @@ export function UnitFormModal({
                   </FormControl>
                   <SelectContent>
                     {rts.map((r) => {
-                      const val = typeof r === "string" ? r : r.name || r.code || r.id || "";
+                      const id = typeof r === "string" ? r : r.id;
+                      const val = typeof r === "string" ? r : r.code;
+                      const label = typeof r === "string" ? `RT ${r}` : r.name;
                       return (
-                        <SelectItem key={val} value={val}>
-                          RT {val}
+                        <SelectItem key={id} value={val}>
+                          {label}
                         </SelectItem>
                       );
                     })}

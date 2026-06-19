@@ -20,6 +20,8 @@ export const ROUTE_PERMISSIONS: RoutePermission[] = [
   { path: "/jadwal/keamanan", requiredResource: "schedules" },
   { path: "/jadwal/kebersihan", requiredResource: "schedules" },
   { path: "/master-data/penghuni/emergency-contacts", requiredResource: "workspace_contacts" },
+  { path: "/master-data/penghuni/rws", requiredRole: "admin_workspace" },
+  { path: "/master-data/penghuni/rts", requiredRole: "admin_workspace" },
   { path: "/master-data/penghuni", requiredResource: "units" }, // Catch-all for other penghuni sub-pages like units
   { path: "/master-data/petugas", requiredRole: "admin_workspace" },
   { path: "/platform-billing", requiredResource: "platform_billing" },
