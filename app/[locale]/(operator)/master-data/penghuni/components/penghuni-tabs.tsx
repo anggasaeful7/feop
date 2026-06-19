@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname, useParams } from "next/navigation";
+import { Link, usePathname } from "@/i18n/routing";
 
 const TABS = [
   { label: "Unit", href: "units" },
@@ -16,16 +15,14 @@ const TABS = [
 
 export function PenghuniTabs() {
   const pathname = usePathname();
-  const params = useParams();
-  const locale = params.locale || "id"; // fallback to id if not found
 
-  const basePath = `/${locale}/master-data/penghuni`;
+  const basePath = `/master-data/penghuni`;
 
   return (
     <div className="mb-4 flex items-center gap-2 overflow-x-auto pb-2">
       {TABS.map((t) => {
         const fullPath = `${basePath}/${t.href}`;
-        const isActive = pathname.includes(`/master-data/penghuni/${t.href}`);
+        const isActive = pathname === fullPath || pathname.startsWith(fullPath + "/");
 
         return (
           <Link

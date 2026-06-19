@@ -2,6 +2,7 @@
 
 import { Sidebar } from "@/components/layout/sidebar";
 import { MobileHeader } from "@/components/layout/mobile-header";
+import { RouteGuard } from "@/components/layout/route-guard";
 
 export default function OperatorLayout({
   children,
@@ -13,7 +14,9 @@ export default function OperatorLayout({
       <Sidebar className="hidden md:flex" />
       <div className="flex-1 flex flex-col min-w-0">
         <MobileHeader />
-        <main className="flex-1 bg-cream-100 p-4 md:p-8">{children}</main>
+        <main className="flex-1 bg-cream-100 p-4 md:p-8">
+          <RouteGuard>{children}</RouteGuard>
+        </main>
       </div>
     </div>
   );

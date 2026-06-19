@@ -18,6 +18,7 @@ import type { Paged } from "@/types";
 import type { Booking, BookingPayload, BookingStatus, Facility, FacilityPayload } from "@/types/facility";
 import { FacilityFormModal } from "./components/facility-modal";
 import { BookingFormModal } from "./components/booking-modal";
+import { usePermissions, hasPermission } from "@/hooks/api/use-permissions";
 
 const STATUS_FILTERS: { key: BookingStatus | "all"; label: string }[] = [
   { key: "pending", label: "Pending" },
@@ -55,6 +56,16 @@ export default function FasilitasPage() {
   const [editingFacility, setEditingFacility] = useState<Facility | null>(null);
   const [creatingBooking, setCreatingBooking] = useState(false);
   const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
+
+  const { data: permissions } = usePermissions();
+
+  const canCreateFacility = hasPermission(permissions, "facilities", "create");
+  const canUpdateFacility = hasPermission(permissions, "facilities", "update");
+
+  const canCreateBooking = hasPermission(permissions, "facility_bookings", "create");
+  const canUpdateBooking = hasPermission(permissions, "facility_bookings", "update");
+  const canApproveBooking = hasPermission(permissions, "facility_bookings", "approve") || canUpdateBooking;
+  const canRejectBooking = hasPermission(permissions, "facility_bookings", "reject") || canUpdateBooking;
 
   const loadFacilities = useCallback(async () => {
     try {
@@ -151,12 +162,16 @@ export default function FasilitasPage() {
         subtitle="Review request booking dari penghuni & atur jadwal"
         actions={
           <div className="flex w-full flex-col sm:flex-row gap-2">
-            <Button variant="secondary" onClick={() => setCreatingBooking(true)} className="w-full sm:w-auto">
-              <CalendarPlus size={16} /> Tambah Booking
-            </Button>
-            <Button onClick={() => setCreatingFacility(true)} className="w-full sm:w-auto">
-              <Plus size={16} /> Tambah Fasilitas
-            </Button>
+            {canCreateBooking && (
+              <Button variant="secondary" onClick={() => setCreatingBooking(true)} className="w-full sm:w-auto">
+                <CalendarPlus size={16} /> Tambah Booking
+              </Button>
+            )}
+            {canCreateFacility && (
+              <Button onClick={() => setCreatingFacility(true)} className="w-full sm:w-auto">
+                <Plus size={16} /> Tambah Fasilitas
+              </Button>
+            )}
           </div>
         }
       />
@@ -181,8 +196,10 @@ export default function FasilitasPage() {
         {facilities?.map((f) => (
           <button
             key={f.id}
-            onClick={() => setEditingFacility(f)}
-            className="rounded-2xl border border-zinc-200/70 bg-white p-4 text-left transition hover:border-zinc-300 hover:shadow-sm"
+            onClick={canUpdateFacility ? () => setEditingFacility(f) : undefined}
+            className={`rounded-2xl border border-zinc-200/70 bg-white p-4 text-left transition ${
+              canUpdateFacility ? "hover:border-zinc-300 hover:shadow-sm" : "cursor-default"
+            }`}
           >
             <div className="flex items-start gap-3">
               <div className="grid h-10 w-10 place-items-center rounded-lg bg-cream-100 text-zinc-700">
@@ -294,9 +311,10 @@ export default function FasilitasPage() {
                 </td>
                 <td className="px-4 py-4">
                   <button
-                    onClick={() => setProof(r)}
+                    onClick={canUpdateBooking ? () => setProof(r) : undefined}
                     className="inline-flex items-center gap-1"
-                    title="Klik untuk ubah URL bukti"
+                    title={canUpdateBooking ? "Klik untuk ubah URL bukti" : undefined}
+                    disabled={!canUpdateBooking}
                   >
                     {r.proof_url ? (
                       <Badge tone="success">
@@ -314,23 +332,29 @@ export default function FasilitasPage() {
                   <div className="flex justify-end gap-2">
                     {r.status === "pending" && (
                       <>
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => rejectBooking(r.id)}
-                        >
-                          <X size={12} /> Tolak
-                        </Button>
-                        <Button size="sm" onClick={() => approveBooking(r.id)}>
-                          <Check size={12} /> Approve
-                        </Button>
-                        <button
-                          onClick={() => setEditingBooking(r)}
-                          className="text-zinc-400 hover:text-zinc-700"
-                          aria-label="Edit"
-                        >
-                          <Pencil size={14} />
-                        </button>
+                        {canRejectBooking && (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => rejectBooking(r.id)}
+                          >
+                            <X size={12} /> Tolak
+                          </Button>
+                        )}
+                        {canApproveBooking && (
+                          <Button size="sm" onClick={() => approveBooking(r.id)}>
+                            <Check size={12} /> Approve
+                          </Button>
+                        )}
+                        {canUpdateBooking && (
+                          <button
+                            onClick={() => setEditingBooking(r)}
+                            className="text-zinc-400 hover:text-zinc-700"
+                            aria-label="Edit"
+                          >
+                            <Pencil size={14} />
+                          </button>
+                        )}
                       </>
                     )}
                   </div>

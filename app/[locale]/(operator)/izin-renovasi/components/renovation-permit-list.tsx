@@ -12,10 +12,15 @@ import { useDataTableState } from "@/hooks/use-data-table-state";
 import { Pencil } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { usePermissions, hasPermission } from "@/hooks/api/use-permissions";
 
 export function RenovationPermitList() {
   const { search, setSearch, debouncedSearch, page, setPage, perPage } = useDataTableState();
   const [status, setStatus] = useState<string>("all");
+
+  const { data: permissions } = usePermissions();
+  const canApprove = hasPermission(permissions, "renovation_permits", "approve") || hasPermission(permissions, "renovation_permits", "update");
+  const canReject = hasPermission(permissions, "renovation_permits", "reject") || hasPermission(permissions, "renovation_permits", "update");
 
   const { data, isLoading } = useRenovationPermits({
     page,
@@ -92,8 +97,8 @@ export function RenovationPermitList() {
         <DetailModal
           permit={selectedPermit}
           onClose={closeAll}
-          onApprove={openApproveFromDetail}
-          onReject={openRejectFromDetail}
+          onApprove={canApprove ? openApproveFromDetail : undefined}
+          onReject={canReject ? openRejectFromDetail : undefined}
         />
       )}
       {modalAction === "approve" && selectedPermit && (

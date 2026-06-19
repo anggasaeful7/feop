@@ -9,8 +9,12 @@ import { useUnits } from "@/hooks/api/use-unit";
 import type { Unit } from "@/types/master-data";
 import { baseColumns } from "../../units/components/columns";
 import { AssignComponentsModal } from "./modals/assign-components-modal";
+import { usePermissions, hasPermission } from "@/hooks/api/use-permissions";
 
 export function AssignComponentsList() {
+  const { data: permissions } = usePermissions();
+  const canUpdate = hasPermission(permissions, "units", "update");
+
   const { search, setSearch, debouncedSearch, page, setPage, perPage } = useDataTableState();
 
   const { data, error, isLoading } = useUnits({
@@ -35,19 +39,21 @@ export function AssignComponentsList() {
         return (
           <div className="flex items-center justify-end gap-2">
             <span className="text-xs text-zinc-500 mr-2">{count} Komponen</span>
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-8 rounded-full px-3 text-xs"
-              onClick={() => setAssigningTo(u)}
-            >
-              <Settings2 size={14} />
-            </Button>
+            {canUpdate && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-8 rounded-full px-3 text-xs"
+                onClick={() => setAssigningTo(u)}
+              >
+                <Settings2 size={14} />
+              </Button>
+            )}
           </div>
         );
       },
     },
-  ], []);
+  ], [canUpdate]);
 
   return (
     <>

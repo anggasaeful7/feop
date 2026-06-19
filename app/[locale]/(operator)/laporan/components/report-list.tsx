@@ -11,6 +11,7 @@ import {
   useUpdateFinancialReport,
   useDeleteFinancialReport,
 } from "@/hooks/api/use-financial-report";
+import { usePermissions, hasPermission } from "@/hooks/api/use-permissions";
 
 const MONTHS_ID = [
   "Januari", "Februari", "Maret", "April", "Mei", "Juni",
@@ -54,6 +55,10 @@ function fileBadge(name: string) {
 }
 
 export function ReportList() {
+  const { data: permissions } = usePermissions();
+  const canUpdate = hasPermission(permissions, "financial_reports", "update");
+  const canDelete = hasPermission(permissions, "financial_reports", "delete");
+
   const { data, isLoading, isError } = useFinancialReports({ per_page: 100 });
   const reports = data?.items;
 
@@ -154,18 +159,22 @@ export function ReportList() {
                   >
                     <Download size={14} /> Unduh
                   </button>
-                  <button
-                    onClick={() => togglePublish(r)}
-                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-zinc-700 hover:bg-zinc-50 rounded-lg transition-colors"
-                  >
-                    {r.status === "published" ? "Jadikan Draft" : "Publish"}
-                  </button>
-                  <button
-                    onClick={() => deleteReport(r)}
-                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                  >
-                    <Trash2 size={14} /> Hapus
-                  </button>
+                  {canUpdate && (
+                    <button
+                      onClick={() => togglePublish(r)}
+                      className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-zinc-700 hover:bg-zinc-50 rounded-lg transition-colors"
+                    >
+                      {r.status === "published" ? "Jadikan Draft" : "Publish"}
+                    </button>
+                  )}
+                  {canDelete && (
+                    <button
+                      onClick={() => deleteReport(r)}
+                      className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                    >
+                      <Trash2 size={14} /> Hapus
+                    </button>
+                  )}
                 </PopoverContent>
               </Popover>
             </li>

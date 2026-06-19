@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { financialReportSchema, type FinancialReportFormValues } from "@/lib/validations/financial-report";
 import { useCreateFinancialReport } from "@/hooks/api/use-financial-report";
+import { usePermissions, hasPermission } from "@/hooks/api/use-permissions";
 
 const MONTHS_ID = [
   "Januari", "Februari", "Maret", "April", "Mei", "Juni",
@@ -50,6 +51,9 @@ function fileBadge(name: string) {
 export function ReportForm() {
   const [publishMode, setPublishMode] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
+
+  const { data: permissions } = usePermissions();
+  const canCreate = hasPermission(permissions, "financial_reports", "create");
 
   const form = useForm<FinancialReportFormValues>({
     resolver: zodResolver(financialReportSchema),
@@ -111,6 +115,8 @@ export function ReportForm() {
       },
     });
   }
+
+  if (!canCreate) return null;
 
   return (
     <Card className="lg:col-span-2 space-y-5">

@@ -7,6 +7,7 @@ import { Badge, Button } from "@/components/ui";
 import { Checkbox } from "@/components/ui/checkbox";
 import { idr } from "@/lib/format";
 import { ResidentBillByUnitItem, ResidentBill } from "@/types/billing";
+import { usePermissions, hasPermission } from "@/hooks/api/use-permissions";
 
 interface BillingDetailsProps {
   unit: ResidentBillByUnitItem;
@@ -25,6 +26,11 @@ export function BillingDetails({
   handleSelectBill,
   handleSelectAll
 }: BillingDetailsProps) {
+  const { data: permissions } = usePermissions();
+  const canDelete = hasPermission(permissions, "resident_bills", "delete");
+  const canApprove = hasPermission(permissions, "resident_bills", "approve");
+  const canPay = hasPermission(permissions, "resident_bills", "pay");
+
   const hasDebt = unit.bills_debt && unit.bills_debt.length > 0;
 
   return (
@@ -41,15 +47,17 @@ export function BillingDetails({
             <table className="w-full text-xs text-left">
               <thead>
                 <tr className="bg-rose-50/50 text-rose-800 font-semibold border-b border-rose-100 uppercase tracking-wider text-[10px]">
-                  <th className="px-4 py-2 w-8">
-                    <Checkbox
-                      checked={
-                        unit.bills_debt!.filter((b) => b.kind === "specific" && b.status !== "paid").length > 0 &&
-                        unit.bills_debt!.filter((b) => b.kind === "specific" && b.status !== "paid").every((b) => selectedBills.has(b.id))
-                      }
-                      onCheckedChange={(c) => handleSelectAll(!!c, unit.bills_debt!)}
-                    />
-                  </th>
+                  {canDelete && (
+                    <th className="px-4 py-2 w-8">
+                      <Checkbox
+                        checked={
+                          unit.bills_debt!.filter((b) => b.kind === "specific" && b.status !== "paid").length > 0 &&
+                          unit.bills_debt!.filter((b) => b.kind === "specific" && b.status !== "paid").every((b) => selectedBills.has(b.id))
+                        }
+                        onCheckedChange={(c) => handleSelectAll(!!c, unit.bills_debt!)}
+                      />
+                    </th>
+                  )}
                   <th className="px-4 py-2 w-12">No</th>
                   <th className="px-4 py-2">Judul Tagihan</th>
                   <th className="px-4 py-2 w-24">Jenis</th>
@@ -64,14 +72,16 @@ export function BillingDetails({
                 {unit.bills_debt!.map((bill, bIdx) => {
                   return (
                     <tr key={bill.id} className="bg-rose-50/10 hover:bg-rose-50/20 transition-colors">
-                      <td className="px-4 py-2.5">
-                        {bill.kind === "specific" && bill.status !== "paid" ? (
-                          <Checkbox
-                            checked={selectedBills.has(bill.id)}
-                            onCheckedChange={(c) => handleSelectBill(bill.id, !!c)}
-                          />
-                        ) : null}
-                      </td>
+                      {canDelete && (
+                        <td className="px-4 py-2.5">
+                          {bill.kind === "specific" && bill.status !== "paid" ? (
+                            <Checkbox
+                              checked={selectedBills.has(bill.id)}
+                              onCheckedChange={(c) => handleSelectBill(bill.id, !!c)}
+                            />
+                          ) : null}
+                        </td>
+                      )}
                       <td className="px-4 py-2.5 font-mono text-rose-400">
                         {bIdx + 1}
                       </td>
@@ -111,7 +121,7 @@ export function BillingDetails({
                         )}
                       </td>
                       <td className="px-4 py-2.5 text-right">
-                        {bill.status === "unpaid" && (
+                        {bill.status === "unpaid" && canPay && (
                           <Button
                             variant="danger"
                             size="sm"
@@ -124,7 +134,7 @@ export function BillingDetails({
                             <MessageCircle size={12} className="mr-1" /> Tagih
                           </Button>
                         )}
-                        {bill.status === "pending_verification" && (
+                        {bill.status === "pending_verification" && canApprove && (
                           <Link href={`/penghuni/${unit.unit_id}/verifikasi?bill_id=${bill.id}`} onClick={(e) => e.stopPropagation()}>
                             <Button variant="warning" size="sm" className="h-7 text-[11px] px-2.5">
                               Verifikasi
@@ -155,15 +165,17 @@ export function BillingDetails({
           <table className="w-full text-xs text-left">
             <thead>
               <tr className="bg-zinc-50 text-zinc-600 font-semibold border-b border-zinc-200 uppercase tracking-wider text-[10px]">
-                <th className="px-4 py-2 w-8">
-                  <Checkbox
-                    checked={
-                      unit.bills.filter((b) => b.kind === "specific" && b.status !== "paid").length > 0 &&
-                      unit.bills.filter((b) => b.kind === "specific" && b.status !== "paid").every((b) => selectedBills.has(b.id))
-                    }
-                    onCheckedChange={(c) => handleSelectAll(!!c, unit.bills)}
-                  />
-                </th>
+                {canDelete && (
+                  <th className="px-4 py-2 w-8">
+                    <Checkbox
+                      checked={
+                        unit.bills.filter((b) => b.kind === "specific" && b.status !== "paid").length > 0 &&
+                        unit.bills.filter((b) => b.kind === "specific" && b.status !== "paid").every((b) => selectedBills.has(b.id))
+                      }
+                      onCheckedChange={(c) => handleSelectAll(!!c, unit.bills)}
+                    />
+                  </th>
+                )}
                 <th className="px-4 py-2 w-12">No</th>
                 <th className="px-4 py-2">Judul Tagihan</th>
                 <th className="px-4 py-2 w-24">Jenis</th>
@@ -180,14 +192,16 @@ export function BillingDetails({
 
                 return (
                   <tr key={bill.id} className="hover:bg-zinc-50/50 transition-colors">
-                    <td className="px-4 py-3">
-                      {bill.kind === "specific" && bill.status !== "paid" ? (
-                        <Checkbox
-                          checked={selectedBills.has(bill.id)}
-                          onCheckedChange={(c) => handleSelectBill(bill.id, !!c)}
-                        />
-                      ) : null}
-                    </td>
+                    {canDelete && (
+                      <td className="px-4 py-3">
+                        {bill.kind === "specific" && bill.status !== "paid" ? (
+                          <Checkbox
+                            checked={selectedBills.has(bill.id)}
+                            onCheckedChange={(c) => handleSelectBill(bill.id, !!c)}
+                          />
+                        ) : null}
+                      </td>
+                    )}
                     <td className="px-4 py-3 font-mono text-zinc-400">
                       {bIdx + 1}
                     </td>
@@ -247,7 +261,7 @@ export function BillingDetails({
                       )}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      {bill.status === "unpaid" && (
+                      {bill.status === "unpaid" && canPay && (
                         <Button
                           variant="danger"
                           size="sm"
@@ -261,7 +275,7 @@ export function BillingDetails({
                         </Button>
                       )}
 
-                      {bill.status === "pending_verification" && (
+                      {bill.status === "pending_verification" && canApprove && (
                         <Link href={`/penghuni/${unit.unit_id}/verifikasi?bill_id=${bill.id}`} onClick={(e) => e.stopPropagation()}>
                           <Button variant="warning" size="sm" className="h-7 text-[11px] px-2.5">
                             Verifikasi

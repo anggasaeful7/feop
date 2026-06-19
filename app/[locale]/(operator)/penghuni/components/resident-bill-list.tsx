@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ApiError, downloadCSV } from "@/lib/axios";
 import { ResidentBillByUnitItem, ResidentBill } from "@/types/billing";
 import { useBulkDeleteSpecificBillingGeneratedBills } from "@/hooks/api/use-specific-billing";
+import { usePermissions, hasPermission } from "@/hooks/api/use-permissions";
 import { Trash } from "lucide-react";
 import { BillingDetails } from "./billing-details";
 import { baseColumns } from "./columns";
@@ -50,6 +51,10 @@ export function ResidentBillList() {
   const [prevUrlYear, setPrevUrlYear] = useState(urlYear);
   const [isExportingExcel, setIsExportingExcel] = useState(false);
   const [expandedUnits, setExpandedUnits] = useState<Set<string>>(new Set());
+
+  const { data: permissions } = usePermissions();
+  const canExport = hasPermission(permissions, "resident_bills", "export");
+  const canDelete = hasPermission(permissions, "resident_bills", "delete");
 
   // Sync year state when urlYear parameter changes
   if (urlYear !== prevUrlYear) {
@@ -286,23 +291,25 @@ export function ResidentBillList() {
                 </Select>
               </div>
             </div>
-            <div className="flex gap-2 w-full sm:w-auto">
-              <Button
-                variant="secondary"
-                size="sm"
-                className="font-bold italic flex-1 sm:flex-none"
-                onClick={handleExportExcel}
-                disabled={isExportingExcel}
-              >
-                <Download size={14} className="mr-1" /> {isExportingExcel ? "..." : "Excel Billing"}
-              </Button>
-            </div>
+            {canExport && (
+              <div className="flex gap-2 w-full sm:w-auto">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="font-bold italic flex-1 sm:flex-none"
+                  onClick={handleExportExcel}
+                  disabled={isExportingExcel}
+                >
+                  <Download size={14} className="mr-1" /> {isExportingExcel ? "..." : "Excel Billing"}
+                </Button>
+              </div>
+            )}
           </div>
         }
       />
 
       {/* Floating Bulk Action Bar */}
-      {selectedBills.size > 0 && (
+      {selectedBills.size > 0 && canDelete && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
           <div className="flex items-center gap-4 rounded-full bg-zinc-900 px-6 py-3 text-sm shadow-xl border border-zinc-700">
             <span className="font-semibold text-white">

@@ -35,7 +35,11 @@ export type AuthUser = {
   role: string;
   workspace_id?: string;
   workspace_name?: string;
+  workspace_type?: string;
   rw?: string;
+  rw_id?: string;
+  rt?: string;
+  rt_id?: string;
 };
 
 export type LoginResponse = {

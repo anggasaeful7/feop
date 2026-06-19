@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Badge, Button, Card } from "@/components/ui";
 import { useUnit } from "@/hooks/api/use-unit";
 import { useResidentBills, useResidentBill, useApproveResidentBill, useRejectResidentBill } from "@/hooks/api/use-resident-bill";
+import { usePermissions, hasPermission } from "@/hooks/api/use-permissions";
 import { idr } from "@/lib/format";
 import { toast } from "sonner";
 
@@ -25,6 +26,10 @@ export default function VerifikasiPage({
   const router = useRouter();
   const [rejectNotes, setRejectNotes] = useState("");
   const [isRejectingModal, setIsRejectingModal] = useState(false);
+
+  const { data: permissions } = usePermissions();
+  const canApprove = hasPermission(permissions, "resident_bills", "approve");
+  const canReject = hasPermission(permissions, "resident_bills", "reject");
 
   // Load unit detail
   const { data: unitObj, isLoading: unitLoading } = useUnit(unit);
@@ -142,20 +147,24 @@ export default function VerifikasiPage({
         title="Verifikasi Bukti Bayar"
         subtitle="Review klaim pembayaran iuran dari penghuni"
         actions={
-          pendingBill.status === "pending_verification" ? (
+          pendingBill.status === "pending_verification" && (canApprove || canReject) ? (
             <div className="flex gap-2">
-              <Button variant="danger" onClick={() => setIsRejectingModal(true)} disabled={approveMutation.isPending || rejectMutation.isPending}>
-                <X size={16} /> Tolak
-              </Button>
-              <Button onClick={handleApprove} disabled={approveMutation.isPending || rejectMutation.isPending}>
-                {approveMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <>
-                    <Check size={16} /> Setujui & Tandai Lunas
-                  </>
-                )}
-              </Button>
+              {canReject && (
+                <Button variant="danger" onClick={() => setIsRejectingModal(true)} disabled={approveMutation.isPending || rejectMutation.isPending}>
+                  <X size={16} /> Tolak
+                </Button>
+              )}
+              {canApprove && (
+                <Button onClick={handleApprove} disabled={approveMutation.isPending || rejectMutation.isPending}>
+                  {approveMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <>
+                      <Check size={16} /> Setujui & Tandai Lunas
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
           ) : (
             <Link href="/penghuni">
@@ -273,7 +282,7 @@ export default function VerifikasiPage({
             </dl>
           </Card>
 
-          {pendingBill.status === "pending_verification" && (
+          {pendingBill.status === "pending_verification" && canApprove && (
             <Card className="border-amber-300 bg-amber-50/60">
               <div className="flex gap-3">
                 <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-amber-200 text-amber-800">

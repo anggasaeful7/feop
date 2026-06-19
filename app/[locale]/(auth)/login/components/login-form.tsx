@@ -7,6 +7,8 @@ import { Eye, EyeOff, Lock, User } from "lucide-react";
 import { api, ApiError } from "@/lib/axios";
 import { writeAuth } from "@/lib/auth-storage";
 import type { LoginResponse } from "@/types";
+import { getMyPermissions } from "@/hooks/api/use-permissions";
+import { usePermissionsStore } from "@/store/use-permissions-store";
 
 export function LoginForm() {
   const router = useRouter();
@@ -28,6 +30,15 @@ export function LoginForm() {
         body: JSON.stringify({ email, password }),
       });
       writeAuth(out.access_token, out.user, remember);
+      
+      // Fetch permissions right after login and save to Zustand
+      try {
+        const perms = await getMyPermissions();
+        usePermissionsStore.getState().setPermissions(perms);
+      } catch (err) {
+        console.error("Failed to fetch permissions on login", err);
+      }
+
       router.push("/dashboard");
     } catch (e) {
       if (e instanceof ApiError) {

@@ -1,8 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, usePathname } from "@/i18n/routing";
 import { useState } from "react";
 import {
   Building2,
@@ -20,13 +19,22 @@ import { useAuthUser } from "@/hooks/use-auth";
 import { useLogout } from "@/hooks/use-logout";
 import { cn } from "@/lib/utils";
 import { initials } from "@/lib/format";
+import { usePermissions, hasPermission } from "@/hooks/api/use-permissions";
+import type { ResourcePermissionsMap } from "@/types/permissions";
 
 type NavItem = {
   href?: string;
   label: string;
   Icon: LucideIcon;
   activePath?: string;
-  children?: { href: string; label: string }[];
+  requiredResource?: keyof ResourcePermissionsMap;
+  requiredRole?: string;
+  children?: {
+    href: string;
+    label: string;
+    requiredResource?: keyof ResourcePermissionsMap;
+    requiredRole?: string;
+  }[];
 };
 
 const NAV: NavItem[] = [
@@ -35,45 +43,45 @@ const NAV: NavItem[] = [
     label: "Billing",
     Icon: Receipt,
     children: [
-      { href: "/penghuni", label: "Billing Penghuni" },
-      { href: "/fasilitas-penghuni", label: "Fasilitas Penghuni" },
-      { href: "/laporan", label: "Upload Laporan" },
+      { href: "/penghuni", label: "Billing Penghuni", requiredResource: "resident_bills" },
+      { href: "/fasilitas-penghuni", label: "Fasilitas Penghuni", requiredResource: "specific_billings" },
+      { href: "/laporan", label: "Upload Laporan", requiredResource: "financial_reports" },
     ],
   },
   {
     label: "Layanan Warga",
     Icon: Mail,
     children: [
-      { href: "/laporan-masalah", label: "Laporan Masalah" },
-      { href: "/laporan-tamu", label: "Laporan Tamu" },
-      { href: "/pengajuan-surat", label: "Pengajuan Surat" },
-      { href: "/izin-renovasi", label: "Izin Renovasi" },
+      { href: "/laporan-masalah", label: "Laporan Masalah", requiredResource: "complaints" },
+      { href: "/laporan-tamu", label: "Laporan Tamu", requiredResource: "guest_reports" },
+      { href: "/pengajuan-surat", label: "Pengajuan Surat", requiredResource: "letter_requests" },
+      { href: "/izin-renovasi", label: "Izin Renovasi", requiredResource: "renovation_permits" },
     ],
   },
   {
     label: "Fasilitas & Jadwal",
     Icon: Building2,
     children: [
-      { href: "/fasilitas", label: "Fasilitas Umum" },
-      { href: "/jadwal/keamanan", label: "Jadwal Keamanan" },
-      { href: "/jadwal/kebersihan", label: "Jadwal Kebersihan" },
+      { href: "/fasilitas", label: "Fasilitas Umum", requiredResource: "facility_bookings" },
+      { href: "/jadwal/keamanan", label: "Jadwal Keamanan", requiredResource: "schedules" },
+      { href: "/jadwal/kebersihan", label: "Jadwal Kebersihan", requiredResource: "schedules" },
     ],
   },
   {
     label: "Master Data",
     Icon: Database,
     children: [
-      { href: "/master-data/penghuni/units", label: "Data Penghuni" },
-      { href: "/master-data/petugas", label: "Data Petugas" },
+      { href: "/master-data/penghuni/units", label: "Data Penghuni", requiredResource: "units" },
+      { href: "/master-data/petugas/officers", label: "Data Petugas", requiredRole: "admin_workspace" },
     ],
   },
   {
     label: "Pengaturan & Lainnya",
     Icon: Settings,
     children: [
-      { href: "/platform-billing", label: "Biaya Platform" },
-      { href: "/notifikasi", label: "Notifikasi" },
-      { href: "/pengaturan", label: "Pengaturan" },
+      { href: "/platform-billing", label: "Biaya Platform", requiredResource: "platform_billing" },
+      { href: "/notifikasi", label: "Notifikasi", requiredResource: "notifications" },
+      { href: "/pengaturan", label: "Pengaturan", requiredRole: "admin_workspace" },
     ],
   },
 ];
@@ -138,6 +146,26 @@ export function Sidebar({ className }: { className?: string }) {
   const pathname = usePathname();
   const user = useAuthUser();
   const logout = useLogout();
+  const { data: permissions } = usePermissions();
+
+  const filteredNav = NAV.map(item => {
+    if (item.children) {
+      const filteredChildren = item.children.filter(child => {
+        if (child.requiredRole && permissions?.role !== child.requiredRole) return false;
+        if (child.requiredResource && !hasPermission(permissions, child.requiredResource, "read")) return false;
+        return true;
+      });
+      return { ...item, children: filteredChildren };
+    }
+
+    if (item.requiredRole && permissions?.role !== item.requiredRole) return null;
+    if (item.requiredResource && !hasPermission(permissions, item.requiredResource, "read")) return null;
+    return item;
+  }).filter(item => {
+    if (!item) return false;
+    if (item.children && item.children.length === 0) return false;
+    return true;
+  }) as NavItem[];
 
   return (
     <aside className={cn("sticky top-0 h-screen flex w-64 shrink-0 flex-col border-r border-zinc-200/60 bg-cream-50", className)}>
@@ -155,7 +183,12 @@ export function Sidebar({ className }: { className?: string }) {
           <div className="text-xs text-zinc-500">
             {user?.workspace_name || "Cluster Mawar"}
           </div>
-          <div className="text-xs text-zinc-500">{user?.rw ? `RW ${user.rw}` : ""}</div>
+          {(user?.rw || user?.rt) && (
+            <div className="text-xs text-zinc-500">
+              {user?.rw ? `RW ${user.rw}` : ""}
+              {user?.rt ? ` / RT ${user.rt}` : ""}
+            </div>
+          )}
         </div>
       </div>
 
@@ -164,7 +197,7 @@ export function Sidebar({ className }: { className?: string }) {
       </div>
 
       <nav className="flex-1 overflow-y-auto space-y-1 px-3 custom-scrollbar">
-        {NAV.map((item) => {
+        {filteredNav.map((item) => {
           if (item.children) {
             return <NavGroup key={item.label} item={item} pathname={pathname} />;
           }
@@ -174,7 +207,7 @@ export function Sidebar({ className }: { className?: string }) {
           const matches = pathname === activePath || pathname.startsWith(activePath + "/");
           // Check if there's any other route that is more specific (for single items)
           let moreSpecificMatch = false;
-          NAV.forEach((other) => {
+          filteredNav.forEach((other) => {
             const otherHref = other.href!;
             const otherActivePath = other.activePath ?? otherHref;
             if (other.children) {

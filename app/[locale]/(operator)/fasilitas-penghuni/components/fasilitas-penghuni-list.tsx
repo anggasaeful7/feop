@@ -8,6 +8,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { ApiError, downloadCSV } from "@/lib/axios";
 import { toast } from "sonner";
 import { useGeneralFacilitiesByUnit } from "@/hooks/api/use-general-facility";
+import { usePermissions, hasPermission } from "@/hooks/api/use-permissions";
 import { useDataTableState } from "@/hooks/use-data-table-state";
 import { UnitWithGeneralFacilities } from "@/types";
 import { Badge } from "@/components/ui/badge";
@@ -43,6 +44,9 @@ export function FasilitasPenghuniList() {
   const [lateFilter, setLateFilter] = useState<string>(urlIsLate);
   const [rtFilter, setRtFilter] = useState<string>("all");
   const [prevUrlIsLate, setPrevUrlIsLate] = useState(urlIsLate);
+
+  const { data: permissions } = usePermissions();
+  const canExport = hasPermission(permissions, "resident_bills", "export");
 
   // Sync state during render
   if (urlIsLate !== prevUrlIsLate) {
@@ -261,15 +265,17 @@ export function FasilitasPenghuniList() {
                 </SelectContent>
               </Select>
             </div>
-            <Button
-              variant="secondary"
-              size="sm"
-              className="font-bold italic w-full sm:w-auto"
-              onClick={handleExportPdf}
-              disabled={isExportingPdf}
-            >
-              <Download size={14} className="mr-1" /> {isExportingPdf ? "..." : "PDF Fasilitas"}
-            </Button>
+            {canExport && (
+              <Button
+                variant="secondary"
+                size="sm"
+                className="font-bold italic w-full sm:w-auto"
+                onClick={handleExportPdf}
+                disabled={isExportingPdf}
+              >
+                <Download size={14} className="mr-1" /> {isExportingPdf ? "..." : "PDF Fasilitas"}
+              </Button>
+            )}
           </div>
         }
       />
