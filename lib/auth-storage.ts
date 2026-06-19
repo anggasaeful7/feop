@@ -1,6 +1,5 @@
 "use client";
 
-import { usePermissionsStore } from "@/store/use-permissions-store";
 import type { AuthUser } from "@/types";
 
 export const AUTH_KEYS = {
@@ -65,13 +64,5 @@ export function clearAuth() {
     s.removeItem(AUTH_KEYS.user);
   }
   document.cookie = `${AUTH_KEYS.token}=; path=/; max-age=0; samesite=lax`;
-  
-  // Clear permissions store after a delay to prevent sidebar items from flashing empty
-  // during the redirect transition, but only if a new session hasn't started.
-  setTimeout(() => {
-    if (!readToken()) {
-      usePermissionsStore.getState().clearPermissions();
-    }
-  }, 800);
 }
 
