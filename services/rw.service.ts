@@ -1,6 +1,6 @@
 import { api } from "@/lib/axios";
 import type { Paged } from "@/types";
-import type { RW, RWPayload, RWQueryParams } from "@/types/master-data";
+import type { RW, RWPayload, RWBulkPayload, RWQueryParams } from "@/types/master-data";
 
 export const RwService = {
   getRws: async (params?: RWQueryParams) => {
@@ -21,6 +21,13 @@ export const RwService = {
 
   createRw: async (payload: RWPayload) => {
     return api<RW>("/master/rws", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  bulkCreateRws: async (payload: RWBulkPayload) => {
+    return api<RW[]>("/master/rws/bulk", {
       method: "POST",
       body: JSON.stringify(payload),
     });

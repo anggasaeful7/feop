@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { RtService } from "@/services/rt.service";
-import type { RTPayload, RTQueryParams } from "@/types/master-data";
+import type { RTPayload, RTBulkPayload, RTQueryParams } from "@/types/master-data";
 import { toast } from "sonner";
 import { ApiError } from "@/lib/axios";
 
@@ -42,6 +42,21 @@ export function useCreateRt() {
   });
 }
 
+export function useBulkCreateRts() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: RTBulkPayload) => RtService.bulkCreateRts(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: rtQK.all });
+      toast.success("RT berhasil ditambahkan secara massal");
+    },
+    onError: (error) => {
+      toast.error(error instanceof ApiError ? error.message : "Gagal menambahkan RT secara massal");
+    },
+  });
+}
+
 export function useUpdateRt(id: string) {
   const queryClient = useQueryClient();
 
@@ -69,5 +84,12 @@ export function useDeleteRt() {
     onError: (error) => {
       toast.error(error instanceof ApiError ? error.message : "Gagal menghapus RT");
     },
+  });
+}
+
+export function useMyRts() {
+  return useQuery({
+    queryKey: [...rtQK.all, "me"] as const,
+    queryFn: () => RtService.getMyRts(),
   });
 }

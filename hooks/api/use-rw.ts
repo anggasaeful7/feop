@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { RwService } from "@/services/rw.service";
-import type { RWPayload, RWQueryParams } from "@/types/master-data";
+import type { RWPayload, RWBulkPayload, RWQueryParams } from "@/types/master-data";
 import { toast } from "sonner";
 import { ApiError } from "@/lib/axios";
 
@@ -40,6 +40,22 @@ export function useCreateRw() {
     },
     onError: (error) => {
       toast.error(error instanceof ApiError ? error.message : "Gagal menambahkan RW");
+    },
+  });
+}
+
+export function useBulkCreateRws() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: RWBulkPayload) => RwService.bulkCreateRws(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: rwQK.all });
+      queryClient.invalidateQueries({ queryKey: ["rts"] });
+      toast.success("RW berhasil ditambahkan secara massal");
+    },
+    onError: (error) => {
+      toast.error(error instanceof ApiError ? error.message : "Gagal menambahkan RW secara massal");
     },
   });
 }

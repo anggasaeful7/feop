@@ -246,6 +246,10 @@ export type RWPayload = {
   is_active: boolean;
 };
 
+export type RWBulkPayload = {
+  items: RWPayload[];
+};
+
 export type RWQueryParams = {
   search?: string;
   page?: number;
@@ -268,6 +272,10 @@ export type RTPayload = {
   code: string;
   name: string;
   is_active: boolean;
+};
+
+export type RTBulkPayload = {
+  items: RTPayload[];
 };
 
 export type RTQueryParams = {
