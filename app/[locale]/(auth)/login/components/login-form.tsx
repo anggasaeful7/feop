@@ -9,9 +9,11 @@ import { writeAuth } from "@/lib/auth-storage";
 import type { LoginResponse } from "@/types";
 import { getMyPermissions } from "@/hooks/api/use-permissions";
 import { usePermissionsStore } from "@/store/use-permissions-store";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function LoginForm() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
@@ -24,7 +26,11 @@ export function LoginForm() {
     // This avoids clearing it prematurely before/during the redirect transition,
     // which prevents the sidebar layout from flashing empty.
     usePermissionsStore.getState().clearPermissions();
-  }, []);
+
+    // Clear React Query cache so that any cached data from previous user accounts
+    // is deleted, forcing new fetches on dashboard.
+    queryClient.clear();
+  }, [queryClient]);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
