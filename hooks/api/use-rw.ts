@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { RwService } from "@/services/rw.service";
-import type { RWPayload, RWBulkPayload, RWQueryParams } from "@/types/master-data";
+import type { RWPayload, RWBulkPayload, RWQueryParams, MasterAdminPayload } from "@/types/master-data";
 import { toast } from "sonner";
 import { ApiError } from "@/lib/axios";
 
@@ -88,6 +88,22 @@ export function useDeleteRw() {
     },
     onError: (error) => {
       toast.error(error instanceof ApiError ? error.message : "Gagal menghapus RW");
+    },
+  });
+}
+
+export function useCreateRwAdmin() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: MasterAdminPayload }) =>
+      RwService.createRwAdmin(id, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: rwQK.all });
+      toast.success("Admin RW berhasil ditambahkan");
+    },
+    onError: (error) => {
+      toast.error(error instanceof ApiError ? error.message : "Gagal menambahkan Admin RW");
     },
   });
 }

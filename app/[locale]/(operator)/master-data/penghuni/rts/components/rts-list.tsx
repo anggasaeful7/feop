@@ -1,14 +1,15 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Plus } from "lucide-react";
+import { Plus, UserPlus } from "lucide-react";
 import { Button, DataTable, DataTableRowActions } from "@/components/ui";
 import { ColumnDef } from "@tanstack/react-table";
-import { useRts, useDeleteRt } from "@/hooks/api/use-rt";
+import { useRts, useDeleteRt, useCreateRtAdmin } from "@/hooks/api/use-rt";
 import { useRws } from "@/hooks/api/use-rw";
 import type { RT } from "@/types/master-data";
 import { RtsFormDialog } from "./rts-form-dialog";
 import { RtsBulkDialog } from "./rts-bulk-dialog";
+import { MasterAdminFormDialog } from "../../rws/components/admin-form-dialog";
 import { useDataTableState } from "@/hooks/use-data-table-state";
 import { getColumns } from "./columns";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -33,8 +34,10 @@ export function RtsList() {
   const [editing, setEditing] = useState<RT | null>(null);
   const [creating, setCreating] = useState(false);
   const [bulkCreating, setBulkCreating] = useState(false);
+  const [addingAdmin, setAddingAdmin] = useState<RT | null>(null);
 
   const deleteRt = useDeleteRt();
+  const createRtAdmin = useCreateRtAdmin();
 
   const columns: ColumnDef<RT>[] = useMemo(() => [
     ...getColumns(rws),
@@ -45,6 +48,16 @@ export function RtsList() {
         const u = row.original;
         return (
           <DataTableRowActions
+            extraActions={
+              <button
+                onClick={() => setAddingAdmin(u)}
+                className="hover:text-zinc-700 transition"
+                title="Tambah Admin RT"
+                aria-label="Tambah Admin RT"
+              >
+                <UserPlus size={16} />
+              </button>
+            }
             onEdit={() => setEditing(u)}
             onDelete={() => deleteRt.mutate(u.id)}
             isDeleting={deleteRt.isPending && deleteRt.variables === u.id}
@@ -129,6 +142,24 @@ export function RtsList() {
           initial={editing}
           rws={rws}
           onClose={() => setEditing(null)}
+        />
+      )}
+
+      {addingAdmin && (
+        <MasterAdminFormDialog
+          title={`Tambah Admin RT - ${addingAdmin.name}`}
+          onClose={() => setAddingAdmin(null)}
+          isPending={createRtAdmin.isPending}
+          onSubmit={(values) => {
+            createRtAdmin.mutate(
+              { id: addingAdmin.id, payload: values },
+              {
+                onSuccess: () => {
+                  setAddingAdmin(null);
+                },
+              }
+            );
+          }}
         />
       )}
     </>

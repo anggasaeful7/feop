@@ -284,3 +284,18 @@ export type RTQueryParams = {
   page?: number;
   per_page?: number;
 };
+
+export type MasterAdminPayload = {
+  email: string;
+  full_name: string;
+  password?: string;
+};
+
+export type MasterAdminResponse = {
+  id: string;
+  email: string;
+  full_name: string;
+  role: string;
+};
+
+

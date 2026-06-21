@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Plus } from "lucide-react";
+import { Plus, UserPlus } from "lucide-react";
 import { Button, DataTable, DataTableRowActions } from "@/components/ui";
 import { ColumnDef } from "@tanstack/react-table";
-import { useRws, useDeleteRw } from "@/hooks/api/use-rw";
+import { useRws, useDeleteRw, useCreateRwAdmin } from "@/hooks/api/use-rw";
 import type { RW } from "@/types/master-data";
 import { RwsFormDialog } from "./rws-form-dialog";
 import { RwsBulkDialog } from "./rws-bulk-dialog";
+import { MasterAdminFormDialog } from "./admin-form-dialog";
 import { useDataTableState } from "@/hooks/use-data-table-state";
 import { baseColumns } from "./columns";
 
@@ -25,8 +26,10 @@ export function RwsList() {
   const [editing, setEditing] = useState<RW | null>(null);
   const [creating, setCreating] = useState(false);
   const [bulkCreating, setBulkCreating] = useState(false);
+  const [addingAdmin, setAddingAdmin] = useState<RW | null>(null);
 
   const deleteRw = useDeleteRw();
+  const createRwAdmin = useCreateRwAdmin();
 
   const columns: ColumnDef<RW>[] = useMemo(() => [
     ...baseColumns,
@@ -37,6 +40,16 @@ export function RwsList() {
         const u = row.original;
         return (
           <DataTableRowActions
+            extraActions={
+              <button
+                onClick={() => setAddingAdmin(u)}
+                className="hover:text-zinc-700 transition"
+                title="Tambah Admin RW"
+                aria-label="Tambah Admin RW"
+              >
+                <UserPlus size={16} />
+              </button>
+            }
             onEdit={() => setEditing(u)}
             onDelete={() => deleteRw.mutate(u.id)}
             isDeleting={deleteRw.isPending && deleteRw.variables === u.id}
@@ -97,6 +110,24 @@ export function RwsList() {
           title={`Edit ${editing.name}`}
           initial={editing}
           onClose={() => setEditing(null)}
+        />
+      )}
+
+      {addingAdmin && (
+        <MasterAdminFormDialog
+          title={`Tambah Admin RW - ${addingAdmin.name}`}
+          onClose={() => setAddingAdmin(null)}
+          isPending={createRwAdmin.isPending}
+          onSubmit={(values) => {
+            createRwAdmin.mutate(
+              { id: addingAdmin.id, payload: values },
+              {
+                onSuccess: () => {
+                  setAddingAdmin(null);
+                },
+              }
+            );
+          }}
         />
       )}
     </>

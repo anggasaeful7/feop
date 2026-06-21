@@ -1,6 +1,6 @@
 import { api } from "@/lib/axios";
 import type { Paged } from "@/types";
-import type { RW, RWPayload, RWBulkPayload, RWQueryParams } from "@/types/master-data";
+import type { RW, RWPayload, RWBulkPayload, RWQueryParams, MasterAdminPayload, MasterAdminResponse } from "@/types/master-data";
 
 export const RwService = {
   getRws: async (params?: RWQueryParams) => {
@@ -43,6 +43,13 @@ export const RwService = {
   deleteRw: async (id: string) => {
     return api(`/master/rws/${id}`, {
       method: "DELETE",
+    });
+  },
+
+  createRwAdmin: async (id: string, payload: MasterAdminPayload) => {
+    return api<MasterAdminResponse>(`/master/rws/${id}/admin`, {
+      method: "POST",
+      body: JSON.stringify(payload),
     });
   },
 };

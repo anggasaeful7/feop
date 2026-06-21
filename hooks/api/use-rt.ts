@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { RtService } from "@/services/rt.service";
-import type { RTPayload, RTBulkPayload, RTQueryParams } from "@/types/master-data";
+import type { RTPayload, RTBulkPayload, RTQueryParams, MasterAdminPayload } from "@/types/master-data";
 import { toast } from "sonner";
 import { ApiError } from "@/lib/axios";
 
@@ -91,5 +91,21 @@ export function useMyRts() {
   return useQuery({
     queryKey: [...rtQK.all, "me"] as const,
     queryFn: () => RtService.getMyRts(),
+  });
+}
+
+export function useCreateRtAdmin() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: MasterAdminPayload }) =>
+      RtService.createRtAdmin(id, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: rtQK.all });
+      toast.success("Admin RT berhasil ditambahkan");
+    },
+    onError: (error) => {
+      toast.error(error instanceof ApiError ? error.message : "Gagal menambahkan Admin RT");
+    },
   });
 }

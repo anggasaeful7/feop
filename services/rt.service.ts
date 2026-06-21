@@ -1,6 +1,6 @@
 import { api } from "@/lib/axios";
 import type { Paged } from "@/types";
-import type { RT, RTPayload, RTBulkPayload, RTQueryParams } from "@/types/master-data";
+import type { RT, RTPayload, RTBulkPayload, RTQueryParams, MasterAdminPayload, MasterAdminResponse } from "@/types/master-data";
 
 export const RtService = {
   getRts: async (params?: RTQueryParams) => {
@@ -94,6 +94,13 @@ export const RtService = {
   deleteRt: async (id: string) => {
     return api(`/master/rts/${id}`, {
       method: "DELETE",
+    });
+  },
+
+  createRtAdmin: async (id: string, payload: MasterAdminPayload) => {
+    return api<MasterAdminResponse>(`/master/rts/${id}/admin`, {
+      method: "POST",
+      body: JSON.stringify(payload),
     });
   },
 };
