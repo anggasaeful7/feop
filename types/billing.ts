@@ -34,6 +34,9 @@ export type ResidentBill = {
   notes?: string;
   bill_payer?: BillPayer | null;
   bill_payer_name?: string | null;
+  month?: number;
+  year?: number;
+  created_by?: string;
   created_at: string;
   updated_at: string;
 };
@@ -74,6 +77,7 @@ export type ResidentBillByUnitQueryParams = {
   name?: string;
   is_late?: boolean | string;
   rt?: string;
+  sort?: string;
 };
 
 export type ResidentBillByUnitItem = {
@@ -85,4 +89,14 @@ export type ResidentBillByUnitItem = {
   bills: ResidentBill[];
   bills_debt?: ResidentBill[];
 };
+
+export type ResidentBillSummary = {
+  total_bills: number;
+  paid_bills: number;
+  unpaid_bills: number;
+  total_amount: number;
+  paid_amount: number;
+  unpaid_amount: number;
+};
+
 

@@ -6,6 +6,7 @@ import { Download, ChevronDown, ChevronUp } from "lucide-react";
 import { Button, DataTable } from "@/components/ui";
 import { ColumnDef } from "@tanstack/react-table";
 import { useResidentBillsByUnit } from "@/hooks/api/use-resident-bill";
+import { ResidentBillSummary } from "./resident-bill-summary";
 import { useDataTableState } from "@/hooks/use-data-table-state";
 import { idr } from "@/lib/format";
 import { toast } from "sonner";
@@ -122,6 +123,7 @@ export function ResidentBillList() {
       if (urlUnit) exportParams.set("unit", urlUnit);
       if (urlName) exportParams.set("name", urlName);
       if (urlIsLate) exportParams.set("is_late", urlIsLate);
+      exportParams.set("sort", "monthly");
 
       await downloadCSV(`/resident-bills/export-billing.xlsx?${exportParams.toString()}`, "billing-penghuni.xlsx");
       toast.success("Berhasil mengekspor data billing Excel");
@@ -145,7 +147,9 @@ export function ResidentBillList() {
     unit: urlUnit,
     name: urlName,
     is_late: urlIsLate,
+    sort: "monthly",
   });
+
 
   const units = billsData?.items || [];
   const total = billsData?.total || 0;
@@ -209,6 +213,18 @@ export function ResidentBillList() {
         </div>
       )}
 
+      {/* Summary Statistics Section */}
+      <ResidentBillSummary
+        year={year}
+        kind={kind}
+        rtFilter={rtFilter}
+        search={debouncedSearch}
+        unitId={urlUnitId}
+        unit={urlUnit}
+        name={urlName}
+        isLate={urlIsLate}
+      />
+
       <DataTable
         data={units}
         columns={columns}
@@ -245,7 +261,7 @@ export function ResidentBillList() {
               ))}
             </div>
 
-            <div className="flex gap-2 w-full sm:w-auto">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               <div className="flex-1 sm:flex-none sm:w-28">
                 <Select
                   value={rtFilter}
@@ -254,7 +270,7 @@ export function ResidentBillList() {
                     setPage(1);
                   }}
                 >
-                  <SelectTrigger className="w-full h-8 rounded-full border-zinc-300 text-xs font-semibold px-4 py-1 bg-white text-zinc-700">
+                  <SelectTrigger className="w-full h-9 rounded-full border-zinc-300 text-xs font-semibold px-4 bg-white text-zinc-700">
                     <SelectValue placeholder="Semua RT" />
                   </SelectTrigger>
                   <SelectContent>
@@ -274,7 +290,7 @@ export function ResidentBillList() {
                     setPage(1);
                   }}
                 >
-                  <SelectTrigger className="w-full h-8 rounded-full border-zinc-300 text-xs font-semibold px-4 py-1 bg-white text-zinc-700">
+                  <SelectTrigger className="w-full h-9 rounded-full border-zinc-300 text-xs font-semibold px-4 bg-white text-zinc-700">
                     <SelectValue placeholder="Semua Jenis" />
                   </SelectTrigger>
                   <SelectContent>
@@ -305,11 +321,11 @@ export function ResidentBillList() {
               </div>
             </div>
             {canExport && (
-              <div className="flex gap-2 w-full sm:w-auto">
+              <div className="flex items-center gap-2 w-full sm:w-auto">
                 <Button
                   variant="secondary"
                   size="sm"
-                  className="font-bold italic flex-1 sm:flex-none"
+                  className="h-9 px-4 text-xs font-bold italic flex-1 sm:flex-none"
                   onClick={handleExportExcel}
                   disabled={isExportingExcel}
                 >
