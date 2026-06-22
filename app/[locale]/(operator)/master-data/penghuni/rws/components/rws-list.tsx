@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Plus, UserPlus } from "lucide-react";
-import { Button, DataTable, DataTableRowActions } from "@/components/ui";
+import { Plus, Loader2, User } from "lucide-react";
+import { Button, DataTable, DataTableRowActions, Modal } from "@/components/ui";
 import { ColumnDef } from "@tanstack/react-table";
-import { useRws, useDeleteRw, useCreateRwAdmin } from "@/hooks/api/use-rw";
+import { useRws, useDeleteRw, useCreateRwAdmin, useRwAdmin, useUpdateRwAdmin } from "@/hooks/api/use-rw";
 import type { RW } from "@/types/master-data";
+import type { MasterAdminFormValues } from "@/lib/validations/admin";
 import { RwsFormDialog } from "./rws-form-dialog";
 import { RwsBulkDialog } from "./rws-bulk-dialog";
 import { MasterAdminFormDialog } from "./admin-form-dialog";
@@ -29,7 +30,6 @@ export function RwsList() {
   const [addingAdmin, setAddingAdmin] = useState<RW | null>(null);
 
   const deleteRw = useDeleteRw();
-  const createRwAdmin = useCreateRwAdmin();
 
   const columns: ColumnDef<RW>[] = useMemo(() => [
     ...baseColumns,
@@ -43,11 +43,11 @@ export function RwsList() {
             extraActions={
               <button
                 onClick={() => setAddingAdmin(u)}
-                className="hover:text-zinc-700 transition"
-                title="Tambah Admin RW"
-                aria-label="Tambah Admin RW"
+                className="hover:text-[#4F7A52] text-zinc-500 transition-colors duration-200"
+                title="Kelola Admin RW"
+                aria-label="Kelola Admin RW"
               >
-                <UserPlus size={16} />
+                <User size={16} />
               </button>
             }
             onEdit={() => setEditing(u)}
@@ -114,22 +114,68 @@ export function RwsList() {
       )}
 
       {addingAdmin && (
-        <MasterAdminFormDialog
-          title={`Tambah Admin RW - ${addingAdmin.name}`}
+        <RwAdminFormDialogWrapper
+          rw={addingAdmin}
           onClose={() => setAddingAdmin(null)}
-          isPending={createRwAdmin.isPending}
-          onSubmit={(values) => {
-            createRwAdmin.mutate(
-              { id: addingAdmin.id, payload: values },
-              {
-                onSuccess: () => {
-                  setAddingAdmin(null);
-                },
-              }
-            );
-          }}
         />
       )}
     </>
+  );
+}
+
+
+interface RwAdminFormDialogWrapperProps {
+  rw: RW;
+  onClose: () => void;
+}
+
+function RwAdminFormDialogWrapper({ rw, onClose }: RwAdminFormDialogWrapperProps) {
+  const { data: admin, isLoading } = useRwAdmin(rw.id);
+  const createRwAdmin = useCreateRwAdmin();
+  const updateRwAdmin = useUpdateRwAdmin();
+
+  if (isLoading) {
+    return (
+      <Modal open title="Admin RW" onClose={onClose}>
+        <div className="flex h-32 items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-zinc-500" />
+        </div>
+      </Modal>
+    );
+  }
+
+  const isEditing = !!admin;
+
+  const handleSubmit = (values: MasterAdminFormValues) => {
+    if (isEditing) {
+      updateRwAdmin.mutate(
+        { id: rw.id, payload: values },
+        {
+          onSuccess: () => {
+            onClose();
+          },
+        }
+      );
+    } else {
+      createRwAdmin.mutate(
+        { id: rw.id, payload: values },
+        {
+          onSuccess: () => {
+            onClose();
+          },
+        }
+      );
+    }
+  };
+
+  return (
+    <MasterAdminFormDialog
+      title={isEditing ? `Edit Admin RW - ${rw.name}` : `Tambah Admin RW - ${rw.name}`}
+      onClose={onClose}
+      isPending={isEditing ? updateRwAdmin.isPending : createRwAdmin.isPending}
+      onSubmit={handleSubmit}
+      initial={admin ? { email: admin.email, full_name: admin.full_name } : undefined}
+      isEditing={isEditing}
+    />
   );
 }

@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Plus, UserPlus } from "lucide-react";
-import { Button, DataTable, DataTableRowActions } from "@/components/ui";
+import { Plus, Loader2, User } from "lucide-react";
+import { Button, DataTable, DataTableRowActions, Modal } from "@/components/ui";
 import { ColumnDef } from "@tanstack/react-table";
-import { useRts, useDeleteRt, useCreateRtAdmin } from "@/hooks/api/use-rt";
+import { useRts, useDeleteRt, useCreateRtAdmin, useRtAdmin, useUpdateRtAdmin } from "@/hooks/api/use-rt";
 import { useRws } from "@/hooks/api/use-rw";
 import type { RT } from "@/types/master-data";
+import type { MasterAdminFormValues } from "@/lib/validations/admin";
 import { RtsFormDialog } from "./rts-form-dialog";
 import { RtsBulkDialog } from "./rts-bulk-dialog";
 import { MasterAdminFormDialog } from "../../rws/components/admin-form-dialog";
@@ -37,7 +38,6 @@ export function RtsList() {
   const [addingAdmin, setAddingAdmin] = useState<RT | null>(null);
 
   const deleteRt = useDeleteRt();
-  const createRtAdmin = useCreateRtAdmin();
 
   const columns: ColumnDef<RT>[] = useMemo(() => [
     ...getColumns(rws),
@@ -51,11 +51,11 @@ export function RtsList() {
             extraActions={
               <button
                 onClick={() => setAddingAdmin(u)}
-                className="hover:text-zinc-700 transition"
-                title="Tambah Admin RT"
-                aria-label="Tambah Admin RT"
+                className="hover:text-[#4F7A52] text-zinc-500 transition-colors duration-200"
+                title="Kelola Admin RT"
+                aria-label="Kelola Admin RT"
               >
-                <UserPlus size={16} />
+                <User size={16} />
               </button>
             }
             onEdit={() => setEditing(u)}
@@ -146,22 +146,67 @@ export function RtsList() {
       )}
 
       {addingAdmin && (
-        <MasterAdminFormDialog
-          title={`Tambah Admin RT - ${addingAdmin.name}`}
+        <RtAdminFormDialogWrapper
+          rt={addingAdmin}
           onClose={() => setAddingAdmin(null)}
-          isPending={createRtAdmin.isPending}
-          onSubmit={(values) => {
-            createRtAdmin.mutate(
-              { id: addingAdmin.id, payload: values },
-              {
-                onSuccess: () => {
-                  setAddingAdmin(null);
-                },
-              }
-            );
-          }}
         />
       )}
     </>
+  );
+}
+
+interface RtAdminFormDialogWrapperProps {
+  rt: RT;
+  onClose: () => void;
+}
+
+function RtAdminFormDialogWrapper({ rt, onClose }: RtAdminFormDialogWrapperProps) {
+  const { data: admin, isLoading } = useRtAdmin(rt.id);
+  const createRtAdmin = useCreateRtAdmin();
+  const updateRtAdmin = useUpdateRtAdmin();
+
+  if (isLoading) {
+    return (
+      <Modal open title="Admin RT" onClose={onClose}>
+        <div className="flex h-32 items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-zinc-500" />
+        </div>
+      </Modal>
+    );
+  }
+
+  const isEditing = !!admin;
+
+  const handleSubmit = (values: MasterAdminFormValues) => {
+    if (isEditing) {
+      updateRtAdmin.mutate(
+        { id: rt.id, payload: values },
+        {
+          onSuccess: () => {
+            onClose();
+          },
+        }
+      );
+    } else {
+      createRtAdmin.mutate(
+        { id: rt.id, payload: values },
+        {
+          onSuccess: () => {
+            onClose();
+          },
+        }
+      );
+    }
+  };
+
+  return (
+    <MasterAdminFormDialog
+      title={isEditing ? `Edit Admin RT - ${rt.name}` : `Tambah Admin RT - ${rt.name}`}
+      onClose={onClose}
+      isPending={isEditing ? updateRtAdmin.isPending : createRtAdmin.isPending}
+      onSubmit={handleSubmit}
+      initial={admin ? { email: admin.email, full_name: admin.full_name } : undefined}
+      isEditing={isEditing}
+    />
   );
 }

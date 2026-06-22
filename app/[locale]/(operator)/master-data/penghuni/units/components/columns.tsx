@@ -6,7 +6,7 @@ import { UNIT_STATUS_LABEL, UNIT_STATUS_TONE, BILL_PAYER_LABEL } from "@/lib/con
 
 export const baseColumns: ColumnDef<Unit>[] = [
   {
-    header: "Kode",
+    header: "Kode Unit",
     accessorKey: "code",
     cell: ({ row }) => {
       const u = row.original;
