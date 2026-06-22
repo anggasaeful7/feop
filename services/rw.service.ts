@@ -52,4 +52,15 @@ export const RwService = {
       body: JSON.stringify(payload),
     });
   },
+
+  getRwAdmin: async (id: string) => {
+    return api<MasterAdminResponse>(`/master/rws/${id}/admin`);
+  },
+
+  updateRwAdmin: async (id: string, payload: MasterAdminPayload) => {
+    return api<MasterAdminResponse>(`/master/rws/${id}/admin`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+  },
 };

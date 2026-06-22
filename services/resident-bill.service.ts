@@ -6,6 +6,7 @@ import type {
   ResidentBillCreatePayload,
   ResidentBillByUnitQueryParams,
   ResidentBillByUnitItem,
+  ResidentBillSummary,
 } from "@/types/billing";
 
 const BASE_URL = "/resident-bills";
@@ -78,9 +79,26 @@ export async function getResidentBillsByUnit(params?: ResidentBillByUnitQueryPar
   if (params?.unit) qs.set("unit", params.unit);
   if (params?.name) qs.set("name", params.name);
   if (params?.rt) qs.set("rt", params.rt);
+  if (params?.sort) qs.set("sort", params.sort);
   if (params?.is_late !== undefined) qs.set("is_late", params.is_late.toString());
 
   const query = qs.toString();
   return api<Paged<ResidentBillByUnitItem>>(`${BASE_URL}/by-unit${query ? `?${query}` : ""}`);
+}
+
+export async function getResidentBillSummary(params?: Omit<ResidentBillByUnitQueryParams, "page" | "per_page" | "sort">) {
+  const qs = new URLSearchParams();
+  if (params?.year) qs.set("year", params.year.toString());
+  if (params?.status) qs.set("status", params.status);
+  if (params?.kind) qs.set("kind", params.kind);
+  if (params?.search) qs.set("search", params.search);
+  if (params?.unit_id) qs.set("unit_id", params.unit_id);
+  if (params?.unit) qs.set("unit", params.unit);
+  if (params?.name) qs.set("name", params.name);
+  if (params?.rt) qs.set("rt", params.rt);
+  if (params?.is_late !== undefined) qs.set("is_late", params.is_late.toString());
+
+  const query = qs.toString();
+  return api<ResidentBillSummary>(`${BASE_URL}/summary${query ? `?${query}` : ""}`);
 }
 

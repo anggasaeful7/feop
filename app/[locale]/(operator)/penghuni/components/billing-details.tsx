@@ -9,6 +9,20 @@ import { idr } from "@/lib/format";
 import { ResidentBillByUnitItem, ResidentBill } from "@/types/billing";
 import { usePermissions, hasPermission } from "@/hooks/api/use-permissions";
 
+const getBillPeriod = (bill: ResidentBill) => {
+  if (bill.month && bill.year) {
+    const monthStr = [
+      "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+      "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+    ][bill.month - 1] || "";
+    return `${monthStr} ${bill.year}`;
+  }
+  if (bill.period_start) {
+    return new Date(bill.period_start).toLocaleDateString("id-ID", { month: "long", year: "numeric" });
+  }
+  return null;
+};
+
 interface BillingDetailsProps {
   unit: ResidentBillByUnitItem;
   year: number;
@@ -18,9 +32,9 @@ interface BillingDetailsProps {
   handleSelectAll: (checked: boolean, bills: ResidentBill[]) => void;
 }
 
-export function BillingDetails({ 
-  unit, 
-  year, 
+export function BillingDetails({
+  unit,
+  year,
   handleTagih,
   selectedBills,
   handleSelectBill,
@@ -89,9 +103,14 @@ export function BillingDetails({
                         <div className="font-semibold text-zinc-800">
                           {bill.title}
                         </div>
-                        {bill.kind === "specific" && bill.period_start && (
+                        {getBillPeriod(bill) && (
                           <div className="text-[11px] text-zinc-500 font-medium mt-0.5">
-                            Periode: {new Date(bill.period_start).toLocaleDateString("id-ID", { month: "long", year: "numeric" })}
+                            Periode: {getBillPeriod(bill)}
+                          </div>
+                        )}
+                        {bill.created_by && (
+                          <div className="text-[10px] text-zinc-400 font-medium mt-0.5">
+                            Dibuat oleh: {bill.created_by}
                           </div>
                         )}
                       </td>
@@ -209,9 +228,14 @@ export function BillingDetails({
                       <div className="font-semibold text-zinc-800">
                         {bill.title}
                       </div>
-                      {bill.kind === "specific" && bill.period_start && (
+                      {getBillPeriod(bill) && (
                         <div className="text-[11px] text-zinc-500 font-medium mt-0.5">
-                          Periode: {new Date(bill.period_start).toLocaleDateString("id-ID", { month: "long", year: "numeric" })}
+                          Periode: {getBillPeriod(bill)}
+                        </div>
+                      )}
+                      {bill.created_by && (
+                        <div className="text-[10px] text-zinc-400 font-medium mt-0.5">
+                          Dibuat oleh: {bill.created_by}
                         </div>
                       )}
                     </td>

@@ -16,25 +16,30 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
-import { masterAdminSchema, type MasterAdminFormValues } from "@/lib/validations/admin";
+import { getAdminSchema, type MasterAdminFormValues } from "@/lib/validations/admin";
 
 export function MasterAdminFormDialog({
   title,
   onClose,
   onSubmit,
   isPending,
+  initial,
+  isEditing = false,
 }: {
   title: string;
   onClose: () => void;
   onSubmit: (values: MasterAdminFormValues) => void;
   isPending: boolean;
+  initial?: { email: string; full_name: string };
+  isEditing?: boolean;
 }) {
   const [showPassword, setShowPassword] = useState(false);
+  const schema = getAdminSchema(isEditing);
   const form = useForm<MasterAdminFormValues>({
-    resolver: zodResolver(masterAdminSchema),
+    resolver: zodResolver(schema),
     defaultValues: {
-      email: "",
-      full_name: "",
+      email: initial?.email || "",
+      full_name: initial?.full_name || "",
       password: "",
     },
   });
@@ -51,10 +56,10 @@ export function MasterAdminFormDialog({
       footer={
         <ModalFormFooter
           isPending={isPending}
-          isEditing={false}
+          isEditing={isEditing}
           onClose={onClose}
           onSubmit={form.handleSubmit(onSubmit)}
-          submitLabel="✓ Simpan Admin"
+          submitLabel={isEditing ? "✓ Simpan Perubahan" : "✓ Simpan Admin"}
         />
       }
     >

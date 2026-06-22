@@ -7,6 +7,7 @@ import {
   rejectResidentBill,
   deleteResidentBill,
   getResidentBillsByUnit,
+  getResidentBillSummary,
 } from "@/services/resident-bill.service";
 import type { ResidentBillQueryParams, ResidentBillByUnitQueryParams } from "@/types/billing";
 
@@ -18,6 +19,7 @@ export const residentBillQK = {
   byUnit: (params?: ResidentBillByUnitQueryParams) => [...residentBillQK.byUnits(), params] as const,
   details: () => [...residentBillQK.all, "detail"] as const,
   detail: (id: string) => [...residentBillQK.details(), id] as const,
+  summary: (params?: Omit<ResidentBillByUnitQueryParams, "page" | "per_page" | "sort">) => [...residentBillQK.all, "summary", params] as const,
 };
 
 export function useResidentBills(params?: ResidentBillQueryParams) {
@@ -88,5 +90,13 @@ export function useDeleteResidentBill() {
     onError: (error) => {
       toast.error(error.message || "Gagal menghapus tagihan");
     },
+  });
+}
+
+export function useResidentBillSummary(params?: Omit<ResidentBillByUnitQueryParams, "page" | "per_page" | "sort">) {
+  return useQuery({
+    queryKey: residentBillQK.summary(params),
+    queryFn: () => getResidentBillSummary(params),
+    placeholderData: (prev) => prev,
   });
 }

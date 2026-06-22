@@ -107,3 +107,29 @@ export function useCreateRwAdmin() {
     },
   });
 }
+
+export function useRwAdmin(id: string, enabled = true) {
+  return useQuery({
+    queryKey: [...rwQK.all, "admin", id] as const,
+    queryFn: () => RwService.getRwAdmin(id),
+    enabled: !!id && enabled,
+    retry: false,
+  });
+}
+
+export function useUpdateRwAdmin() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: MasterAdminPayload }) =>
+      RwService.updateRwAdmin(id, payload),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: rwQK.all });
+      queryClient.invalidateQueries({ queryKey: [...rwQK.all, "admin", id] });
+      toast.success("Admin RW berhasil diubah");
+    },
+    onError: (error) => {
+      toast.error(error instanceof ApiError ? error.message : "Gagal mengubah Admin RW");
+    },
+  });
+}

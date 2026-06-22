@@ -109,3 +109,29 @@ export function useCreateRtAdmin() {
     },
   });
 }
+
+export function useRtAdmin(id: string, enabled = true) {
+  return useQuery({
+    queryKey: [...rtQK.all, "admin", id] as const,
+    queryFn: () => RtService.getRtAdmin(id),
+    enabled: !!id && enabled,
+    retry: false,
+  });
+}
+
+export function useUpdateRtAdmin() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: MasterAdminPayload }) =>
+      RtService.updateRtAdmin(id, payload),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: rtQK.all });
+      queryClient.invalidateQueries({ queryKey: [...rtQK.all, "admin", id] });
+      toast.success("Admin RT berhasil diubah");
+    },
+    onError: (error) => {
+      toast.error(error instanceof ApiError ? error.message : "Gagal mengubah Admin RT");
+    },
+  });
+}

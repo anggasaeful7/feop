@@ -103,4 +103,15 @@ export const RtService = {
       body: JSON.stringify(payload),
     });
   },
+
+  getRtAdmin: async (id: string) => {
+    return api<MasterAdminResponse>(`/master/rts/${id}/admin`);
+  },
+
+  updateRtAdmin: async (id: string, payload: MasterAdminPayload) => {
+    return api<MasterAdminResponse>(`/master/rts/${id}/admin`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+  },
 };
