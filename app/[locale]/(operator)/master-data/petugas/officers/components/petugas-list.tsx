@@ -13,10 +13,17 @@ import type { Officer, OfficerDivision } from "@/types/master-data";
 import { PetugasFormDialog } from "./petugas-form-dialog";
 import { useDataTableState } from "@/hooks/use-data-table-state";
 import { baseColumns } from "./columns";
+import { usePermissions, hasPermission } from "@/hooks/api/use-permissions";
 
 export function PetugasList() {
   const { search, setSearch, debouncedSearch, page, setPage, perPage } = useDataTableState();
   const [division, setDivision] = useState<string>("all");
+
+  const { data: permissions } = usePermissions();
+  const isAdmin = permissions?.role === "admin_workspace";
+  const canCreate = isAdmin || hasPermission(permissions, "officers", "create");
+  const canUpdate = isAdmin || hasPermission(permissions, "officers", "update");
+  const canDelete = isAdmin || hasPermission(permissions, "officers", "delete");
 
   const { data, error, isLoading } = useOfficers({
     search: debouncedSearch,
@@ -41,15 +48,15 @@ export function PetugasList() {
         const u = row.original;
         return (
           <DataTableRowActions
-            onEdit={() => setEditing(u)}
-            onDelete={() => deleteOfficer.mutate(u.id)}
+            onEdit={canUpdate ? () => setEditing(u) : undefined}
+            onDelete={canDelete ? () => deleteOfficer.mutate(u.id) : undefined}
             isDeleting={deleteOfficer.isPending && deleteOfficer.variables === u.id}
             deleteConfirmMessage={`Hapus petugas ${u.name}?`}
           />
         );
       },
     },
-  ], [deleteOfficer]);
+  ], [deleteOfficer, canUpdate, canDelete]);
 
   return (
     <>
@@ -83,9 +90,11 @@ export function PetugasList() {
               </SelectContent>
             </Select>
 
-            <Button size="sm" onClick={() => setCreating(true)} className="w-full sm:w-auto">
-              <Plus size={16} className="mr-1" /> Tambah Petugas
-            </Button>
+            {canCreate && (
+              <Button size="sm" onClick={() => setCreating(true)} className="w-full sm:w-auto">
+                <Plus size={16} className="mr-1" /> Tambah Petugas
+              </Button>
+            )}
           </div>
         }
       />

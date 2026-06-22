@@ -14,8 +14,14 @@ import {
 } from "@/hooks/api/use-general-facility";
 import { useDataTableState } from "@/hooks/use-data-table-state";
 import { baseColumns } from "./columns";
+import { usePermissions, hasPermission } from "@/hooks/api/use-permissions";
 
 export function GeneralFacilityList() {
+  const { data: permissions } = usePermissions();
+  const canCreate = hasPermission(permissions, "general_facilities", "create");
+  const canUpdate = hasPermission(permissions, "general_facilities", "update");
+  const canDelete = hasPermission(permissions, "general_facilities", "delete");
+
   const { search, setSearch, debouncedSearch, page, setPage, perPage } = useDataTableState();
 
   const { data, isLoading } = useGeneralFacilities({
@@ -42,17 +48,19 @@ export function GeneralFacilityList() {
         const t = row.original;
         return (
           <div className="flex items-center justify-end gap-2">
-            <DataTableRowActions
-              onEdit={() => setEditing(t)}
-              onDelete={() => deleteMutation.mutate(t.id)}
-              isDeleting={deleteMutation.isPending && deleteMutation.variables === t.id}
-              deleteConfirmMessage={`Hapus fasilitas ${t.name}?`}
-            />
+            {(canUpdate || canDelete) && (
+              <DataTableRowActions
+                onEdit={canUpdate ? () => setEditing(t) : undefined}
+                onDelete={canDelete ? () => deleteMutation.mutate(t.id) : undefined}
+                isDeleting={deleteMutation.isPending && deleteMutation.variables === t.id}
+                deleteConfirmMessage={`Hapus fasilitas ${t.name}?`}
+              />
+            )}
           </div>
         );
       },
     },
-  ], [deleteMutation]);
+  ], [deleteMutation, canUpdate, canDelete]);
 
   return (
     <>
@@ -69,15 +77,21 @@ export function GeneralFacilityList() {
         onPageChange={setPage}
         actions={
           <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
-            <Button size="sm" variant="secondary" onClick={() => setShowSettings(true)} className="w-full sm:w-auto">
-              <Settings size={16} className="mr-1" /> Pengaturan Punishment
-            </Button>
-            <Button size="sm" variant="secondary" onClick={() => setAssigning(true)} className="w-full sm:w-auto">
-              <Link size={16} className="mr-1" /> Assign ke unit
-            </Button>
-            <Button size="sm" onClick={() => setCreating(true)} className="w-full sm:w-auto">
-              <Plus size={16} className="mr-1" /> Tambah Fasilitas
-            </Button>
+            {canUpdate && (
+              <Button size="sm" variant="secondary" onClick={() => setShowSettings(true)} className="w-full sm:w-auto">
+                <Settings size={16} className="mr-1" /> Pengaturan Punishment
+              </Button>
+            )}
+            {canCreate && (
+              <Button size="sm" variant="secondary" onClick={() => setAssigning(true)} className="w-full sm:w-auto">
+                <Link size={16} className="mr-1" /> Assign ke unit
+              </Button>
+            )}
+            {canCreate && (
+              <Button size="sm" onClick={() => setCreating(true)} className="w-full sm:w-auto">
+                <Plus size={16} className="mr-1" /> Tambah Fasilitas
+              </Button>
+            )}
           </div>
         }
       />

@@ -100,7 +100,7 @@ export function DataTable<TData, TValue>({
               />
             </div>
           )}
-          <div className="w-full overflow-x-auto sm:w-auto pb-1 sm:pb-0 hide-scrollbar">
+          <div className="w-full overflow-x-auto sm:w-auto py-1 px-1 hide-scrollbar">
             {actions}
           </div>
         </div>

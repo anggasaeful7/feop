@@ -11,8 +11,14 @@ import type { UnitType } from "@/types/master-data";
 import { useUnitTypes, useDeleteUnitType, unitTypeQK } from "@/hooks/api/use-unit-type";
 import { useDataTableState } from "@/hooks/use-data-table-state";
 import { baseColumns } from "./columns";
+import { usePermissions, hasPermission } from "@/hooks/api/use-permissions";
 
 export function UnitTypesList() {
+  const { data: permissions } = usePermissions();
+  const canCreate = hasPermission(permissions, "units", "create");
+  const canUpdate = hasPermission(permissions, "units", "update");
+  const canDelete = hasPermission(permissions, "units", "delete");
+
   const queryClient = useQueryClient();
   const { search, setSearch, debouncedSearch, page, setPage, perPage } = useDataTableState();
 
@@ -29,24 +35,27 @@ export function UnitTypesList() {
   const [editing, setEditing] = useState<UnitType | null>(null);
   const [creating, setCreating] = useState(false);
 
-  const columns: ColumnDef<UnitType>[] = useMemo(() => [
-    ...baseColumns,
-    {
-      id: "actions",
-      header: "",
-      cell: ({ row }) => {
-        const t = row.original;
-        return (
-          <DataTableRowActions
-            onEdit={() => setEditing(t)}
-            onDelete={() => deleteMutation.mutate(t.id)}
-            isDeleting={deleteMutation.isPending && deleteMutation.variables === t.id}
-            deleteConfirmMessage={`Hapus tipe ${t.code}?`}
-          />
-        );
-      },
-    },
-  ], [deleteMutation]);
+  const columns: ColumnDef<UnitType>[] = useMemo(() => {
+    const cols = [...baseColumns];
+    if (canUpdate || canDelete) {
+      cols.push({
+        id: "actions",
+        header: "",
+        cell: ({ row }) => {
+          const t = row.original;
+          return (
+            <DataTableRowActions
+              onEdit={canUpdate ? () => setEditing(t) : undefined}
+              onDelete={canDelete ? () => deleteMutation.mutate(t.id) : undefined}
+              isDeleting={deleteMutation.isPending && deleteMutation.variables === t.id}
+              deleteConfirmMessage={`Hapus tipe ${t.code}?`}
+            />
+          );
+        },
+      });
+    }
+    return cols;
+  }, [deleteMutation, canUpdate, canDelete]);
 
   return (
     <>
@@ -63,16 +72,20 @@ export function UnitTypesList() {
         onPageChange={setPage}
         actions={
           <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
-            <CSVTools
-              resourceLabel="Tipe Unit"
-              templatePath="/master/unit-types/csv-template"
-              importPath="/master/unit-types/import"
-              templateFilename="unit-types-template.csv"
-              onAfterImport={() => queryClient.invalidateQueries({ queryKey: unitTypeQK.all })}
-            />
-            <Button size="sm" onClick={() => setCreating(true)} className="w-full sm:w-auto">
-              <Plus size={16} className="mr-1" /> Tambah Tipe
-            </Button>
+            {canCreate && (
+              <CSVTools
+                resourceLabel="Tipe Unit"
+                templatePath="/master/unit-types/csv-template"
+                importPath="/master/unit-types/import"
+                templateFilename="unit-types-template.csv"
+                onAfterImport={() => queryClient.invalidateQueries({ queryKey: unitTypeQK.all })}
+              />
+            )}
+            {canCreate && (
+              <Button size="sm" onClick={() => setCreating(true)} className="w-full sm:w-auto">
+                <Plus size={16} className="mr-1" /> Tambah Tipe
+              </Button>
+            )}
           </div>
         }
       />

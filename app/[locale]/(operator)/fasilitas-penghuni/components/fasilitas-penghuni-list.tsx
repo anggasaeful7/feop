@@ -8,19 +8,14 @@ import { ColumnDef } from "@tanstack/react-table";
 import { ApiError, downloadCSV } from "@/lib/axios";
 import { toast } from "sonner";
 import { useGeneralFacilitiesByUnit } from "@/hooks/api/use-general-facility";
+import { usePermissions, hasPermission } from "@/hooks/api/use-permissions";
 import { useDataTableState } from "@/hooks/use-data-table-state";
 import { UnitWithGeneralFacilities } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-const RT_OPTIONS = [
-  { value: "all", label: "Semua RT" },
-  { value: "001", label: "RT 001" },
-  { value: "002", label: "RT 002" },
-  { value: "003", label: "RT 003" },
-  { value: "004", label: "RT 004" },
-  { value: "005", label: "RT 005" },
-];
+import { useMyRts } from "@/hooks/api/use-rt";
+
 
 const LATE_TABS = [
   { key: "all", label: "Semua" },
@@ -43,6 +38,27 @@ export function FasilitasPenghuniList() {
   const [lateFilter, setLateFilter] = useState<string>(urlIsLate);
   const [rtFilter, setRtFilter] = useState<string>("all");
   const [prevUrlIsLate, setPrevUrlIsLate] = useState(urlIsLate);
+
+  const { data: permissions } = usePermissions();
+  const { data: rtsData } = useMyRts();
+  const canExport = hasPermission(permissions, "resident_bills", "export");
+
+  const rtOptions = useMemo(() => {
+    const base = [{ value: "all", label: "Semua RT" }];
+    if (!rtsData) return base;
+    const seen = new Set<string>();
+    const loaded: { value: string; label: string }[] = [];
+    rtsData.forEach((item) => {
+      if (!seen.has(item.code)) {
+        seen.add(item.code);
+        loaded.push({
+          value: item.code,
+          label: item.name,
+        });
+      }
+    });
+    return [...base, ...loaded];
+  }, [rtsData]);
 
   // Sync state during render
   if (urlIsLate !== prevUrlIsLate) {
@@ -249,11 +265,11 @@ export function FasilitasPenghuniList() {
                   setPage(1);
                 }}
               >
-                <SelectTrigger className="w-full h-9 rounded-full border-zinc-300 text-xs font-semibold px-4 bg-white text-zinc-700">
+                <SelectTrigger className="w-full h-8 rounded-full border-zinc-300 text-xs font-semibold px-4 py-1 bg-white text-zinc-700">
                   <SelectValue placeholder="Semua RT" />
                 </SelectTrigger>
                 <SelectContent>
-                  {RT_OPTIONS.map((opt) => (
+                  {rtOptions.map((opt) => (
                     <SelectItem key={opt.value} value={opt.value}>
                       {opt.label}
                     </SelectItem>
@@ -261,15 +277,17 @@ export function FasilitasPenghuniList() {
                 </SelectContent>
               </Select>
             </div>
-            <Button
-              variant="secondary"
-              size="sm"
-              className="font-bold italic w-full sm:w-auto"
-              onClick={handleExportPdf}
-              disabled={isExportingPdf}
-            >
-              <Download size={14} className="mr-1" /> {isExportingPdf ? "..." : "PDF Fasilitas"}
-            </Button>
+            {canExport && (
+              <Button
+                variant="secondary"
+                size="sm"
+                className="font-bold italic w-full sm:w-auto"
+                onClick={handleExportPdf}
+                disabled={isExportingPdf}
+              >
+                <Download size={14} className="mr-1" /> {isExportingPdf ? "..." : "PDF Fasilitas"}
+              </Button>
+            )}
           </div>
         }
       />

@@ -10,15 +10,20 @@ import { useFamilyMembers, useDeleteFamilyMember, useFamilyMemberPictureUrl } fr
 import type { Person, FamilyMember } from "@/types/master-data";
 import { FamilyMemberFormModal } from "./family-member-form-modal";
 import { Skeleton } from "@/components/ui/skeleton";
+import { usePermissions, hasPermission } from "@/hooks/api/use-permissions";
 
 function FamilyMemberCard({
   person,
   member,
   onEdit,
+  canUpdate,
+  canDelete,
 }: {
   person: Person;
   member: FamilyMember;
   onEdit: (m: FamilyMember) => void;
+  canUpdate: boolean;
+  canDelete: boolean;
 }) {
   const { data: pictureData, isLoading: isLoadingPicture } = useFamilyMemberPictureUrl(person.id, member.id, member.has_picture);
   const deleteMut = useDeleteFamilyMember(person.id);
@@ -52,29 +57,33 @@ function FamilyMemberCard({
       </div>
 
       <div className="flex flex-col gap-1 sm:flex-row shrink-0">
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 rounded-lg"
-          onClick={() => onEdit(member)}
-        >
-          <Edit2 size={14} />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg"
-          onClick={() => {
-            if (confirm(`Hapus ${member.name} dari anggota keluarga?`)) {
-              deleteMut.mutate(member.id);
-            }
-          }}
-          disabled={deleteMut.isPending}
-        >
-          <Trash2 size={14} />
-        </Button>
+        {canUpdate && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 rounded-lg"
+            onClick={() => onEdit(member)}
+          >
+            <Edit2 size={14} />
+          </Button>
+        )}
+        {canDelete && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg"
+            onClick={() => {
+              if (confirm(`Hapus ${member.name} dari anggota keluarga?`)) {
+                deleteMut.mutate(member.id);
+              }
+            }}
+            disabled={deleteMut.isPending}
+          >
+            <Trash2 size={14} />
+          </Button>
+        )}
       </div>
     </div>
   );
@@ -87,6 +96,11 @@ export function FamilyMemberListModal({
   person: Person;
   onClose: () => void;
 }) {
+  const { data: permissions } = usePermissions();
+  const canCreate = hasPermission(permissions, "family_members", "create");
+  const canUpdate = hasPermission(permissions, "family_members", "update");
+  const canDelete = hasPermission(permissions, "family_members", "delete");
+
   const { data, isPending } = useFamilyMembers(person.id);
   const items = data?.items || [];
 
@@ -108,9 +122,11 @@ export function FamilyMemberListModal({
       >
         <div className="mb-4 flex items-center justify-between">
           <p className="text-sm text-zinc-500">Daftar anggota keluarga yang terdaftar untuk warga ini.</p>
-          <Button size="sm" onClick={() => setCreating(true)} className="rounded-xl">
-            <Plus size={16} className="mr-1" /> Tambah
-          </Button>
+          {canCreate && (
+            <Button size="sm" onClick={() => setCreating(true)} className="rounded-xl">
+              <Plus size={16} className="mr-1" /> Tambah
+            </Button>
+          )}
         </div>
 
         {isPending ? (
@@ -133,6 +149,8 @@ export function FamilyMemberListModal({
                 person={person}
                 member={member}
                 onEdit={setEditing}
+                canUpdate={canUpdate}
+                canDelete={canDelete}
               />
             ))}
           </div>

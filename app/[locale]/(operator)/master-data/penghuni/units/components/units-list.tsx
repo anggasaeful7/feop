@@ -14,17 +14,35 @@ import { UnitFormModal } from "./modals/unit-form-modal";
 import { useDataTableState } from "@/hooks/use-data-table-state";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { baseColumns } from "./columns";
+import { usePermissions, hasPermission } from "@/hooks/api/use-permissions";
 
-const RT_OPTIONS = [
-  { value: "all", label: "Semua RT" },
-  { value: "001", label: "RT 001" },
-  { value: "002", label: "RT 002" },
-  { value: "003", label: "RT 003" },
-  { value: "004", label: "RT 004" },
-  { value: "005", label: "RT 005" },
-];
+import { useMyRts } from "@/hooks/api/use-rt";
+
 
 export function UnitsList() {
+  const { data: permissions } = usePermissions();
+  const { data: rtsData } = useMyRts();
+  const canCreate = hasPermission(permissions, "units", "create");
+  const canUpdate = hasPermission(permissions, "units", "update");
+  const canDelete = hasPermission(permissions, "units", "delete");
+
+  const rtOptions = useMemo(() => {
+    const base = [{ value: "all", label: "Semua RT" }];
+    if (!rtsData) return base;
+    const seen = new Set<string>();
+    const loaded: { value: string; label: string }[] = [];
+    rtsData.forEach((item) => {
+      if (!seen.has(item.code)) {
+        seen.add(item.code);
+        loaded.push({
+          value: item.code,
+          label: item.name,
+        });
+      }
+    });
+    return [...base, ...loaded];
+  }, [rtsData]);
+
   const { search, setSearch, debouncedSearch, page, setPage, perPage } = useDataTableState();
 
   const [rtFilter, setRtFilter] = useState<string>("all");
@@ -43,24 +61,27 @@ export function UnitsList() {
 
   const deleteUnit = useDeleteUnit();
 
-  const columns: ColumnDef<Unit>[] = useMemo(() => [
-    ...baseColumns,
-    {
-      id: "actions",
-      header: "",
-      cell: ({ row }) => {
-        const u = row.original;
-        return (
-          <DataTableRowActions
-            onEdit={() => setEditing(u)}
-            onDelete={() => deleteUnit.mutate(u.id)}
-            isDeleting={deleteUnit.isPending && deleteUnit.variables === u.id}
-            deleteConfirmMessage={`Hapus unit ${u.code}?`}
-          />
-        );
-      },
-    },
-  ], [deleteUnit]);
+  const columns: ColumnDef<Unit>[] = useMemo(() => {
+    const cols = [...baseColumns];
+    if (canUpdate || canDelete) {
+      cols.push({
+        id: "actions",
+        header: "",
+        cell: ({ row }) => {
+          const u = row.original;
+          return (
+            <DataTableRowActions
+              onEdit={canUpdate ? () => setEditing(u) : undefined}
+              onDelete={canDelete ? () => deleteUnit.mutate(u.id) : undefined}
+              isDeleting={deleteUnit.isPending && deleteUnit.variables === u.id}
+              deleteConfirmMessage={`Hapus unit ${u.code}?`}
+            />
+          );
+        },
+      });
+    }
+    return cols;
+  }, [deleteUnit, canUpdate, canDelete]);
 
   return (
     <>
@@ -91,11 +112,11 @@ export function UnitsList() {
                   setPage(1);
                 }}
               >
-                <SelectTrigger className="w-full h-9 rounded-full border-zinc-300 text-xs font-semibold px-4 bg-white text-zinc-700">
+                <SelectTrigger className="w-full h-8 rounded-full border-zinc-300 text-xs font-semibold px-4 py-1 bg-white text-zinc-700">
                   <SelectValue placeholder="Semua RT" />
                 </SelectTrigger>
                 <SelectContent>
-                  {RT_OPTIONS.map((opt) => (
+                  {rtOptions.map((opt) => (
                     <SelectItem key={opt.value} value={opt.value}>
                       {opt.label}
                     </SelectItem>
@@ -103,16 +124,20 @@ export function UnitsList() {
                 </SelectContent>
               </Select>
             </div>
-            <CSVTools
-              resourceLabel="Unit"
-              templatePath="/master/units/csv-template"
-              importPath="/master/units/import"
-              templateFilename="units-template.csv"
-              onAfterImport={() => { refetch(); }}
-            />
-            <Button size="sm" onClick={() => setCreating(true)} className="w-full sm:w-auto">
-              <Plus size={16} className="mr-1" /> Tambah Unit
-            </Button>
+            {canCreate && (
+              <CSVTools
+                resourceLabel="Unit"
+                templatePath="/master/units/csv-template"
+                importPath="/master/units/import"
+                templateFilename="units-template.csv"
+                onAfterImport={() => { refetch(); }}
+              />
+            )}
+            {canCreate && (
+              <Button size="sm" onClick={() => setCreating(true)} className="w-full sm:w-auto">
+                <Plus size={16} className="mr-1" /> Tambah Unit
+              </Button>
+            )}
           </div>
         }
       />

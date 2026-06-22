@@ -11,8 +11,15 @@ import { ResidentFormModal } from "./modals/resident-form-modal";
 import { FamilyMemberListModal } from "./family-members/family-member-list-modal";
 import { useDataTableState } from "@/hooks/use-data-table-state";
 import { baseColumns } from "./columns";
+import { usePermissions, hasPermission } from "@/hooks/api/use-permissions";
 
 export function ResidentList() {
+  const { data: permissions } = usePermissions();
+  const canCreate = hasPermission(permissions, "persons", "create");
+  const canUpdate = hasPermission(permissions, "persons", "update");
+  const canDelete = hasPermission(permissions, "persons", "delete");
+  const canViewFamily = hasPermission(permissions, "family_members", "read");
+
   const { search, setSearch, debouncedSearch, page, setPage, perPage } = useDataTableState();
 
   const { data, error, isLoading, refetch } = usePersons({
@@ -29,33 +36,38 @@ export function ResidentList() {
 
   const deletePerson = useDeletePerson();
 
-  const columns: ColumnDef<Person>[] = useMemo(() => [
-    ...baseColumns,
-    {
-      id: "actions",
-      header: "",
-      cell: ({ row }) => {
-        const p = row.original;
-        return (
-          <DataTableRowActions
-            onEdit={() => setEditing(p)}
-            onDelete={() => deletePerson.mutate(p.id)}
-            isDeleting={deletePerson.isPending && deletePerson.variables === p.id}
-            deleteConfirmMessage={`Hapus warga ${p.full_name}?`}
-            extraActions={
-              <button
-                onClick={() => setViewingFamily(p)}
-                className="hover:text-purple-600 transition"
-                title="Anggota Keluarga"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-users"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              </button>
-            }
-          />
-        );
-      },
-    },
-  ], [deletePerson]);
+  const columns: ColumnDef<Person>[] = useMemo(() => {
+    const cols = [...baseColumns];
+    if (canUpdate || canDelete || canViewFamily) {
+      cols.push({
+        id: "actions",
+        header: "",
+        cell: ({ row }) => {
+          const p = row.original;
+          return (
+            <DataTableRowActions
+              onEdit={canUpdate ? () => setEditing(p) : undefined}
+              onDelete={canDelete ? () => deletePerson.mutate(p.id) : undefined}
+              isDeleting={deletePerson.isPending && deletePerson.variables === p.id}
+              deleteConfirmMessage={`Hapus warga ${p.full_name}?`}
+              extraActions={
+                canViewFamily ? (
+                  <button
+                    onClick={() => setViewingFamily(p)}
+                    className="hover:text-purple-600 transition"
+                    title="Anggota Keluarga"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-users"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                  </button>
+                ) : null
+              }
+            />
+          );
+        },
+      });
+    }
+    return cols;
+  }, [deletePerson, canUpdate, canDelete, canViewFamily]);
 
   return (
     <>
@@ -78,16 +90,20 @@ export function ResidentList() {
         onPageChange={setPage}
         actions={
           <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
-            <CSVTools
-              resourceLabel="Warga"
-              templatePath="/master/persons/csv-template"
-              importPath="/master/persons/import"
-              templateFilename="persons-template.csv"
-              onAfterImport={() => { refetch(); }}
-            />
-            <Button size="sm" onClick={() => setCreating(true)} className="w-full sm:w-auto">
-              <Plus size={16} className="mr-1" /> Tambah Warga
-            </Button>
+            {canCreate && (
+              <CSVTools
+                resourceLabel="Warga"
+                templatePath="/master/persons/csv-template"
+                importPath="/master/persons/import"
+                templateFilename="persons-template.csv"
+                onAfterImport={() => { refetch(); }}
+              />
+            )}
+            {canCreate && (
+              <Button size="sm" onClick={() => setCreating(true)} className="w-full sm:w-auto">
+                <Plus size={16} className="mr-1" /> Tambah Warga
+              </Button>
+            )}
           </div>
         }
       />

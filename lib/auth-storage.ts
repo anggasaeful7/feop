@@ -65,3 +65,4 @@ export function clearAuth() {
   }
   document.cookie = `${AUTH_KEYS.token}=; path=/; max-age=0; samesite=lax`;
 }
+

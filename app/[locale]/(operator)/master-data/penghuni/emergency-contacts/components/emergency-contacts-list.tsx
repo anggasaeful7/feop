@@ -13,8 +13,14 @@ import { useDataTableState } from "@/hooks/use-data-table-state";
 import { EmergencyContactFormModal } from "./modals/emergency-contacts-form-modal";
 
 import { baseColumns } from "./columns";
+import { usePermissions, hasPermission } from "@/hooks/api/use-permissions";
 
 export function EmergencyContactsList() {
+  const { data: permissions } = usePermissions();
+  const canCreate = hasPermission(permissions, "workspace_contacts", "create");
+  const canUpdate = hasPermission(permissions, "workspace_contacts", "update");
+  const canDelete = hasPermission(permissions, "workspace_contacts", "delete");
+
   const { search, setSearch, debouncedSearch, page, setPage, perPage } = useDataTableState();
 
   const { data: response, isLoading } = useEmergencyContacts({
@@ -29,24 +35,27 @@ export function EmergencyContactsList() {
 
   const deleteMutation = useDeleteEmergencyContact();
 
-  const columns: ColumnDef<EmergencyContact>[] = useMemo(() => [
-    ...baseColumns,
-    {
-      id: "actions",
-      header: "",
-      cell: ({ row }) => {
-        const c = row.original;
-        return (
-          <DataTableRowActions
-            onEdit={() => setEditing(c)}
-            onDelete={() => deleteMutation.mutate(c.id)}
-            isDeleting={deleteMutation.isPending && deleteMutation.variables === c.id}
-            deleteConfirmMessage={`Apakah Anda yakin ingin menghapus kontak ${c.name}?`}
-          />
-        );
-      },
-    },
-  ], [deleteMutation]);
+  const columns: ColumnDef<EmergencyContact>[] = useMemo(() => {
+    const cols = [...baseColumns];
+    if (canUpdate || canDelete) {
+      cols.push({
+        id: "actions",
+        header: "",
+        cell: ({ row }) => {
+          const c = row.original;
+          return (
+            <DataTableRowActions
+              onEdit={canUpdate ? () => setEditing(c) : undefined}
+              onDelete={canDelete ? () => deleteMutation.mutate(c.id) : undefined}
+              isDeleting={deleteMutation.isPending && deleteMutation.variables === c.id}
+              deleteConfirmMessage={`Apakah Anda yakin ingin menghapus kontak ${c.name}?`}
+            />
+          );
+        },
+      });
+    }
+    return cols;
+  }, [deleteMutation, canUpdate, canDelete]);
 
 
 
@@ -64,9 +73,11 @@ export function EmergencyContactsList() {
         perPage={perPage}
         onPageChange={setPage}
         actions={
-          <Button size="sm" onClick={() => setCreating(true)} className="w-full sm:w-auto">
-            <Plus size={16} className="mr-1" /> Tambah Kontak
-          </Button>
+          canCreate ? (
+            <Button size="sm" onClick={() => setCreating(true)} className="w-full sm:w-auto">
+              <Plus size={16} className="mr-1" /> Tambah Kontak
+            </Button>
+          ) : undefined
         }
       />
 

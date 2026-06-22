@@ -35,7 +35,7 @@ export function BaseScheduleDetailModal({
   initialSchedule?: BaseSchedule;
   division: "cleaning" | "security";
   onClose: () => void;
-  onEdit: (schedule: BaseSchedule) => void;
+  onEdit?: (schedule: BaseSchedule) => void;
   onDelete?: () => void;
   isDeleting?: boolean;
 }) {
@@ -93,10 +93,12 @@ export function BaseScheduleDetailModal({
             <Button variant="secondary" onClick={onClose}>
               Tutup
             </Button>
-            <Button onClick={() => schedule && onEdit(schedule)}>
-              <Pencil size={16} className="mr-2" />
-              Edit Jadwal
-            </Button>
+            {onEdit && (
+              <Button onClick={() => schedule && onEdit(schedule)}>
+                <Pencil size={16} className="mr-2" />
+                Edit Jadwal
+              </Button>
+            )}
           </div>
         </div>
       }

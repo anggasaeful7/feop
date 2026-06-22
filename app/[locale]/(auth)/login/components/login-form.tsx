@@ -1,21 +1,36 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Lock, User } from "lucide-react";
 import { api, ApiError } from "@/lib/axios";
 import { writeAuth } from "@/lib/auth-storage";
 import type { LoginResponse } from "@/types";
+import { getMyPermissions } from "@/hooks/api/use-permissions";
+import { usePermissionsStore } from "@/store/use-permissions-store";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function LoginForm() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Clear permissions store when the login page mounts.
+    // This avoids clearing it prematurely before/during the redirect transition,
+    // which prevents the sidebar layout from flashing empty.
+    usePermissionsStore.getState().clearPermissions();
+
+    // Clear React Query cache so that any cached data from previous user accounts
+    // is deleted, forcing new fetches on dashboard.
+    queryClient.clear();
+  }, [queryClient]);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -28,6 +43,15 @@ export function LoginForm() {
         body: JSON.stringify({ email, password }),
       });
       writeAuth(out.access_token, out.user, remember);
+      
+      // Fetch permissions right after login and save to Zustand
+      try {
+        const perms = await getMyPermissions();
+        usePermissionsStore.getState().setPermissions(perms);
+      } catch (err) {
+        console.error("Failed to fetch permissions on login", err);
+      }
+
       router.push("/dashboard");
     } catch (e) {
       if (e instanceof ApiError) {

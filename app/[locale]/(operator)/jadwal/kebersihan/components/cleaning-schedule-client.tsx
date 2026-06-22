@@ -11,8 +11,14 @@ import { BaseScheduleDetailModal } from "../../components/base-schedule-detail-m
 import { CalendarView, type CalendarEvent } from "@/components/ui/calendar-view";
 import { getMonthDateRange } from "@/lib/utils";
 import { useScheduleCalendarEvents } from "../../hooks/use-schedule-calendar";
+import { usePermissions, hasPermission } from "@/hooks/api/use-permissions";
 
 export function CleaningScheduleClient() {
+  const { data: permissions } = usePermissions();
+  const canCreate = hasPermission(permissions, "schedules", "create");
+  const canUpdate = hasPermission(permissions, "schedules", "update");
+  const canDelete = hasPermission(permissions, "schedules", "delete");
+
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const { dateFrom, dateTo } = useMemo(() => getMonthDateRange(currentDate), [currentDate]);
@@ -43,6 +49,7 @@ export function CleaningScheduleClient() {
   };
 
   const handleDateClick = (dateStr: string) => {
+    if (!canCreate) return;
     setCreatingDate(dateStr);
     setCreating(true);
   };
@@ -58,12 +65,14 @@ export function CleaningScheduleClient() {
         title="Jadwal Kebersihan"
         subtitle="Atur dan pantau jadwal kebersihan lingkungan"
         actions={
-          <Button onClick={() => {
-            setCreatingDate(null);
-            setCreating(true);
-          }}>
-            <Plus size={16} className="mr-2" /> Tambah Jadwal
-          </Button>
+          canCreate ? (
+            <Button onClick={() => {
+              setCreatingDate(null);
+              setCreating(true);
+            }}>
+              <Plus size={16} className="mr-2" /> Tambah Jadwal
+            </Button>
+          ) : undefined
         }
       />
 
@@ -128,15 +137,15 @@ export function CleaningScheduleClient() {
           initialSchedule={viewing}
           division="cleaning"
           onClose={() => setViewing(null)}
-          onEdit={() => {
+          onEdit={canUpdate ? () => {
             setEditing(viewing);
             setViewing(null);
-          }}
-          onDelete={() => {
+          } : undefined}
+          onDelete={canDelete ? () => {
              if (confirm("Yakin hapus jadwal ini?")) {
                deleteMut.mutate(viewing.id, { onSuccess: () => setViewing(null) });
              }
-          }}
+          } : undefined}
           isDeleting={deleteMut.isPending}
         />
       )}

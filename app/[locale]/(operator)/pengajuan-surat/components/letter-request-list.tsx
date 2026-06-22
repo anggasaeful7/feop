@@ -12,10 +12,15 @@ import { useDataTableState } from "@/hooks/use-data-table-state";
 import { Pencil } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { usePermissions, hasPermission } from "@/hooks/api/use-permissions";
 
 export function LetterRequestList() {
   const { search, setSearch, debouncedSearch, page, setPage, perPage } = useDataTableState();
   const [status, setStatus] = useState<string>("all");
+
+  const { data: permissions } = usePermissions();
+  const canApprove = hasPermission(permissions, "letter_requests", "approve") || hasPermission(permissions, "letter_requests", "update");
+  const canReject = hasPermission(permissions, "letter_requests", "reject") || hasPermission(permissions, "letter_requests", "update");
 
   const { data, isLoading } = useLetterRequests({
     page,
@@ -95,8 +100,8 @@ export function LetterRequestList() {
         <DetailModal
           request={selectedRequest}
           onClose={closeAll}
-          onApprove={openApproveFromDetail}
-          onReject={openRejectFromDetail}
+          onApprove={canApprove ? openApproveFromDetail : undefined}
+          onReject={canReject ? openRejectFromDetail : undefined}
         />
       )}
       {modalAction === "approve" && selectedRequest && (

@@ -8,6 +8,7 @@ import { useUpdateGuestReportNote } from "@/hooks/api/use-guest-report";
 import { formatDate } from "@/lib/format";
 import { Loader2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
+import { usePermissions, hasPermission } from "@/hooks/api/use-permissions";
 
 export function DetailModal({
   report,
@@ -21,6 +22,9 @@ export function DetailModal({
   const [editNote, setEditNote] = useState(report.operator_note || "");
 
   const updateNoteMutation = useUpdateGuestReportNote();
+
+  const { data: permissions } = usePermissions();
+  const canUpdate = hasPermission(permissions, "guest_reports", "update");
 
   const handleSaveNote = async () => {
     try {
@@ -112,37 +116,39 @@ export function DetailModal({
           )}
         </div>
 
-        <div className="pt-4 border-t border-zinc-100">
-          <div className="text-xs font-semibold text-zinc-600 mb-2">CATATAN OPERATOR</div>
-          <div className="space-y-3 mt-1">
-            <Textarea
-              value={editNote}
-              onChange={(e) => setEditNote(e.target.value)}
-              placeholder="Tambahkan keterangan atau catatan operator di sini..."
-              rows={4}
-              className="w-full text-sm bg-white resize-none border border-zinc-200 focus:border-emerald-600 rounded-xl p-3"
-            />
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="danger" onClick={onClose} disabled={updateNoteMutation.isPending}>
-                Batal
-              </Button>
-              <Button
-                variant="primary"
-                onClick={handleSaveNote}
-                disabled={updateNoteMutation.isPending || editNote === operatorNote}
-              >
-                {updateNoteMutation.isPending ? (
-                  <>
-                    <Loader2 size={12} className="animate-spin mr-1" />
-                    Menyimpan...
-                  </>
-                ) : (
-                  "Simpan Catatan"
-                )}
-              </Button>
+        {canUpdate && (
+          <div className="pt-4 border-t border-zinc-100">
+            <div className="text-xs font-semibold text-zinc-600 mb-2">CATATAN OPERATOR</div>
+            <div className="space-y-3 mt-1">
+              <Textarea
+                value={editNote}
+                onChange={(e) => setEditNote(e.target.value)}
+                placeholder="Tambahkan keterangan atau catatan operator di sini..."
+                rows={4}
+                className="w-full text-sm bg-white resize-none border border-zinc-200 focus:border-emerald-600 rounded-xl p-3"
+              />
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="danger" onClick={onClose} disabled={updateNoteMutation.isPending}>
+                  Batal
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={handleSaveNote}
+                  disabled={updateNoteMutation.isPending || editNote === operatorNote}
+                >
+                  {updateNoteMutation.isPending ? (
+                    <>
+                      <Loader2 size={12} className="animate-spin mr-1" />
+                      Menyimpan...
+                    </>
+                  ) : (
+                    "Simpan Catatan"
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </Modal>
   );

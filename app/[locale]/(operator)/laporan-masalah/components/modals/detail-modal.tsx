@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { formatDateTime } from "@/lib/format";
 import type { Complaint } from "@/types/complaint";
 import { useUpdateComplaint, useComplaintPhotoUrl } from "@/hooks/api/use-complaint";
+import { usePermissions, hasPermission } from "@/hooks/api/use-permissions";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import {
@@ -45,6 +46,9 @@ export function DetailModal({ complaint, onClose }: DetailModalProps) {
     complaint.id,
     complaint.has_photo
   );
+
+  const { data: permissions } = usePermissions();
+  const canUpdate = hasPermission(permissions, "complaints", "update");
 
   const { mutate: updateComplaint, isPending } = useUpdateComplaint();
 
@@ -139,64 +143,66 @@ export function DetailModal({ complaint, onClose }: DetailModalProps) {
           </div>
 
           {/* Right Column: Tindak Lanjut & Respon Form */}
-          <div className="rounded-lg border border-zinc-200/60 bg-cream-50/50 p-5 self-start">
-            <h4 className="text-sm font-semibold text-zinc-900 mb-4">Tindak Lanjut & Respon</h4>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="status"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Update Status</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+          {canUpdate && (
+            <div className="rounded-lg border border-zinc-200/60 bg-cream-50/50 p-5 self-start">
+              <h4 className="text-sm font-semibold text-zinc-900 mb-4">Tindak Lanjut & Respon</h4>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Update Status</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="bg-white">
+                              <SelectValue placeholder="Pilih status" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="open">{COMPLAINT_STATUS_LABEL.open}</SelectItem>
+                            <SelectItem value="in_progress">{COMPLAINT_STATUS_LABEL.in_progress}</SelectItem>
+                            <SelectItem value="resolved">{COMPLAINT_STATUS_LABEL.resolved}</SelectItem>
+                            <SelectItem value="rejected">{COMPLAINT_STATUS_LABEL.rejected}</SelectItem>
+                            <SelectItem value="closed">{COMPLAINT_STATUS_LABEL.closed}</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="response"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Respon Operator</FormLabel>
                         <FormControl>
-                          <SelectTrigger className="bg-white">
-                            <SelectValue placeholder="Pilih status" />
-                          </SelectTrigger>
+                          <Textarea
+                            placeholder="Tulis tanggapan atau solusi di sini..."
+                            className="resize-none h-32 bg-white"
+                            {...field}
+                          />
                         </FormControl>
-                        <SelectContent>
-                          <SelectItem value="open">{COMPLAINT_STATUS_LABEL.open}</SelectItem>
-                          <SelectItem value="in_progress">{COMPLAINT_STATUS_LABEL.in_progress}</SelectItem>
-                          <SelectItem value="resolved">{COMPLAINT_STATUS_LABEL.resolved}</SelectItem>
-                          <SelectItem value="rejected">{COMPLAINT_STATUS_LABEL.rejected}</SelectItem>
-                          <SelectItem value="closed">{COMPLAINT_STATUS_LABEL.closed}</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="response"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Respon Operator</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Tulis tanggapan atau solusi di sini..."
-                          className="resize-none h-32 bg-white"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="pt-4 flex justify-end gap-3">
-                  <Button type="button" variant="danger" onClick={onClose} disabled={isPending}>
-                    Batal
-                  </Button>
-                  <Button type="submit" disabled={isPending}>
-                    {isPending ? "Menyimpan..." : "Simpan Pembaruan"}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </div>
+                  <div className="pt-4 flex justify-end gap-3">
+                    <Button type="button" variant="danger" onClick={onClose} disabled={isPending}>
+                      Batal
+                    </Button>
+                    <Button type="submit" disabled={isPending}>
+                      {isPending ? "Menyimpan..." : "Simpan Pembaruan"}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </div>
+          )}
         </div>
       </div>
     </Modal>
