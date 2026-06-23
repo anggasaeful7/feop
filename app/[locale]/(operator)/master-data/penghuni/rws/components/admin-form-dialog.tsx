@@ -16,7 +16,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
-import { getAdminSchema, type MasterAdminFormValues } from "@/lib/validations/admin";
+import { getAdminSchema, type AdminFormValues } from "@/lib/validations/admin";
+import type { MasterAdminPayload } from "@/types/master-data";
 
 export function MasterAdminFormDialog({
   title,
@@ -28,21 +29,33 @@ export function MasterAdminFormDialog({
 }: {
   title: string;
   onClose: () => void;
-  onSubmit: (values: MasterAdminFormValues) => void;
+  onSubmit: (values: MasterAdminPayload) => void;
   isPending: boolean;
   initial?: { email: string; full_name: string };
   isEditing?: boolean;
 }) {
   const [showPassword, setShowPassword] = useState(false);
   const schema = getAdminSchema(isEditing);
-  const form = useForm<MasterAdminFormValues>({
+
+  const form = useForm<AdminFormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       email: initial?.email || "",
       full_name: initial?.full_name || "",
       password: "",
+      password_confirmation: "",
     },
   });
+
+  const handleFormSubmit = (data: AdminFormValues) => {
+    const submitData: MasterAdminPayload = {
+      email: data.email,
+      full_name: data.full_name,
+      ...(data.password ? { password: data.password } : {}),
+      ...(data.password_confirmation ? { password_confirmation: data.password_confirmation } : {}),
+    };
+    onSubmit(submitData);
+  };
 
   return (
     <Modal
@@ -58,13 +71,13 @@ export function MasterAdminFormDialog({
           isPending={isPending}
           isEditing={isEditing}
           onClose={onClose}
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={form.handleSubmit(handleFormSubmit)}
           submitLabel={isEditing ? "✓ Simpan Perubahan" : "✓ Simpan Admin"}
         />
       }
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-2">
+        <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4 mt-2">
           <FormField
             control={form.control}
             name="full_name"
@@ -99,6 +112,34 @@ export function MasterAdminFormDialog({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      {...field}
+                      className="rounded-xl italic bg-transparent border-[#E4DDCB] pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((s) => !s)}
+                      className="absolute inset-y-0 right-3 flex items-center px-2 text-zinc-400 hover:text-zinc-600"
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="password_confirmation"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Konfirmasi Password</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Input

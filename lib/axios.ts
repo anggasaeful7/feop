@@ -60,7 +60,6 @@ axiosInstance.interceptors.response.use(
     if (error.response?.status === 401) {
       if (typeof window !== "undefined") {
         clearAuth();
-        window.location.href = "/login";
       }
     }
     return Promise.reject(error);

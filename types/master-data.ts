@@ -289,6 +289,7 @@ export type MasterAdminPayload = {
   email: string;
   full_name: string;
   password?: string;
+  password_confirmation?: string;
 };
 
 export type MasterAdminResponse = {
