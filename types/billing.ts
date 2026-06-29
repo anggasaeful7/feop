@@ -76,8 +76,10 @@ export type ResidentBillByUnitQueryParams = {
   unit?: string;
   name?: string;
   is_late?: boolean | string;
+  rw?: string;
   rt?: string;
   sort?: string;
+  overdue_months?: number;
 };
 
 export type ResidentBillByUnitItem = {

@@ -91,19 +91,16 @@ export function ReportList() {
   }
 
   return (
-    <Card>
-      <h3 className="text-xl font-bold text-zinc-900">Arsip Laporan</h3>
-      <p className="mb-4 text-xs italic text-zinc-500">
-        Per workspace · disimpan di Cloudflare R2
-      </p>
+    <Card className="flex flex-col h-full max-h-[730px]">
+      <h3 className="text-xl font-bold text-zinc-900 mb-4 shrink-0">Arsip Laporan</h3>
 
       {isError && (
-        <div className="mb-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+        <div className="mb-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 shrink-0">
           Gagal memuat arsip laporan.
         </div>
       )}
 
-      <ul className="space-y-3">
+      <ul className="flex-1 min-h-0 overflow-y-auto pr-1.5 space-y-3 custom-scrollbar">
         {isLoading && (
           <li className="py-2">
             <Skeleton className="h-16 w-full rounded-lg" />

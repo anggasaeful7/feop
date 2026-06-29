@@ -20,7 +20,9 @@ export function useGeneralFacilitiesByUnit(params?: {
   unit?: string;
   name?: string;
   is_late?: boolean | string;
+  rw?: string;
   rt?: string;
+  overdue_months?: number;
 }) {
   return useQuery({
     queryKey: ["general-facilities", "by-unit", params],

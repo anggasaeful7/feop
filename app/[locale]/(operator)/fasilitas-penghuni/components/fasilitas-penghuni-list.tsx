@@ -2,8 +2,9 @@
 
 import React, { useState, useMemo } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { ChevronDown, ChevronUp, Download } from "lucide-react";
-import { DataTable, Button } from "@/components/ui";
+import { ChevronDown, ChevronUp, Download, SlidersHorizontal, X } from "lucide-react";
+import { DataTable, Button, Toggle } from "@/components/ui";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ColumnDef } from "@tanstack/react-table";
 import { ApiError, downloadCSV } from "@/lib/axios";
 import { toast } from "sonner";
@@ -13,9 +14,9 @@ import { useDataTableState } from "@/hooks/use-data-table-state";
 import { UnitWithGeneralFacilities } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-import { useMyRts } from "@/hooks/api/use-rt";
-
+import { useRts } from "@/hooks/api/use-rt";
+import { useRws } from "@/hooks/api/use-rw";
+import { useAuthUser } from "@/hooks/use-auth";
 
 const LATE_TABS = [
   { key: "all", label: "Semua" },
@@ -26,6 +27,7 @@ export function FasilitasPenghuniList() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const user = useAuthUser();
   const urlYear = searchParams.get("year") || undefined;
   const urlUnitId = searchParams.get("unit_id") || undefined;
   const urlUnit = searchParams.get("unit") || undefined;
@@ -36,31 +38,73 @@ export function FasilitasPenghuniList() {
   const [expandedUnits, setExpandedUnits] = useState<Set<string>>(new Set());
   const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [lateFilter, setLateFilter] = useState<string>(urlIsLate);
+  const [rwFilter, setRwFilter] = useState<string>("all");
   const [rtFilter, setRtFilter] = useState<string>("all");
   const [prevUrlIsLate, setPrevUrlIsLate] = useState(urlIsLate);
+  const [onlyOverdue, setOnlyOverdue] = useState<boolean>(false);
+
+  const isAdminRw = user?.role === "admin_rw";
+  const isAdminRt = user?.role === "admin_rt";
 
   const { data: permissions } = usePermissions();
-  const { data: rtsData } = useMyRts();
   const canExport = hasPermission(permissions, "resident_bills", "export");
 
-  const rtOptions = useMemo(() => {
-    const base = [{ value: "all", label: "Semua RT" }];
-    if (!rtsData) return base;
+  const { data: rwsData } = useRws({ per_page: 500 });
+  const rws = useMemo(() => rwsData?.items || [], [rwsData?.items]);
+
+  const selectedRwObj = useMemo(() => {
+    if (rwFilter === "all" || !rwsData?.items) return null;
+    return rwsData.items.find((item) => item.code === rwFilter) || null;
+  }, [rwsData, rwFilter]);
+
+  const { data: rtsData } = useRts({
+    rw_id: isAdminRw ? user?.rw_id : selectedRwObj?.id,
+    per_page: 500,
+  });
+  const rts = useMemo(() => rtsData?.items || [], [rtsData?.items]);
+
+  const rwOptions = useMemo(() => {
+    const base = [{ value: "all", label: "Semua RW" }];
     const seen = new Set<string>();
     const loaded: { value: string; label: string }[] = [];
-    rtsData.forEach((item) => {
-      if (!seen.has(item.code)) {
+    rws.forEach((item) => {
+      if (item.code && !seen.has(item.code)) {
         seen.add(item.code);
-        loaded.push({
-          value: item.code,
-          label: item.name,
-        });
+        loaded.push({ value: item.code, label: item.name || `RW ${item.code}` });
       }
     });
     return [...base, ...loaded];
-  }, [rtsData]);
+  }, [rws]);
 
-  // Sync state during render
+  const rtOptions = useMemo(() => {
+    const base = [{ value: "all", label: "Semua RT" }];
+    const seen = new Set<string>();
+    const loaded: { value: string; label: string }[] = [];
+    rts.forEach((item) => {
+      if (!seen.has(item.code)) {
+        seen.add(item.code);
+        loaded.push({ value: item.code, label: item.name });
+      }
+    });
+    return [...base, ...loaded];
+  }, [rts]);
+
+  const overdue_months = onlyOverdue ? user?.punishment_months : undefined;
+  const effectiveRw = isAdminRt ? user?.rw : isAdminRw ? user?.rw : rwFilter === "all" ? undefined : rwFilter;
+  const effectiveRt = isAdminRt ? user?.rt : rtFilter === "all" ? undefined : rtFilter;
+
+  const activeFilterCount = [
+    !isAdminRw && !isAdminRt && rwFilter !== "all",
+    !isAdminRt && rtFilter !== "all",
+    onlyOverdue,
+  ].filter(Boolean).length;
+
+  const resetFilters = () => {
+    setRwFilter("all");
+    setRtFilter("all");
+    setOnlyOverdue(false);
+  };
+
   if (urlIsLate !== prevUrlIsLate) {
     setPrevUrlIsLate(urlIsLate);
     setLateFilter(urlIsLate);
@@ -73,7 +117,7 @@ export function FasilitasPenghuniList() {
     } else {
       params.set("is_late", val);
     }
-    params.delete("page"); // Reset page on filter change
+    params.delete("page");
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
@@ -87,7 +131,9 @@ export function FasilitasPenghuniList() {
       if (urlUnit) exportParams.set("unit", urlUnit);
       if (urlName) exportParams.set("name", urlName);
       if (lateFilter !== "all") exportParams.set("is_late", lateFilter);
-      if (rtFilter !== "all") exportParams.set("rt", rtFilter);
+      if (effectiveRw) exportParams.set("rw", effectiveRw);
+      if (effectiveRt) exportParams.set("rt", effectiveRt);
+      if (overdue_months) exportParams.set("overdue_months", overdue_months.toString());
 
       await downloadCSV(`/resident-bills/export-overdue.pdf?${exportParams.toString()}`, "penghuni-menunggak.pdf");
       toast.success("Berhasil mengekspor PDF penghuni menunggak");
@@ -106,8 +152,10 @@ export function FasilitasPenghuniList() {
     unit_id: urlUnitId,
     unit: urlUnit,
     name: urlName,
-    rt: rtFilter === "all" ? undefined : rtFilter,
+    rw: effectiveRw,
+    rt: effectiveRt,
     is_late: lateFilter === "all" ? undefined : lateFilter,
+    overdue_months,
   });
 
   const units = data?.items || [];
@@ -124,10 +172,7 @@ export function FasilitasPenghuniList() {
       header: "Kode Unit",
       cell: ({ row }) => <div className="font-bold text-zinc-900">{row.original.unit_code}</div>,
     },
-    {
-      accessorKey: "unit_block",
-      header: "Blok",
-    },
+    { accessorKey: "unit_block", header: "Blok" },
     {
       accessorKey: "owner_name",
       header: "Pemilik",
@@ -141,9 +186,7 @@ export function FasilitasPenghuniList() {
     {
       accessorKey: "bill_payer",
       header: "Pembayar",
-      cell: ({ row }) => (
-        <span className="capitalize">{row.original.bill_payer || "-"}</span>
-      ),
+      cell: ({ row }) => <span className="capitalize">{row.original.bill_payer || "-"}</span>,
     },
     {
       id: "actions",
@@ -155,15 +198,7 @@ export function FasilitasPenghuniList() {
         return (
           <div className="text-right">
             <span className="inline-flex items-center gap-1 text-xs text-brand-900 font-bold hover:underline cursor-pointer">
-              {isExpanded ? (
-                <>
-                  Tutup <ChevronUp size={14} />
-                </>
-              ) : (
-                <>
-                  Lihat ({count}) <ChevronDown size={14} />
-                </>
-              )}
+              {isExpanded ? (<>Tutup <ChevronUp size={14} /></>) : (<>Lihat ({count}) <ChevronDown size={14} /></>)}
             </span>
           </div>
         );
@@ -173,7 +208,6 @@ export function FasilitasPenghuniList() {
 
   const renderRowDetails = (unit: UnitWithGeneralFacilities) => {
     const facilities = unit.general_facilities || [];
-
     return (
       <div className="flex flex-col gap-4 rounded-xl border border-[#E4DDCB] bg-white p-4 shadow-sm animate-in fade-in slide-in-from-top-1 duration-200">
         <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Daftar Fasilitas</h4>
@@ -240,52 +274,109 @@ export function FasilitasPenghuniList() {
         onExpandedRowKeysChange={setExpandedUnits}
         renderRowDetails={renderRowDetails}
         actions={
-          <div className="flex flex-col sm:flex-row w-full sm:w-auto items-stretch sm:items-center gap-3">
-            <div className="flex overflow-x-auto gap-2 pb-1 sm:pb-0 w-full sm:w-auto hide-scrollbar">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            {/* Late tabs */}
+            <div className="flex gap-1.5">
               {LATE_TABS.map((tab) => (
                 <button
                   key={tab.key}
                   onClick={() => changeLateFilter(tab.key)}
-                  className={`shrink-0 h-9 rounded-full px-4 text-xs font-semibold transition ${lateFilter === tab.key
-                      ? tab.key === "true"
-                        ? "bg-rose-700 text-white"
-                        : "bg-brand-900 text-white"
-                      : "border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50"
-                    }`}
+                  className={`h-9 rounded-full px-4 text-xs font-semibold transition whitespace-nowrap ${lateFilter === tab.key
+                    ? tab.key === "true" ? "bg-rose-700 text-white" : "bg-brand-900 text-white"
+                    : "border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50"}`}
                 >
                   {tab.label}
                 </button>
               ))}
             </div>
-            <div className="w-full sm:w-32">
-              <Select
-                value={rtFilter}
-                onValueChange={(val) => {
-                  setRtFilter(val);
-                  setPage(1);
-                }}
-              >
-                <SelectTrigger className="w-full h-8 rounded-full border-zinc-300 text-xs font-semibold px-4 py-1 bg-white text-zinc-700">
-                  <SelectValue placeholder="Semua RT" />
-                </SelectTrigger>
-                <SelectContent>
-                  {rtOptions.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+
+            <div className="h-5 w-px bg-zinc-200" />
+
+            {/* Filter popover */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className={`relative inline-flex items-center gap-2 h-9 rounded-full px-4 text-xs font-semibold border transition
+                  ${activeFilterCount > 0
+                    ? "border-brand bg-brand text-white"
+                    : "border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50"}`}>
+                  <SlidersHorizontal size={13} />
+                  Filter
+                  {activeFilterCount > 0 && (
+                    <span className="ml-0.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-white text-brand text-[10px] font-bold">
+                      {activeFilterCount}
+                    </span>
+                  )}
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-72 p-4 rounded-2xl shadow-xl border border-zinc-200 bg-white">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-sm font-bold text-zinc-900">Filter</span>
+                  {activeFilterCount > 0 && (
+                    <button
+                      onClick={resetFilters}
+                      className="inline-flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-900 transition"
+                    >
+                      <X size={11} /> Reset
+                    </button>
+                  )}
+                </div>
+
+                <div className="space-y-3">
+                  {/* RW — hidden for admin_rw and admin_rt */}
+                  {!isAdminRw && !isAdminRt && (
+                    <div>
+                      <label className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wide mb-1.5 block">RW</label>
+                      <Select value={rwFilter} onValueChange={(val) => { setRwFilter(val); setRtFilter("all"); setPage(1); }}>
+                        <SelectTrigger className="w-full h-9 rounded-lg border-zinc-200 text-xs font-medium bg-zinc-50 text-zinc-800">
+                          <SelectValue placeholder="Semua RW" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {rwOptions.map((opt) => (<SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  {/* RT — hidden for admin_rt */}
+                  {!isAdminRt && (
+                    <div>
+                      <label className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wide mb-1.5 block">RT</label>
+                      <Select disabled={!isAdminRw && rwFilter === "all"} value={rtFilter} onValueChange={(v) => { setRtFilter(v); setPage(1); }}>
+                        <SelectTrigger className="w-full h-9 rounded-lg border-zinc-200 text-xs font-medium bg-zinc-50 text-zinc-800 disabled:opacity-40">
+                          <SelectValue placeholder="Semua RT" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {rtOptions.map((opt) => (<SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  {/* Overdue toggle */}
+                  {user?.punishment_months ? (
+                    <div className="flex items-center justify-between pt-1 border-t border-zinc-100">
+                      <div>
+                        <p className="text-xs font-semibold text-zinc-800">Hanya Terlambat</p>
+                        <p className="text-[11px] text-zinc-500">≥ {user.punishment_months} bulan menunggak</p>
+                      </div>
+                      <Toggle checked={onlyOverdue} onChange={setOnlyOverdue} />
+                    </div>
+                  ) : null}
+                </div>
+              </PopoverContent>
+            </Popover>
+
+            {/* Export PDF */}
             {canExport && (
               <Button
                 variant="secondary"
                 size="sm"
-                className="font-bold italic w-full sm:w-auto"
+                className="h-9 px-4 font-bold italic text-xs"
                 onClick={handleExportPdf}
                 disabled={isExportingPdf}
               >
-                <Download size={14} className="mr-1" /> {isExportingPdf ? "..." : "PDF Fasilitas"}
+                <Download size={13} className="mr-1" />
+                {isExportingPdf ? "..." : "PDF"}
               </Button>
             )}
           </div>

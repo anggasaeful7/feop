@@ -29,8 +29,8 @@ const EMERALD = "#047857";
 const ROSE = "#e11d48";
 
 export function TrendBarChart({ data }: { data: TrendPoint[] }) {
-  const terkumpulColors = data.map((d) =>
-    d.label === "Apr" ? AMBER : BRAND,
+  const terkumpulColors = data.map((_, i) =>
+    i === data.length - 1 ? AMBER : BRAND,
   );
 
   return (

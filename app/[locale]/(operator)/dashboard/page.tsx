@@ -1,223 +1,195 @@
-import type { ReactNode } from "react";
-import {
-  ArrowUpFromLine,
-  Calendar,
-  ChevronDown,
-  CheckCircle2,
-  Home,
-  Plus,
-  type LucideIcon,
-} from "lucide-react";
+"use client";
+
+import { useState, useMemo } from "react";
 import { PageHeader } from "@/components/layout/page-header";
-import { Badge, Card, Button, Stat } from "@/components/ui";
-import { PaymentStatusChart, TrendBarChart } from "./components/charts";
-
 import { useTranslations } from "next-intl";
+import { useDashboard } from "@/hooks/api/use-dashboard";
+import { useAuthUser } from "@/hooks/use-auth";
+import { useRts } from "@/hooks/api/use-rt";
+import { useRws } from "@/hooks/api/use-rw";
 
-const trend = [
-  { label: "Nov", tertagih: 60, terkumpul: 50 },
-  { label: "Des", tertagih: 62, terkumpul: 55 },
-  { label: "Jan", tertagih: 65, terkumpul: 50 },
-  { label: "Feb", tertagih: 60, terkumpul: 52 },
-  { label: "Mar", tertagih: 64, terkumpul: 60 },
-  { label: "Apr", tertagih: 70, terkumpul: 38 },
-];
+import { DashboardFilters } from "./components/dashboard-filters";
+import { DashboardStats } from "./components/dashboard-stats";
+import { DashboardChartsSection } from "./components/dashboard-charts-section";
+import { DashboardRecentActivity } from "./components/dashboard-recent-activity";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function DashboardPage() {
   const t = useTranslations("Dashboard");
+  const user = useAuthUser();
 
-  const activities: { Icon: LucideIcon; text: ReactNode; amount: string; time: string }[] = [
-    {
-      Icon: CheckCircle2,
-      text: <><b>A-12 · Pak Budi</b> membayar IPL April</>,
-      amount: "Rp 450.000",
-      time: "2 jam",
-    },
-    {
-      Icon: CheckCircle2,
-      text: <><b>B-04 · Bu Sari</b> membayar Iuran 17 Agt</>,
-      amount: "Rp 50.000",
-      time: "5 jam",
-    },
-    {
-      Icon: ArrowUpFromLine,
-      text: <><b>Anda</b> upload Laporan Maret</>,
-      amount: "PDF 412 KB",
-      time: "kemarin",
-    },
-    {
-      Icon: Home,
-      text: <><b>C-08 · Pak Heri</b> request booking Aula</>,
-      amount: "Sab 27 Apr",
-      time: "kemarin",
-    },
-  ];
+  const [rwFilter, setRwFilter] = useState<string>("all");
+  const [rtFilter, setRtFilter] = useState<string>("all");
+  const [dateFilter, setDateFilter] = useState<Date | null>(new Date());
+  const [onlyOverdue, setOnlyOverdue] = useState<boolean>(false);
 
-  const attention = [
-    { dot: "rose", text: "12 unit telat bayar > 7 hari", action: "Kirim reminder →" },
-    { dot: "amber", text: "5 booking fasilitas pending", action: "Review →" },
-    { dot: "amber", text: "Laporan April belum diupload", action: "Upload →" },
-    { dot: "sky", text: "3 penghuni baru butuh verifikasi", action: "Verifikasi →" },
-  ];
+  const isAdminRw = user?.role === "admin_rw";
+  const isAdminRt = user?.role === "admin_rt";
+
+  const { data: rwsData } = useRws({ per_page: 500 });
+  const rws = useMemo(() => rwsData?.items || [], [rwsData?.items]);
+
+  const selectedRwObj = useMemo(() => {
+    if (rwFilter === "all" || !rwsData?.items) return null;
+    return rwsData.items.find((item) => item.code === rwFilter) || null;
+  }, [rwsData, rwFilter]);
+
+  const { data: rtsData } = useRts({
+    rw_id: isAdminRw ? user?.rw_id : selectedRwObj?.id,
+    per_page: 200,
+  });
+
+  const rts = useMemo(() => rtsData?.items || [], [rtsData?.items]);
+
+  const rwOptions = useMemo(() => {
+    const base = [{ value: "all", label: "Semua RW" }];
+    const seen = new Set<string>();
+    const loaded: { value: string; label: string }[] = [];
+    rws.forEach((item) => {
+      const val = item.code;
+      if (val && !seen.has(val)) {
+        seen.add(val);
+        loaded.push({
+          value: val,
+          label: item.name || `RW ${val}`,
+        });
+      }
+    });
+    return [...base, ...loaded];
+  }, [rws]);
+
+  const rtOptions = useMemo(() => {
+    const base = [{ value: "all", label: "Semua RT" }];
+    const seen = new Set<string>();
+    const loaded: { value: string; label: string }[] = [];
+    rts.forEach((item) => {
+      const val = typeof item === "string" ? item : (item?.code || item?.name || item?.id || "");
+      if (val && !seen.has(val)) {
+        seen.add(val);
+        loaded.push({
+          value: val,
+          label: val.startsWith("RT") ? val : `RT ${val}`,
+        });
+      }
+    });
+    return [...base, ...loaded];
+  }, [rts]);
+
+  const overdue_months = onlyOverdue ? user?.punishment_months : undefined;
+
+  // Fetch dashboard data
+  const { data, isLoading } = useDashboard({
+    rw: (isAdminRw || isAdminRt) ? user?.rw : (rwFilter === "all" ? undefined : rwFilter),
+    rt: isAdminRt ? user?.rt : (rtFilter === "all" ? undefined : rtFilter),
+    month: dateFilter ? dateFilter.getMonth() + 1 : undefined,
+    year: dateFilter ? dateFilter.getFullYear() : undefined,
+    overdue_months,
+  });
+
+  // Derived metrics
+  const totalBilled = data?.billing_summary.total_amount || 0;
+  const totalCollected = data?.billing_summary.paid_amount || 0;
+  const totalOutstanding = data?.billing_summary.unpaid_amount || 0;
+
+  const totalUnits = data?.unit_summary.total_units || 0;
+  const activeUnits = data?.unit_summary.active_units || 0;
+
+  const paidBills = data?.payment_status.sudah_bayar || 0;
+  const unpaidBills = data?.payment_status.belum_bayar || 0;
+  const totalBills = data?.payment_status.total || 0;
+  const percentCollected = totalBills > 0 ? Math.round((paidBills / totalBills) * 100) : 0;
+
+  const filters = (
+    <DashboardFilters
+      isAdminRw={isAdminRw}
+      isAdminRt={isAdminRt}
+      punishmentMonths={user?.punishment_months || 0}
+      rwFilter={rwFilter}
+      setRwFilter={setRwFilter}
+      rwOptions={rwOptions}
+      rtFilter={rtFilter}
+      setRtFilter={setRtFilter}
+      rtOptions={rtOptions}
+      dateFilter={dateFilter}
+      setDateFilter={setDateFilter}
+      onlyOverdue={onlyOverdue}
+      setOnlyOverdue={setOnlyOverdue}
+    />
+  );
 
   return (
     <>
       <PageHeader
-        eyebrow={t("header.eyebrow")}
         title={t("header.title")}
         subtitle={t("header.subtitle")}
-        actions={
-          <div className="flex w-full flex-wrap sm:flex-nowrap gap-2">
-            <Button variant="secondary" className="w-full sm:w-auto">
-              <Calendar size={16} /> April 2026 <ChevronDown size={14} />
-            </Button>
-            <Button className="w-full sm:w-auto">
-              <Plus size={16} /> {t("header.createBill")}
-            </Button>
-          </div>
-        }
+        actions={filters}
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <Stat
-          label={t("stats.billed")}
-          value="Rp 54,0jt"
-          hint={
-            <span className="flex items-center gap-2">
-              <Badge tone="neutral">120 unit</Badge>
-              <span>Apr 2026</span>
-            </span>
-          }
-        />
-        <Stat
-          label={t("stats.collected")}
-          value="Rp 38,7jt"
-          hint={
-            <span className="flex items-center gap-2">
-              <Badge tone="success">72%</Badge>
-              <span>+Rp 8,4jt (7 hari)</span>
-            </span>
-          }
-        />
-        <Stat
-          label={t("stats.outstanding")}
-          value="Rp 15,3jt"
-          hint={
-            <span className="flex items-center gap-2">
-              <Badge tone="warning">34 unit</Badge>
-              <span>12 telat &gt;7 hari</span>
-            </span>
-          }
-        />
-        <Stat
-          label={t("stats.activeResidents")}
-          value="120 / 124"
-          hint={
-            <span className="flex items-center gap-2">
-              <Badge tone="neutral">4 kosong</Badge>
-              <span>2 baru bulan ini</span>
-            </span>
-          }
-        />
-      </div>
+      {isLoading ? (
+        <div className="space-y-4 animate-pulse">
+          {/* Stats Skeletons */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+                <Skeleton className="h-4 w-24 mb-3" />
+                <Skeleton className="h-8 w-36 mb-2" />
+                <Skeleton className="h-5 w-16" />
+              </div>
+            ))}
+          </div>
 
-      <div className="mt-4 grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <Card className="xl:col-span-2">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-lg font-bold text-zinc-900">
-              {t("charts.billingTrend")}
-            </h3>
-            <div className="flex items-center gap-4 text-xs text-zinc-500">
-              <span className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded-sm bg-cream-300" />
-                {t("charts.billed")}
-              </span>
-              <span className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded-sm bg-brand" />
-                {t("charts.collected")}
-              </span>
+          {/* Charts Skeletons */}
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+            <div className="xl:col-span-2 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+              <Skeleton className="h-6 w-48 mb-6" />
+              <Skeleton className="h-[280px] w-full" />
+            </div>
+            <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+              <Skeleton className="h-6 w-48 mb-6" />
+              <Skeleton className="h-[280px] w-full" />
             </div>
           </div>
-          <TrendBarChart data={trend} />
-        </Card>
 
-        <Card>
-          <h3 className="mb-4 text-lg font-bold text-zinc-900">{t("charts.paymentStatus")}</h3>
-          <div className="flex items-center gap-4">
-            <PaymentStatusChart
-              percent={72}
-              slices={[
-                { label: t("charts.paid"), value: 86, color: "emerald" },
-                { label: t("charts.pending"), value: 24, color: "amber" },
-                { label: t("charts.overdue"), value: 10, color: "rose" },
-              ]}
-            />
-            <ul className="space-y-2 text-sm">
-              <li className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-sm bg-emerald-700" />
-                {t("charts.paid")} <span className="ml-auto font-semibold">86 unit</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-sm bg-amber-500" />
-                {t("charts.pending")} <span className="ml-auto font-semibold">24 unit</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-sm bg-rose-600" />
-                {t("charts.overdue")} <span className="ml-auto font-semibold">10 unit</span>
-              </li>
-            </ul>
+          {/* Activities Skeletons */}
+          <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+            <Skeleton className="h-6 w-48 mb-4" />
+            <div className="space-y-3">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="flex items-center gap-3 py-2">
+                  <Skeleton className="h-8 w-8 rounded-md" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-1/3" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </div>
+                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-3 w-12" />
+                </div>
+              ))}
+            </div>
           </div>
-        </Card>
-      </div>
+        </div>
+      ) : (
+        <>
+          <DashboardStats
+            totalBilled={totalBilled}
+            totalCollected={totalCollected}
+            totalOutstanding={totalOutstanding}
+            totalUnits={totalUnits}
+            activeUnits={activeUnits}
+            totalBills={totalBills}
+            unpaidBills={unpaidBills}
+          />
 
-      <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card>
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-lg font-bold text-zinc-900">{t("recentActivity.title")}</h3>
-            <a className="text-sm text-zinc-500 hover:text-zinc-800" href="#">
-              {t("recentActivity.viewAll")}
-            </a>
-          </div>
-          <ul className="space-y-3">
-            {activities.map(({ Icon, ...a }, i) => (
-              <li
-                key={i}
-                className="flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-zinc-50"
-              >
-                <span className="grid h-8 w-8 place-items-center rounded-md bg-zinc-100 text-zinc-600">
-                  <Icon size={16} />
-                </span>
-                <div className="flex-1 text-sm text-zinc-700">{a.text}</div>
-                <div className="text-sm font-semibold text-zinc-800">{a.amount}</div>
-                <div className="w-12 text-right text-xs text-zinc-400">{a.time}</div>
-              </li>
-            ))}
-          </ul>
-        </Card>
+          <DashboardChartsSection
+            trendData={data?.billing_trend || []}
+            paidBills={paidBills}
+            unpaidBills={unpaidBills}
+            percentCollected={percentCollected}
+          />
 
-        <Card>
-          <h3 className="mb-4 text-lg font-bold text-zinc-900">{t("attention.title")}</h3>
-          <ul className="divide-y divide-zinc-200/70">
-            {attention.map((a, i) => (
-              <li key={i} className="flex items-center gap-3 py-3 text-sm">
-                <span
-                  className={`h-2 w-2 rounded-full ${
-                    a.dot === "rose"
-                      ? "bg-rose-500"
-                      : a.dot === "amber"
-                        ? "bg-amber-500"
-                        : "bg-sky-500"
-                  }`}
-                />
-                <span className="flex-1 text-zinc-700">{a.text}</span>
-                <a className="text-sm font-medium text-zinc-700 hover:underline" href="#">
-                  {a.action}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </Card>
-      </div>
+          <DashboardRecentActivity activities={data?.recent_activity || []} />
+        </>
+      )}
     </>
   );
 }

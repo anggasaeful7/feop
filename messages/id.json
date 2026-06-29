@@ -10,9 +10,9 @@
       "createBill": "Buat Tagihan"
     },
     "stats": {
-      "billed": "TOTAL TERTAGIH",
-      "collected": "TERKUMPUL",
-      "outstanding": "OUTSTANDING",
+      "billed": "TOTAL TAGIHAN",
+      "collected": "LUNAS",
+      "outstanding": "BELUM BAYAR",
       "activeResidents": "PENGHUNI AKTIF"
     },
     "charts": {

@@ -21,7 +21,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   parseLocalDate,
   formatLocalDate,
-} from "@/lib/utils";
+} from "@/lib/format";
 import { useOfficers } from "@/hooks/api/use-petugas";
 import { useShifts } from "@/hooks/api/use-shift";
 import type { BaseSchedule, BaseSchedulePayload } from "@/types/schedules";

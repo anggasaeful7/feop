@@ -8,7 +8,8 @@ import { Modal } from "@/components/ui/modal";
 import { useOfficers } from "@/hooks/api/use-petugas";
 import { useShifts } from "@/hooks/api/use-shift";
 import type { BaseSchedule } from "@/types/schedules";
-import { categoryColorMap, parseLocalDate } from "@/lib/utils";
+import { categoryColorMap } from "@/lib/utils";
+import { parseLocalDate } from "@/lib/format";
 
 const DAYS_OF_WEEK: Record<string, string> = {
   monday: "Senin",

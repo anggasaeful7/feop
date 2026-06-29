@@ -9,7 +9,7 @@ import type { CleaningSchedule } from "@/types/schedules";
 import { CleaningScheduleFormModal } from "./cleaning-schedule-modal";
 import { BaseScheduleDetailModal } from "../../components/base-schedule-detail-modal";
 import { CalendarView, type CalendarEvent } from "@/components/ui/calendar-view";
-import { getMonthDateRange } from "@/lib/utils";
+import { getMonthDateRange } from "@/lib/format";
 import { useScheduleCalendarEvents } from "../../hooks/use-schedule-calendar";
 import { usePermissions, hasPermission } from "@/hooks/api/use-permissions";
 

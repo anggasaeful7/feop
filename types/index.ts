@@ -14,6 +14,7 @@ export * from "./letter-request";
 export * from "./financial-report";
 export * from "./general-facility";
 export * from "./punishment";
+export * from "./dashboard";
 
 export type ApiEnvelope<T> = { data: T };
 
@@ -40,6 +41,7 @@ export type AuthUser = {
   rw_id?: string;
   rt?: string;
   rt_id?: string;
+  punishment_months?: number;
 };
 
 export type LoginResponse = {
