@@ -32,6 +32,7 @@ type NavItem = {
   children?: {
     href: string;
     label: string;
+    activePath?: string;
     requiredResource?: keyof ResourcePermissionsMap;
     requiredRole?: string;
   }[];
@@ -71,25 +72,25 @@ const NAV: NavItem[] = [
     label: "Master Data",
     Icon: Database,
     children: [
-      { href: "/master-data/penghuni/units", label: "Data Penghuni", requiredResource: "units" },
-      { href: "/master-data/petugas/officers", label: "Data Petugas", requiredRole: "admin_workspace" },
+      { href: "/master-data/penghuni/units", label: "Data Penghuni", activePath: "/master-data/penghuni", requiredResource: "units" },
+      { href: "/master-data/petugas/officers", label: "Data Petugas", activePath: "/master-data/petugas", requiredRole: "admin_workspace" },
     ],
   },
   {
     label: "Pengaturan & Lainnya",
     Icon: Settings,
     children: [
-      { href: "/platform-billing", label: "Biaya Platform", requiredResource: "platform_billing" },
-      { href: "/notifikasi", label: "Notifikasi", requiredResource: "notifications" },
+      { href: "/notifikasi", label: "Notifikasi", requiredRole: "admin_workspace" },
       { href: "/pengaturan", label: "Pengaturan", requiredRole: "admin_workspace" },
     ],
   },
 ];
 
 function NavGroup({ item, pathname }: { item: NavItem; pathname: string }) {
-  const hasActiveChild = item.children?.some(
-    (child) => pathname === child.href || pathname.startsWith(child.href + "/")
-  );
+  const hasActiveChild = item.children?.some((child) => {
+    const base = child.activePath ?? child.href;
+    return pathname === base || pathname.startsWith(base + "/");
+  });
   const [isOpen, setIsOpen] = useState(hasActiveChild || false);
   const [prevPathname, setPrevPathname] = useState(pathname);
 
@@ -120,9 +121,8 @@ function NavGroup({ item, pathname }: { item: NavItem; pathname: string }) {
       {isOpen && (
         <div className="ml-9 space-y-1">
           {item.children?.map((child) => {
-            // Precise matching to prevent parent path matching child path incorrectly if similar
-            const active =
-              pathname === child.href || pathname.startsWith(child.href + "/");
+            const base = child.activePath ?? child.href;
+            const active = pathname === base || pathname.startsWith(base + "/");
             return (
               <Link
                 key={child.href}

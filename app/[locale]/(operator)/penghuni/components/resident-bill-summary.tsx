@@ -8,33 +8,39 @@ import { idr } from "@/lib/format";
 type ResidentBillSummaryProps = {
   year: number;
   kind: string;
+  rwFilter: string;
   rtFilter: string;
   search: string;
   unitId?: string;
   unit?: string;
   name?: string;
   isLate?: string;
+  overdueMoonths?: number;
 };
 
 export function ResidentBillSummary({
   year,
   kind,
+  rwFilter,
   rtFilter,
   search,
   unitId,
   unit,
   name,
   isLate,
+  overdueMoonths,
 }: ResidentBillSummaryProps) {
   const { data: summaryData, isLoading: isLoadingSummary } = useResidentBillSummary({
     year,
     kind: kind === "all" ? undefined : kind,
+    rw: rwFilter === "all" ? undefined : rwFilter,
     rt: rtFilter === "all" ? undefined : rtFilter,
     search: search || undefined,
     unit_id: unitId,
     unit,
     name,
     is_late: isLate,
+    overdue_months: overdueMoonths,
   });
 
   return (

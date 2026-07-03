@@ -5,8 +5,7 @@ import { Plus, Loader2, User } from "lucide-react";
 import { Button, DataTable, DataTableRowActions, Modal } from "@/components/ui";
 import { ColumnDef } from "@tanstack/react-table";
 import { useRws, useDeleteRw, useCreateRwAdmin, useRwAdmin, useUpdateRwAdmin } from "@/hooks/api/use-rw";
-import type { RW } from "@/types/master-data";
-import type { MasterAdminFormValues } from "@/lib/validations/admin";
+import type { RW, MasterAdminPayload } from "@/types/master-data";
 import { RwsFormDialog } from "./rws-form-dialog";
 import { RwsBulkDialog } from "./rws-bulk-dialog";
 import { MasterAdminFormDialog } from "./admin-form-dialog";
@@ -146,7 +145,7 @@ function RwAdminFormDialogWrapper({ rw, onClose }: RwAdminFormDialogWrapperProps
 
   const isEditing = !!admin;
 
-  const handleSubmit = (values: MasterAdminFormValues) => {
+  const handleSubmit = (values: MasterAdminPayload) => {
     if (isEditing) {
       updateRwAdmin.mutate(
         { id: rw.id, payload: values },

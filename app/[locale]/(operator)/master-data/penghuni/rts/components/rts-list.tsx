@@ -6,8 +6,7 @@ import { Button, DataTable, DataTableRowActions, Modal } from "@/components/ui";
 import { ColumnDef } from "@tanstack/react-table";
 import { useRts, useDeleteRt, useCreateRtAdmin, useRtAdmin, useUpdateRtAdmin } from "@/hooks/api/use-rt";
 import { useRws } from "@/hooks/api/use-rw";
-import type { RT } from "@/types/master-data";
-import type { MasterAdminFormValues } from "@/lib/validations/admin";
+import type { RT, MasterAdminPayload } from "@/types/master-data";
 import { RtsFormDialog } from "./rts-form-dialog";
 import { RtsBulkDialog } from "./rts-bulk-dialog";
 import { MasterAdminFormDialog } from "../../rws/components/admin-form-dialog";
@@ -177,7 +176,7 @@ function RtAdminFormDialogWrapper({ rt, onClose }: RtAdminFormDialogWrapperProps
 
   const isEditing = !!admin;
 
-  const handleSubmit = (values: MasterAdminFormValues) => {
+  const handleSubmit = (values: MasterAdminPayload) => {
     if (isEditing) {
       updateRtAdmin.mutate(
         { id: rt.id, payload: values },
