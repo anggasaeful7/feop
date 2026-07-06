@@ -40,10 +40,13 @@ export function LoginForm() {
     try {
       const out = await api<LoginResponse>("/auth/login", {
         method: "POST",
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ type: "website", username: email, password }),
       });
-      writeAuth(out.access_token, out.user, remember);
-      
+      console.log("[LOGIN] Full response data:", out);
+      console.log("[LOGIN] Extracted api_base_url:", out.api_base_url);
+
+      writeAuth(out.access_token, out.user, out.api_base_url, remember);
+
       // Fetch permissions right after login and save to Zustand
       try {
         const perms = await getMyPermissions();
