@@ -46,12 +46,22 @@ export type AuthUser = {
   is_active?: boolean;
 };
 
+export type WorkspaceSelection = {
+  id: string;
+  display_name: string;
+  slug: string;
+  api_base_url: string;
+  mobile_base_url?: string;
+};
+
 export type LoginResponse = {
   access_token: string;
   token_type: string;
   expires_at?: string;
   expires_in?: number;
-  api_base_url: string;
+  api_base_url?: string;
   mobile_base_url?: string;
+  requires_workspace_selection?: boolean;
+  workspaces?: WorkspaceSelection[];
   user: AuthUser;
 };

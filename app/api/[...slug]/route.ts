@@ -42,8 +42,10 @@ async function handleProxy(request: NextRequest, params: { slug: string[] }) {
   const targetUrl = new URL(`${baseUrl}/api/v1/${slugPath}${request.nextUrl.search}`);
 
   const headers = new Headers(request.headers);
-  // Remove host header to avoid SSL/DNS conflicts with the target server
+  // Remove headers that might cause CORS or host issues with the target server
   headers.delete("host");
+  headers.delete("origin");
+  headers.delete("referer");
 
   if (token) {
     headers.set("Authorization", `Bearer ${token}`);

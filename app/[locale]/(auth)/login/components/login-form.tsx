@@ -3,7 +3,7 @@
 import { useState, useEffect, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Lock, User } from "lucide-react";
+import { Eye, EyeOff, Lock, User, Building2, ArrowLeft, ChevronRight } from "lucide-react";
 import { api, ApiError } from "@/lib/axios";
 import { writeAuth } from "@/lib/auth-storage";
 import type { LoginResponse } from "@/types";
@@ -20,6 +20,7 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [workspaceSelection, setWorkspaceSelection] = useState<LoginResponse | null>(null);
 
   useEffect(() => {
     // Clear permissions store when the login page mounts.
@@ -42,10 +43,14 @@ export function LoginForm() {
         method: "POST",
         body: JSON.stringify({ type: "website", username: email, password }),
       });
-      console.log("[LOGIN] Full response data:", out);
-      console.log("[LOGIN] Extracted api_base_url:", out.api_base_url);
 
-      writeAuth(out.access_token, out.user, out.api_base_url, remember);
+      if (out.requires_workspace_selection && out.workspaces && out.workspaces.length > 0) {
+        setWorkspaceSelection(out);
+        setSubmitting(false);
+        return;
+      }
+
+      writeAuth(out.access_token, out.user, out.api_base_url || "", remember);
 
       // Fetch permissions right after login and save to Zustand
       try {
@@ -65,6 +70,97 @@ export function LoginForm() {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  async function handleSelectWorkspace(workspaceId: string) {
+    if (!workspaceSelection) return;
+    setErrorMsg(null);
+    setSubmitting(true);
+
+    try {
+      const out = await api<LoginResponse>("/auth/select-workspace", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${workspaceSelection.access_token}`,
+        },
+        body: JSON.stringify({ workspace_id: workspaceId }),
+      });
+
+      if (out.api_base_url) {
+        writeAuth(out.access_token, out.user, out.api_base_url, remember);
+
+        try {
+          const perms = await getMyPermissions();
+          usePermissionsStore.getState().setPermissions(perms);
+        } catch (err) {
+          console.error("Failed to fetch permissions on login", err);
+        }
+
+        router.push("/dashboard");
+      } else {
+        setErrorMsg("Invalid response from server. Missing api_base_url.");
+      }
+    } catch (e) {
+      if (e instanceof ApiError) {
+        setErrorMsg(e.message);
+      } else {
+        setErrorMsg("Cannot reach the server. Please try again.");
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (workspaceSelection) {
+    return (
+      <div className="w-full space-y-6">
+        <div className="space-y-2">
+          <button
+            type="button"
+            onClick={() => setWorkspaceSelection(null)}
+            className="flex items-center text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
+          >
+            <ArrowLeft className="mr-1 h-4 w-4" />
+            Back to login
+          </button>
+          <h2 className="text-xl font-semibold text-zinc-900">Select Workspace</h2>
+          <p className="text-sm text-zinc-500">
+            Please choose a workspace to continue.
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          {workspaceSelection.workspaces?.map((ws) => (
+            <button
+              key={ws.id}
+              onClick={() => handleSelectWorkspace(ws.id)}
+              disabled={submitting}
+              className="group flex w-full items-center justify-between rounded-xl border border-zinc-200 bg-white p-4 text-left transition-all hover:border-brand hover:ring-1 hover:ring-brand disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand/10 text-brand">
+                  <Building2 size={20} />
+                </div>
+                <div>
+                  <div className="font-semibold text-zinc-900">{ws.display_name}</div>
+                  <div className="text-xs text-zinc-500">{ws.slug}</div>
+                </div>
+              </div>
+              <ChevronRight className="h-5 w-5 text-zinc-400 transition-colors group-hover:text-brand" />
+            </button>
+          ))}
+        </div>
+
+        {errorMsg && (
+          <div
+            role="alert"
+            className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+          >
+            {errorMsg}
+          </div>
+        )}
+      </div>
+    );
   }
 
   return (
