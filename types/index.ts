@@ -42,11 +42,26 @@ export type AuthUser = {
   rt?: string;
   rt_id?: string;
   punishment_months?: number;
+  tenant_id?: string;
+  is_active?: boolean;
+};
+
+export type WorkspaceSelection = {
+  id: string;
+  display_name: string;
+  slug: string;
+  api_base_url: string;
+  mobile_base_url?: string;
 };
 
 export type LoginResponse = {
   access_token: string;
   token_type: string;
-  expires_in: number;
+  expires_at?: string;
+  expires_in?: number;
+  api_base_url?: string;
+  mobile_base_url?: string;
+  requires_workspace_selection?: boolean;
+  workspaces?: WorkspaceSelection[];
   user: AuthUser;
 };

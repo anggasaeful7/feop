@@ -46,6 +46,11 @@ axiosInstance.interceptors.request.use(async (config) => {
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
+      const apiBaseUrl = cookieStore.get("ipl_api_base_url")?.value;
+      const isAuthRoute = config.url?.startsWith("/auth/") || config.url?.startsWith("auth/");
+      if (apiBaseUrl && !isAuthRoute) {
+        config.baseURL = `${apiBaseUrl.replace(/\/$/, "")}/api/v1`;
+      }
     } catch {
       // ignore error if cookies cannot be read
     }
@@ -69,6 +74,7 @@ axiosInstance.interceptors.response.use(
 // Generic api function replacing the old fetch-based one
 export async function api<T>(path: string, init?: RequestInit): Promise<T> {
   try {
+    console.log("API_URL", API_URL);
     const config: AxiosRequestConfig = {
       url: path,
       method: init?.method || "GET",

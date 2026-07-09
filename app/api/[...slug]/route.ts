@@ -23,19 +23,29 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
 }
 
 async function handleProxy(request: NextRequest, params: { slug: string[] }) {
-  const backendUrl = env.apiUrl;
+  const cookieStore = await cookies();
+  const token = cookieStore.get("ipl_access_token")?.value;
+  let apiBaseUrl = cookieStore.get("ipl_api_base_url")?.value;
+  
+  if (apiBaseUrl === "undefined" || apiBaseUrl === "null") {
+    apiBaseUrl = undefined;
+  }
+
   const slugPath = params.slug.join("/");
+
+  // Force auth requests (like login) to use the main env.apiUrl
+  const isAuthRoute = slugPath.startsWith("auth/");
+  const backendUrl = (apiBaseUrl && !isAuthRoute) ? apiBaseUrl : env.apiUrl;
 
   // Attach /api/v1 which is abstracted from the frontend codebase
   const baseUrl = backendUrl.endsWith("/") ? backendUrl.slice(0, -1) : backendUrl;
   const targetUrl = new URL(`${baseUrl}/api/v1/${slugPath}${request.nextUrl.search}`);
 
-  const cookieStore = await cookies();
-  const token = cookieStore.get("ipl_access_token")?.value;
-
   const headers = new Headers(request.headers);
-  // Remove host header to avoid SSL/DNS conflicts with the target server
+  // Remove headers that might cause CORS or host issues with the target server
   headers.delete("host");
+  headers.delete("origin");
+  headers.delete("referer");
 
   if (token) {
     headers.set("Authorization", `Bearer ${token}`);

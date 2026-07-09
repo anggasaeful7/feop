@@ -5,6 +5,7 @@ import type { AuthUser } from "@/types";
 export const AUTH_KEYS = {
   token: "ipl_access_token",
   user: "ipl_user",
+  api_base_url: "ipl_api_base_url",
 } as const;
 
 function storages(): Storage[] {
@@ -44,17 +45,20 @@ export function readUser(): AuthUser | null {
   return null;
 }
 
-export function writeAuth(token: string, user: AuthUser, remember: boolean) {
+export function writeAuth(token: string, user: AuthUser, apiBaseUrl: string, remember: boolean) {
   if (typeof window === "undefined") return;
   const target = remember ? window.localStorage : window.sessionStorage;
   const other = remember ? window.sessionStorage : window.localStorage;
   target.setItem(AUTH_KEYS.token, token);
   target.setItem(AUTH_KEYS.user, JSON.stringify(user));
+  target.setItem(AUTH_KEYS.api_base_url, apiBaseUrl);
   other.removeItem(AUTH_KEYS.token);
   other.removeItem(AUTH_KEYS.user);
+  other.removeItem(AUTH_KEYS.api_base_url);
 
   const maxAge = remember ? 60 * 60 * 24 * 7 : 60 * 60 * 24;
   document.cookie = `${AUTH_KEYS.token}=${encodeURIComponent(token)}; path=/; max-age=${maxAge}; samesite=lax`;
+  document.cookie = `${AUTH_KEYS.api_base_url}=${encodeURIComponent(apiBaseUrl)}; path=/; max-age=${maxAge}; samesite=lax`;
 }
 
 export function clearAuth() {
@@ -62,7 +66,9 @@ export function clearAuth() {
   for (const s of storages()) {
     s.removeItem(AUTH_KEYS.token);
     s.removeItem(AUTH_KEYS.user);
+    s.removeItem(AUTH_KEYS.api_base_url);
   }
   document.cookie = `${AUTH_KEYS.token}=; path=/; max-age=0; samesite=lax`;
+  document.cookie = `${AUTH_KEYS.api_base_url}=; path=/; max-age=0; samesite=lax`;
 }
 
