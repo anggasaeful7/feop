@@ -238,3 +238,59 @@ body {
   display: none !important;
 }
 
+/* ─── Radix Sheet (Sidebar & FilterBar) Animations ───────────────── */
+
+/* Overlay Animation */
+.sheet-overlay[data-state="open"] {
+  animation: sheetFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.sheet-overlay[data-state="closed"] {
+  animation: sheetFadeOut 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Content Slide Animations */
+.sheet-content[data-state="open"][data-side="left"] {
+  animation: sheetSlideInLeft 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.sheet-content[data-state="closed"][data-side="left"] {
+  animation: sheetSlideOutLeft 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.sheet-content[data-state="open"][data-side="right"] {
+  animation: sheetSlideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.sheet-content[data-state="closed"][data-side="right"] {
+  animation: sheetSlideOutRight 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes sheetFadeIn {
+  from { opacity: 0; }
+  to { opacity: 0.8; }
+}
+
+@keyframes sheetFadeOut {
+  from { opacity: 0.8; }
+  to { opacity: 0; }
+}
+
+@keyframes sheetSlideInLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes sheetSlideOutLeft {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+
+@keyframes sheetSlideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes sheetSlideOutRight {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+
+

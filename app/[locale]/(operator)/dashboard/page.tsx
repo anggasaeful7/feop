@@ -139,8 +139,8 @@ export default function DashboardPage() {
           </div>
 
           {/* Charts Skeletons */}
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-            <div className="xl:col-span-2 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-2 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
               <Skeleton className="h-6 w-48 mb-6" />
               <Skeleton className="h-[280px] w-full" />
             </div>

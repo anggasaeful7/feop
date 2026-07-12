@@ -11,6 +11,7 @@ import {
   X,
 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
+import { FilterBar } from "@/components/ui/filter-bar";
 import { Badge, Button, Card } from "@/components/ui";
 import { api, ApiError } from "@/lib/axios";
 import { idr, idrShort, formatBookingWindow } from "@/lib/format";
@@ -242,7 +243,7 @@ export default function FasilitasPage() {
               Review segera · rata-rata response 2 jam
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <FilterBar activeFilterCount={+(statusFilter !== "pending")}>
             {STATUS_FILTERS.map((f) => (
               <button
                 key={f.key}
@@ -255,7 +256,7 @@ export default function FasilitasPage() {
                 {f.label}
               </button>
             ))}
-          </div>
+          </FilterBar>
         </div>
 
         <table className="w-full text-sm">

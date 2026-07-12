@@ -205,9 +205,21 @@ export function FamilyMemberFormModal({
             render={({ field }) => (
               <FormItem className="col-span-2 sm:col-span-1">
                 <FormLabel>Hubungan</FormLabel>
-                <FormControl>
-                  <Input placeholder="Istri, Anak, dll" {...field} className="rounded-xl bg-transparent" />
-                </FormControl>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="rounded-xl">
+                      <SelectValue placeholder="Pilih Hubungan" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="Kepala Keluarga">Kepala Keluarga</SelectItem>
+                    <SelectItem value="Suami">Suami</SelectItem>
+                    <SelectItem value="Istri">Istri</SelectItem>
+                    <SelectItem value="Anak">Anak</SelectItem>
+                    <SelectItem value="Orang Tua">Orang Tua</SelectItem>
+                    <SelectItem value="Saudara">Saudara</SelectItem>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}

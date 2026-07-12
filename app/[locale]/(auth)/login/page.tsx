@@ -10,10 +10,12 @@ export const metadata: Metadata = {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex flex-1 bg-auth-panel">
-      <BrandPanel />
+    <div className="min-h-screen flex flex-col lg:flex-row flex-1 bg-auth-panel">
+      <div className="hidden lg:block lg:w-1/2">
+        <BrandPanel />
+      </div>
 
-      <div className="flex flex-1 items-center justify-center px-6 py-12 sm:px-12">
+      <div className="flex flex-1 items-center justify-center px-5 py-10 sm:px-8 lg:px-12">
         <div className="w-full max-w-md">
           <header className="mb-10">
             <h1 className="text-4xl font-semibold tracking-tight text-zinc-900">

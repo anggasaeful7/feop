@@ -79,16 +79,18 @@ export function PetugasList() {
         onPageChange={setPage}
         actions={
           <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
-            <Select value={division} onValueChange={setDivision}>
-              <SelectTrigger className="w-full sm:w-40 rounded-full h-9 bg-white text-sm border-[#E4DDCB] italic">
-                <SelectValue placeholder="Semua Divisi" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Semua Divisi</SelectItem>
-                <SelectItem value="cleaning">Kebersihan</SelectItem>
-                <SelectItem value="security">Keamanan</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="w-full sm:w-40">
+              <Select value={division} onValueChange={setDivision}>
+                <SelectTrigger className="w-full rounded-full h-9 bg-white text-sm border-[#E4DDCB] italic">
+                  <SelectValue placeholder="Semua Divisi" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Semua Divisi</SelectItem>
+                  <SelectItem value="cleaning">Kebersihan</SelectItem>
+                  <SelectItem value="security">Keamanan</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
             {canCreate && (
               <Button size="sm" onClick={() => setCreating(true)} className="w-full sm:w-auto">

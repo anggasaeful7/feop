@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export function BrandPanel() {
   return (
-    <div className="relative flex min-h-screen w-1/2 flex-col justify-between overflow-hidden bg-brand-900 p-12 text-white">
+    <div className="relative flex min-h-screen w-full flex-col justify-between overflow-hidden bg-brand-900 p-12 text-white">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"

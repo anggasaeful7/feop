@@ -2,9 +2,9 @@
 
 import React, { useState, useMemo } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { ChevronDown, ChevronUp, Download, SlidersHorizontal, X } from "lucide-react";
+import { ChevronDown, ChevronUp, Download } from "lucide-react";
 import { DataTable, Button, Toggle } from "@/components/ui";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { FilterBar } from "@/components/ui/filter-bar";
 import { ColumnDef } from "@tanstack/react-table";
 import { ApiError, downloadCSV } from "@/lib/axios";
 import { toast } from "sonner";
@@ -274,9 +274,9 @@ export function FasilitasPenghuniList() {
         onExpandedRowKeysChange={setExpandedUnits}
         renderRowDetails={renderRowDetails}
         actions={
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            {/* Late tabs */}
-            <div className="flex gap-1.5">
+          <div className="flex items-center gap-2">
+            {/* Late tabs — inline on wide desktop only */}
+            <div className="hidden xl:flex gap-1.5">
               {LATE_TABS.map((tab) => (
                 <button
                   key={tab.key}
@@ -290,81 +290,67 @@ export function FasilitasPenghuniList() {
               ))}
             </div>
 
-            <div className="h-5 w-px bg-zinc-200" />
+            <div className="hidden xl:block h-5 w-px bg-zinc-200" />
 
-            {/* Filter popover */}
-            <Popover>
-              <PopoverTrigger asChild>
-                <button className={`relative inline-flex items-center gap-2 h-9 rounded-full px-4 text-xs font-semibold border transition
-                  ${activeFilterCount > 0
-                    ? "border-brand bg-brand text-white"
-                    : "border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50"}`}>
-                  <SlidersHorizontal size={13} />
-                  Filter
-                  {activeFilterCount > 0 && (
-                    <span className="ml-0.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-white text-brand text-[10px] font-bold">
-                      {activeFilterCount}
-                    </span>
-                  )}
-                </button>
-              </PopoverTrigger>
-              <PopoverContent align="end" className="w-72 p-4 rounded-2xl shadow-xl border border-zinc-200 bg-white">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm font-bold text-zinc-900">Filter</span>
-                  {activeFilterCount > 0 && (
+            <FilterBar activeFilterCount={activeFilterCount} onReset={resetFilters} alwaysDrawer>
+              {/* Late tabs inside drawer for mobile/tablet */}
+              <div>
+                <label className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wide mb-1.5 block">Status</label>
+                <div className="flex gap-1.5">
+                  {LATE_TABS.map((tab) => (
                     <button
-                      onClick={resetFilters}
-                      className="inline-flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-900 transition"
+                      key={tab.key}
+                      onClick={() => changeLateFilter(tab.key)}
+                      className={`h-9 rounded-full px-4 text-xs font-semibold transition whitespace-nowrap ${lateFilter === tab.key
+                        ? tab.key === "true" ? "bg-rose-700 text-white" : "bg-brand-900 text-white"
+                        : "border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50"}`}
                     >
-                      <X size={11} /> Reset
+                      {tab.label}
                     </button>
-                  )}
+                  ))}
                 </div>
-
-                <div className="space-y-3">
-                  {/* RW — hidden for admin_rw and admin_rt */}
-                  {!isAdminRw && !isAdminRt && (
-                    <div>
-                      <label className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wide mb-1.5 block">RW</label>
-                      <Select value={rwFilter} onValueChange={(val) => { setRwFilter(val); setRtFilter("all"); setPage(1); }}>
-                        <SelectTrigger className="w-full h-9 rounded-lg border-zinc-200 text-xs font-medium bg-zinc-50 text-zinc-800">
-                          <SelectValue placeholder="Semua RW" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {rwOptions.map((opt) => (<SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-
-                  {/* RT — hidden for admin_rt */}
-                  {!isAdminRt && (
-                    <div>
-                      <label className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wide mb-1.5 block">RT</label>
-                      <Select disabled={!isAdminRw && rwFilter === "all"} value={rtFilter} onValueChange={(v) => { setRtFilter(v); setPage(1); }}>
-                        <SelectTrigger className="w-full h-9 rounded-lg border-zinc-200 text-xs font-medium bg-zinc-50 text-zinc-800 disabled:opacity-40">
-                          <SelectValue placeholder="Semua RT" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {rtOptions.map((opt) => (<SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-
-                  {/* Overdue toggle */}
-                  {user?.punishment_months ? (
-                    <div className="flex items-center justify-between pt-1 border-t border-zinc-100">
-                      <div>
-                        <p className="text-xs font-semibold text-zinc-800">Hanya Terlambat</p>
-                        <p className="text-[11px] text-zinc-500">≥ {user.punishment_months} bulan menunggak</p>
-                      </div>
-                      <Toggle checked={onlyOverdue} onChange={setOnlyOverdue} />
-                    </div>
-                  ) : null}
+              </div>
+              {/* RW — hidden for admin_rw and admin_rt */}
+              {!isAdminRw && !isAdminRt && (
+                <div>
+                  <label className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wide mb-1.5 block">RW</label>
+                  <Select value={rwFilter} onValueChange={(val) => { setRwFilter(val); setRtFilter("all"); setPage(1); }}>
+                    <SelectTrigger className="w-full h-9 rounded-lg border-zinc-200 text-xs font-medium bg-zinc-50 text-zinc-800">
+                      <SelectValue placeholder="Semua RW" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {rwOptions.map((opt) => (<SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              </PopoverContent>
-            </Popover>
+              )}
+
+              {/* RT — hidden for admin_rt */}
+              {!isAdminRt && (
+                <div>
+                  <label className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wide mb-1.5 block">RT</label>
+                  <Select disabled={!isAdminRw && rwFilter === "all"} value={rtFilter} onValueChange={(v) => { setRtFilter(v); setPage(1); }}>
+                    <SelectTrigger className="w-full h-9 rounded-lg border-zinc-200 text-xs font-medium bg-zinc-50 text-zinc-800 disabled:opacity-40">
+                      <SelectValue placeholder="Semua RT" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {rtOptions.map((opt) => (<SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Overdue toggle */}
+              {user?.punishment_months ? (
+                <div className="flex items-center justify-between pt-1 border-t border-zinc-100">
+                  <div>
+                    <p className="text-xs font-semibold text-zinc-800">Hanya Terlambat</p>
+                    <p className="text-[11px] text-zinc-500">≥ {user.punishment_months} bulan menunggak</p>
+                  </div>
+                  <Toggle checked={onlyOverdue} onChange={setOnlyOverdue} />
+                </div>
+              ) : null}
+            </FilterBar>
 
             {/* Export PDF */}
             {canExport && (

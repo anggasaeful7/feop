@@ -57,8 +57,8 @@ export function BillingDetails({
             <span className="h-2 w-2 rounded-full bg-rose-600 animate-pulse" />
             <h4 className="text-xs font-bold text-rose-700 uppercase tracking-wider">Tunggakan Tahun Sebelumnya</h4>
           </div>
-          <div className="rounded-lg border border-rose-100 overflow-hidden">
-            <table className="w-full text-xs text-left">
+          <div className="rounded-lg border border-rose-100 overflow-x-auto">
+            <table className="w-full text-xs text-left min-w-[700px]">
               <thead>
                 <tr className="bg-rose-50/50 text-rose-800 font-semibold border-b border-rose-100 uppercase tracking-wider text-[10px]">
                   {canDelete && (
@@ -180,8 +180,8 @@ export function BillingDetails({
         {hasDebt && (
           <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 mt-1">Tagihan Tahun {year}</h4>
         )}
-        <div className="rounded-lg border border-zinc-200 overflow-hidden">
-          <table className="w-full text-xs text-left">
+        <div className="rounded-lg border border-zinc-200 overflow-x-auto">
+          <table className="w-full text-xs text-left min-w-[700px]">
             <thead>
               <tr className="bg-zinc-50 text-zinc-600 font-semibold border-b border-zinc-200 uppercase tracking-wider text-[10px]">
                 {canDelete && (
