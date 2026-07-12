@@ -21,10 +21,10 @@ export function MobileHeader() {
   }
 
   return (
-    <header className="flex h-14 shrink-0 items-center gap-4 border-b border-zinc-200/60 bg-cream-50 px-4 md:hidden">
+    <header className="flex h-14 shrink-0 items-center gap-4 border-b border-zinc-200/60 bg-cream-50 px-4 lg:hidden">
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" className="md:hidden -ml-2">
+          <Button variant="ghost" size="icon" className="lg:hidden -ml-2">
             <Menu className="h-5 w-5" />
             <span className="sr-only">Toggle navigation menu</span>
           </Button>

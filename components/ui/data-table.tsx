@@ -85,8 +85,8 @@ export function DataTable<TData, TValue>({
 
   return (
     <Card className="p-0">
-      <div className={`${size === 'sm' ? 'my-2 px-3 gap-2' : 'my-4 px-4 gap-4'} flex flex-col md:flex-row md:items-center justify-between`}>
-        {title && <h3 className={`${size === 'sm' ? 'text-lg whitespace-nowrap' : 'text-2xl'} font-bold text-zinc-900 italic`}>{title}</h3>}
+      <div className={`${size === 'sm' ? 'my-2 px-3 gap-2' : 'my-4 px-4 gap-4'} flex flex-col md:flex-row md:items-center md:flex-wrap justify-between`}>
+        {title && <h3 className={`${size === 'sm' ? 'text-lg whitespace-nowrap' : 'text-2xl'} font-bold text-zinc-900 italic shrink-0`}>{title}</h3>}
         <div className="flex w-full md:w-auto flex-col sm:flex-row items-start sm:items-center gap-3">
           {onSearchChange && (
             <div className={`relative w-full ${size === 'sm' ? 'sm:w-48' : 'sm:w-auto'}`}>

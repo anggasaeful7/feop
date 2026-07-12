@@ -68,9 +68,9 @@ export function ComplaintList() {
         search={search}
         onSearchChange={setSearch}
         actions={
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
             <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1); }}>
-              <SelectTrigger className="w-40 bg-[#FFFDF7]">
+              <SelectTrigger className="w-full sm:w-40 h-9 rounded-lg border-zinc-200 text-xs font-medium bg-zinc-50 text-zinc-800">
                 <SelectValue placeholder="Semua Status" />
               </SelectTrigger>
               <SelectContent>
@@ -84,7 +84,7 @@ export function ComplaintList() {
             </Select>
 
             <Select value={category} onValueChange={(v) => { setCategory(v); setPage(1); }}>
-              <SelectTrigger className="w-40 bg-[#FFFDF7]">
+              <SelectTrigger className="w-full sm:w-40 h-9 rounded-lg border-zinc-200 text-xs font-medium bg-zinc-50 text-zinc-800">
                 <SelectValue placeholder="Semua Kategori" />
               </SelectTrigger>
               <SelectContent>

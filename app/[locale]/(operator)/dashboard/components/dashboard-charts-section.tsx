@@ -33,8 +33,8 @@ export function DashboardChartsSection({
   }));
 
   return (
-    <div className="mt-4 grid grid-cols-1 xl:grid-cols-3 gap-4">
-      <Card className="xl:col-span-2">
+    <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <Card className="lg:col-span-2">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-bold text-zinc-900">
             {t("charts.billingTrend")}
@@ -62,7 +62,7 @@ export function DashboardChartsSection({
             Distribusi pembayaran dari total {paidBills + unpaidBills} tagihan
           </p>
         </div>
-        <div className="flex flex-col sm:flex-row items-center gap-6">
+        <div className="flex flex-col xl:flex-row items-center gap-6">
           <PaymentStatusChart
             percent={percentCollected}
             slices={[
