@@ -68,8 +68,8 @@ export function UnitFormModal({
       resident_id: initial?.resident_id || "",
       rt: initial?.rt || "",
       rw: initial?.rw || authUser?.rw || "",
-      occupancy_month: initial?.occupancy_month || "",
-      occupancy_year: initial?.occupancy_year || "",
+      occupancy_month: initial?.occupancy_month || null,
+      occupancy_year: initial?.occupancy_year || null,
       notes: initial?.notes || "",
     },
   });
@@ -110,8 +110,8 @@ export function UnitFormModal({
       resident_id: values.status === "vacant" || values.resident_id === "" ? null : values.resident_id,
       rt: values.rt === "" ? null : values.rt,
       rw: values.rw === "" ? null : values.rw,
-      occupancy_month: values.occupancy_month === "" ? null : values.occupancy_month,
-      occupancy_year: values.occupancy_year === "" ? null : values.occupancy_year,
+      occupancy_month: values.occupancy_month === null ? null : values.occupancy_month,
+      occupancy_year: values.occupancy_year === null ? null : values.occupancy_year,
       notes: values.notes === "" ? null : values.notes,
     };
 

@@ -11,8 +11,8 @@ export const unitSchema = z.object({
   resident_id: z.string().nullable().optional(),
   rt: z.string().nullable().optional(),
   rw: z.string().nullable().optional(),
-  occupancy_month: z.string().nullable().optional(),
-  occupancy_year: z.string().nullable().optional(),
+  occupancy_month: z.number().nullable().optional(),
+  occupancy_year: z.number().nullable().optional(),
   notes: z.string().nullable().optional(),
 }).superRefine((data, ctx) => {
   if (data.status !== "vacant") {
