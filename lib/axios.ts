@@ -74,7 +74,6 @@ axiosInstance.interceptors.response.use(
 // Generic api function replacing the old fetch-based one
 export async function api<T>(path: string, init?: RequestInit): Promise<T> {
   try {
-    console.log("API_URL", API_URL);
     const config: AxiosRequestConfig = {
       url: path,
       method: init?.method || "GET",

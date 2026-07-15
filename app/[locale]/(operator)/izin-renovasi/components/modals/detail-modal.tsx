@@ -6,8 +6,10 @@ import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { formatDateTime, formatDate } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Download, CheckCircle, XCircle } from "lucide-react";
+import { Download, CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { FileSection } from "@/components/shared/file-section";
 import { RenovationPermitService } from "@/services/renovation-permit.service";
+import { useRenovationPermitDetail } from "@/hooks/api/use-renovation-permit";
 import { toast } from "sonner";
 
 interface DetailModalProps {
@@ -20,6 +22,9 @@ interface DetailModalProps {
 export function DetailModal({ permit, onClose, onApprove, onReject }: DetailModalProps) {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isOpeningDoc, setIsOpeningDoc] = useState<string | null>(null);
+
+  const { data: detail, isLoading: isLoadingDetail } = useRenovationPermitDetail(permit.id);
+  const permitData = detail ?? permit;
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -35,10 +40,10 @@ export function DetailModal({ permit, onClose, onApprove, onReject }: DetailModa
   };
 
   const handleDownloadResult = async () => {
-    if (!permit.has_result) return;
+    if (!permitData.has_result) return;
     try {
       setIsDownloading(true);
-      const res = await RenovationPermitService.getResultUrl(permit.id);
+      const res = await RenovationPermitService.getResultUrl(permitData.id);
       window.open(res.url, "_blank");
     } catch {
       toast.error("Gagal mengunduh surat izin");
@@ -50,7 +55,7 @@ export function DetailModal({ permit, onClose, onApprove, onReject }: DetailModa
   const handleOpenDocument = async (docId: string) => {
     try {
       setIsOpeningDoc(docId);
-      const res = await RenovationPermitService.getDocumentUrl(permit.id, docId);
+      const res = await RenovationPermitService.getDocumentUrl(permitData.id, docId);
       window.open(res.url, "_blank");
     } catch {
       toast.error("Gagal membuka dokumen pendukung");
@@ -66,160 +71,150 @@ export function DetailModal({ permit, onClose, onApprove, onReject }: DetailModa
       title="Detail Izin Renovasi"
       className="max-w-4xl"
     >
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-6">
-        <div className="space-y-6">
-          {/* Informasi Pemohon */}
-          <div>
-            <h4 className="text-sm font-semibold text-zinc-900 border-b pb-2 mb-3">Informasi Pemohon</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-              <div>
-                <p className="text-zinc-500">Nama Pemohon</p>
-                <p className="font-medium text-zinc-900">{permit.resident_name}</p>
+      <div className="relative">
+        {isLoadingDetail && (
+          <div className="absolute inset-0 flex items-center justify-center z-10">
+            <Loader2 size={24} className="animate-spin text-zinc-400" />
+          </div>
+        )}
+        <div className={`grid grid-cols-1 lg:grid-cols-2 gap-6 pb-6${isLoadingDetail ? " opacity-50 pointer-events-none" : ""}`}>
+          <div className="space-y-6">
+            {/* Informasi Pemohon */}
+            <div>
+              <h4 className="text-sm font-semibold text-zinc-600 mb-3">INFORMASI PEMOHON</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                <div>
+                  <p className="text-zinc-500">Nama Pemohon</p>
+                  <p className="font-medium text-zinc-900">{permitData.resident_name}</p>
+                </div>
+                <div>
+                  <p className="text-zinc-500">Unit</p>
+                  <p className="font-medium text-zinc-900">{permitData.unit_code}</p>
+                </div>
+                <div>
+                  <p className="text-zinc-500">Tanggal Pengajuan</p>
+                  <p className="font-medium text-zinc-900">{formatDateTime(permitData.created_at)}</p>
+                </div>
+                <div>
+                  <p className="text-zinc-500">Status</p>
+                  <div className="mt-1">{getStatusBadge(permitData.status)}</div>
+                </div>
               </div>
-              <div>
-                <p className="text-zinc-500">Unit</p>
-                <p className="font-medium text-zinc-900">{permit.unit_code}</p>
-              </div>
-              <div>
-                <p className="text-zinc-500">Tanggal Pengajuan</p>
-                <p className="font-medium text-zinc-900">{formatDateTime(permit.created_at)}</p>
-              </div>
-              <div>
-                <p className="text-zinc-500">Status</p>
-                <div className="mt-1">{getStatusBadge(permit.status)}</div>
+            </div>
+
+            {/* Rincian Renovasi */}
+            <div>
+              <h4 className="text-sm font-semibold text-zinc-600 mb-3">RINCIAN PEKERJAAN</h4>
+              <div className="space-y-3 text-sm">
+                <div>
+                  <p className="text-zinc-500 mb-1">Deskripsi Renovasi</p>
+                  <div className="bg-zinc-50 p-3 rounded border border-zinc-200 text-zinc-700">
+                    {permitData.description}
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-zinc-500">Kendaraan Material</p>
+                    <p className="font-medium text-zinc-900">{permitData.material_vehicle || "-"}</p>
+                  </div>
+                  <div>
+                    <p className="text-zinc-500">Tanggal Mulai</p>
+                    <p className="font-medium text-zinc-900">{formatDate(permitData.start_date)}</p>
+                  </div>
+                  <div>
+                    <p className="text-zinc-500">Estimasi Selesai</p>
+                    <p className="font-medium text-zinc-900">{formatDate(permitData.estimated_end_date)}</p>
+                  </div>
+                  <div>
+                    <p className="text-zinc-500">Jam Kerja</p>
+                    <p className="font-medium text-zinc-900">{permitData.work_hours}</p>
+                  </div>
+                  <div>
+                    <p className="text-zinc-500">Jumlah Pekerja</p>
+                    <p className="font-medium text-zinc-900">{permitData.worker_count} Orang</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Rincian Renovasi */}
-          <div>
-            <h4 className="text-sm font-semibold text-zinc-900 border-b pb-2 mb-3">Rincian Pekerjaan</h4>
-            <div className="space-y-3 text-sm">
-              <div>
-                <p className="text-zinc-500 mb-1">Deskripsi Renovasi</p>
-                <div className="bg-zinc-50 p-3 rounded border border-zinc-200 text-zinc-700">
-                  {permit.description}
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="space-y-6">
+            {/* Informasi Kontraktor */}
+            <div>
+              <h4 className="text-sm font-semibold text-zinc-600 mb-3">INFORMASI KONTRAKTOR</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                 <div>
-                  <p className="text-zinc-500">Kendaraan Material</p>
-                  <p className="font-medium text-zinc-900">{permit.material_vehicle || "-"}</p>
+                  <p className="text-zinc-500">Penanggung Jawab (PIC)</p>
+                  <p className="font-medium text-zinc-900">{permitData.contractor_pic_name}</p>
                 </div>
                 <div>
-                  <p className="text-zinc-500">Tanggal Mulai</p>
-                  <p className="font-medium text-zinc-900">{formatDate(permit.start_date)}</p>
-                </div>
-                <div>
-                  <p className="text-zinc-500">Estimasi Selesai</p>
-                  <p className="font-medium text-zinc-900">{formatDate(permit.estimated_end_date)}</p>
-                </div>
-                <div>
-                  <p className="text-zinc-500">Jam Kerja</p>
-                  <p className="font-medium text-zinc-900">{permit.work_hours}</p>
-                </div>
-                <div>
-                  <p className="text-zinc-500">Jumlah Pekerja</p>
-                  <p className="font-medium text-zinc-900">{permit.worker_count} Orang</p>
+                  <p className="text-zinc-500">No. Telepon / HP</p>
+                  <p className="font-medium text-zinc-900">{permitData.contractor_phone}</p>
                 </div>
               </div>
             </div>
+
+            {/* File Pendukung */}
+            <FileSection
+              title="File Pendukung"
+              files={permitData.documents?.map((doc) => ({
+                id: doc.id,
+                name: doc.file_name,
+                size: doc.file_size,
+              }))}
+              emptyMessage="Tidak ada file pendukung"
+              loadingId={isOpeningDoc}
+              onView={handleOpenDocument}
+            />
+
+            {/* Tindak Lanjut Operator */}
+            {permitData.status === "rejected" && permitData.rejection_reason && (
+              <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+                <h4 className="text-sm font-semibold text-red-900 mb-1 flex items-center gap-2">
+                  <XCircle className="h-4 w-4" /> Alasan Penolakan
+                </h4>
+                <p className="text-sm text-red-700">{permitData.rejection_reason}</p>
+                <p className="text-xs text-red-600 mt-2">Ditinjau pada: {formatDateTime(permitData.reviewed_at || "")}</p>
+              </div>
+            )}
+
+            {permitData.status === "approved" && (
+              <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
+                <h4 className="text-sm font-semibold text-emerald-900 mb-1 flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4" /> Izin Disetujui
+                </h4>
+                <p className="text-xs text-emerald-700 mb-3">Ditinjau pada: {formatDateTime(permitData.reviewed_at || "")}</p>
+                {permitData.has_result && (
+                  <Button
+                    onClick={handleDownloadResult}
+                    disabled={isDownloading}
+                    className="w-full bg-emerald-600 hover:bg-emerald-700"
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    {isDownloading ? "Mengunduh..." : "Unduh Surat Izin"}
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="space-y-6">
-          {/* Informasi Kontraktor */}
-          <div>
-            <h4 className="text-sm font-semibold text-zinc-900 border-b pb-2 mb-3">Informasi Kontraktor</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-              <div>
-                <p className="text-zinc-500">Penanggung Jawab (PIC)</p>
-                <p className="font-medium text-zinc-900">{permit.contractor_pic_name}</p>
-              </div>
-              <div>
-                <p className="text-zinc-500">No. Telepon / HP</p>
-                <p className="font-medium text-zinc-900">{permit.contractor_phone}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Dokumen Pendukung */}
-          <div>
-            <h4 className="text-sm font-semibold text-zinc-900 border-b pb-2 mb-3">Dokumen Pendukung</h4>
-            {permit.documents && permit.documents.length > 0 ? (
-              <div className="space-y-2">
-                {permit.documents.map((doc) => (
-                  <div key={doc.id} className="flex items-center justify-between p-3 border border-zinc-200 rounded-lg bg-white">
-                    <div className="flex items-center gap-3">
-                      <FileText className="text-blue-500 h-5 w-5" />
-                      <div>
-                        <p className="text-sm font-medium text-zinc-900 line-clamp-1">{doc.file_name}</p>
-                        <p className="text-xs text-zinc-500">{(doc.file_size / 1024).toFixed(2)} KB</p>
-                      </div>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleOpenDocument(doc.id)}
-                      disabled={isOpeningDoc === doc.id}
-                    >
-                      {isOpeningDoc === doc.id ? "Memuat..." : "Lihat"}
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-zinc-500 italic">Tidak ada dokumen pendukung</p>
-            )}
-          </div>
-
-          {/* Tindak Lanjut Operator */}
-          {permit.status === "rejected" && permit.rejection_reason && (
-            <div className="bg-red-50 p-4 rounded-lg border border-red-200">
-              <h4 className="text-sm font-semibold text-red-900 mb-1 flex items-center gap-2">
-                <XCircle className="h-4 w-4" /> Alasan Penolakan
-              </h4>
-              <p className="text-sm text-red-700">{permit.rejection_reason}</p>
-              <p className="text-xs text-red-600 mt-2">Ditinjau pada: {formatDateTime(permit.reviewed_at || "")}</p>
-            </div>
-          )}
-
-          {permit.status === "approved" && (
-            <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
-              <h4 className="text-sm font-semibold text-emerald-900 mb-1 flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" /> Izin Disetujui
-              </h4>
-              <p className="text-xs text-emerald-700 mb-3">Ditinjau pada: {formatDateTime(permit.reviewed_at || "")}</p>
-              {permit.has_result && (
-                <Button
-                  onClick={handleDownloadResult}
-                  disabled={isDownloading}
-                  className="w-full bg-emerald-600 hover:bg-emerald-700"
-                >
-                  <Download className="mr-2 h-4 w-4" />
-                  {isDownloading ? "Mengunduh..." : "Unduh Surat Izin"}
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-zinc-200">
+          {permitData.status === "pending" && (onApprove || onReject) && (
+            <>
+              {onReject && (
+                <Button variant="danger" onClick={onReject}>
+                  Tolak
                 </Button>
               )}
-            </div>
+              {onApprove && (
+                <Button onClick={onApprove}>
+                  Setujui
+                </Button>
+              )}
+            </>
           )}
         </div>
-      </div>
-
-      <div className="flex items-center justify-end gap-3 pt-4 border-t border-zinc-200">
-        {permit.status === "pending" && (onApprove || onReject) && (
-          <>
-            {onReject && (
-              <Button variant="danger" onClick={onReject}>
-                Tolak
-              </Button>
-            )}
-            {onApprove && (
-              <Button onClick={onApprove}>
-                Setujui
-              </Button>
-            )}
-          </>
-        )}
       </div>
     </Modal>
   );
