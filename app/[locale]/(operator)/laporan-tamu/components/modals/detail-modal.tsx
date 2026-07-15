@@ -6,7 +6,8 @@ import type { GuestReport } from "@/types/guest-report";
 import { GuestReportService } from "@/services/guest-report.service";
 import { useUpdateGuestReportNote } from "@/hooks/api/use-guest-report";
 import { formatDate } from "@/lib/format";
-import { Loader2, ExternalLink } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { FileSection } from "@/components/shared/file-section";
 import { toast } from "sonner";
 import { usePermissions, hasPermission } from "@/hooks/api/use-permissions";
 
@@ -94,27 +95,17 @@ export function DetailModal({
           </div>
         )}
 
-        <div className="pt-4 border-t border-zinc-100">
-          <div className="text-xs font-semibold text-zinc-600 mb-2">IDENTITAS TAMU (KTP)</div>
-          {report.has_ktp ? (
-            <div className="flex items-center justify-between bg-zinc-50 rounded p-2 text-sm border border-zinc-100">
-              <span className="truncate flex-1 mr-2 text-zinc-700">
-                {report.ktp_file_name || "Foto KTP Terlampir"}
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleViewKtp}
-                disabled={downloadingKtp}
-                className="text-brand-700"
-              >
-                {downloadingKtp ? <Loader2 size={14} className="animate-spin" /> : <ExternalLink size={14} />}
-              </Button>
-            </div>
-          ) : (
-            <div className="text-sm text-zinc-400">Tidak ada lampiran KTP</div>
-          )}
-        </div>
+        <FileSection
+          title="Identitas Tamu (KTP)"
+          files={
+            report.has_ktp
+              ? [{ id: "ktp", name: report.ktp_file_name || "Foto KTP Terlampir" }]
+              : []
+          }
+          emptyMessage="Tidak ada lampiran KTP"
+          loadingId={downloadingKtp ? "ktp" : null}
+          onView={handleViewKtp}
+        />
 
         {canUpdate && (
           <div className="pt-4 border-t border-zinc-100">
