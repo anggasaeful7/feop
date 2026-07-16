@@ -62,8 +62,6 @@ body {
   box-shadow:
     0 4px 6px -1px rgba(0, 0, 0, 0.06),
     0 20px 40px -8px rgba(0, 0, 0, 0.12) !important;
-  overflow: hidden !important;
-  padding: 4px !important;
 }
 
 /* Header */
@@ -147,12 +145,13 @@ body {
 
 /* ─── Month-Year Picker Mode ─────────────────────────────────────── */
 
-.react-datepicker__month-container {
+/* Tighten width only when showing month/year grids */
+.react-datepicker__month-container:has(.react-datepicker__month-text) {
   width: 240px !important;
 }
 
-/* Turn the month container into a 3-column grid */
-.react-datepicker__month {
+/* Turn the month container into a 3-column grid (only for month-year picker mode) */
+.react-datepicker__month:has(.react-datepicker__month-text) {
   display: grid !important;
   grid-template-columns: repeat(3, 1fr) !important;
   gap: 4px !important;
@@ -160,8 +159,8 @@ body {
   margin: 0 !important;
 }
 
-/* Make each row wrapper transparent to the grid */
-.react-datepicker__month-wrapper {
+/* Make each row wrapper transparent to the grid (only for month-year picker mode) */
+.react-datepicker__month:has(.react-datepicker__month-text) .react-datepicker__month-wrapper {
   display: contents !important;
 }
 

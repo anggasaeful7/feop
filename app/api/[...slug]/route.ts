@@ -26,7 +26,7 @@ async function handleProxy(request: NextRequest, params: { slug: string[] }) {
   const cookieStore = await cookies();
   const token = cookieStore.get("ipl_access_token")?.value;
   let apiBaseUrl = cookieStore.get("ipl_api_base_url")?.value;
-  
+
   if (apiBaseUrl === "undefined" || apiBaseUrl === "null") {
     apiBaseUrl = undefined;
   }
