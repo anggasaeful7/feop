@@ -126,8 +126,8 @@ export type Unit = {
   resident_name?: string | null;
   rt?: string | null;
   rw?: string | null;
-  occupancy_month?: string | null;
-  occupancy_year?: string | null;
+  occupancy_month?: number | null;
+  occupancy_year?: number | null;
   notes?: string | null;
   active_components?: {
     id: string;
@@ -149,8 +149,8 @@ export type UnitPayload = {
   resident_id?: string | null;
   rt?: string | null;
   rw?: string | null;
-  occupancy_month?: string | null;
-  occupancy_year?: string | null;
+  occupancy_month?: number | null;
+  occupancy_year?: number | null;
   notes?: string | null;
 };
 
