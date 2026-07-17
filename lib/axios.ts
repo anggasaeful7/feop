@@ -93,7 +93,7 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
     if (res.status === 204) return undefined as T;
 
     const body = res.data;
-    if (body && "data" in body) return body.data;
+    if (body && "data" in body) return body.data as T;
 
     return undefined as T;
   } catch (error) {
@@ -160,7 +160,7 @@ export async function uploadCSV<T>(path: string, file: File): Promise<T> {
     });
 
     const body = res.data;
-    if (body && "data" in body) return body.data;
+    if (body && "data" in body) return body.data as T;
 
     throw new ApiError(res.status, {
       code: "unknown",
