@@ -75,15 +75,13 @@ export async function POST(request: Request) {
   }
 
   if (!upstream.ok || !body?.data) {
+    const code = body?.error?.code ?? "auth_failed";
     const message =
-      upstream.status === 401
+      body?.error?.message ??
+      (upstream.status === 401
         ? "Email atau password salah."
-        : "Gagal masuk. Silakan coba lagi.";
-    return clientError(
-      upstream.status === 401 ? 401 : upstream.status,
-      "auth_failed",
-      message
-    );
+        : "Gagal masuk. Silakan coba lagi.");
+    return clientError(upstream.status === 401 ? 401 : upstream.status, code, message);
   }
 
   const { user } = body.data;

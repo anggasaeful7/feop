@@ -16,7 +16,13 @@ export * from "./general-facility";
 export * from "./punishment";
 export * from "./dashboard";
 
-export type ApiEnvelope<T> = { data: T };
+export type APIError = {
+  code: string;
+  message: string;
+  details?: Record<string, unknown>;
+};
+
+export type ApiEnvelope<T> = { data?: T, error?: APIError; };
 
 export type ApiErrorBody = {
   error: { code: string; message: string; details?: Record<string, unknown> };
