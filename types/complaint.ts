@@ -1,3 +1,23 @@
+export interface TimelineAttachment {
+  file_name: string;
+  mime_type: string;
+  size: number;
+  url: string;
+}
+
+export interface TimelineEntry {
+  actor_id: string;
+  actor_name: string;
+  actor_type: string;
+  attachment: TimelineAttachment;
+  created_at: string;
+  event_type: string;
+  id: string;
+  message: string;
+  status_from: string;
+  status_to: string;
+}
+
 export interface Complaint {
   category: string;
   created_at: string;
@@ -17,6 +37,7 @@ export interface Complaint {
   updated_at: string;
   urgency: "low" | "medium" | "high" | string;
   workspace_id: string;
+  timeline?: TimelineEntry[];
 }
 
 export interface GetComplaintsParams {

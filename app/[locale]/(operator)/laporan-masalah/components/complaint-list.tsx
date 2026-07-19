@@ -24,14 +24,14 @@ export function ComplaintList() {
     category: category !== "all" ? category : undefined,
   });
 
-  const [selectedComplaint, setSelectedComplaint] = useState<Complaint | null>(null);
+  const [selectedComplaintId, setSelectedComplaintId] = useState<string | null>(null);
 
   const handleViewDetail = (complaint: Complaint) => {
-    setSelectedComplaint(complaint);
+    setSelectedComplaintId(complaint.id);
   };
 
   const closeModal = () => {
-    setSelectedComplaint(null);
+    setSelectedComplaintId(null);
   };
 
   const columns: ColumnDef<Complaint>[] = useMemo(() => [
@@ -99,8 +99,8 @@ export function ComplaintList() {
         }
       />
 
-      {selectedComplaint && (
-        <DetailModal complaint={selectedComplaint} onClose={closeModal} />
+      {selectedComplaintId && (
+        <DetailModal complaintId={selectedComplaintId} onClose={closeModal} />
       )}
     </div>
   );
