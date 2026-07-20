@@ -46,7 +46,7 @@ axiosInstance.interceptors.request.use(async (config) => {
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
-      const apiBaseUrl = cookieStore.get("ipl_api_base_url")?.value;
+      const apiBaseUrl = env.operatorUrl || cookieStore.get("ipl_api_base_url")?.value;
       const isAuthRoute = config.url?.startsWith("/auth/") || config.url?.startsWith("auth/");
       if (apiBaseUrl && !isAuthRoute) {
         config.baseURL = `${apiBaseUrl.replace(/\/$/, "")}/api/v1`;

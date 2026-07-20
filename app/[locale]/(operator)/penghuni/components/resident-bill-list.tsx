@@ -46,12 +46,14 @@ export function ResidentBillList() {
   const [kind, setKind] = useState<string>("all");
   const [rwFilter, setRwFilter] = useState<string>("all");
   const [rtFilter, setRtFilter] = useState<string>("all");
+  const [monthFilter, setMonthFilter] = useState<string>("all");
   const [yearDate, setYearDate] = useState<Date | null>(
     urlYear ? new Date(Number(urlYear), 0, 1) : new Date(new Date().getFullYear(), 0, 1)
   );
   const year = yearDate ? yearDate.getFullYear() : new Date().getFullYear();
   const [prevUrlYear, setPrevUrlYear] = useState(urlYear);
   const [isExportingExcel, setIsExportingExcel] = useState(false);
+  const [isExportingRekon, setIsExportingRekon] = useState(false);
   const [expandedUnits, setExpandedUnits] = useState<Set<string>>(new Set());
   const [onlyOverdue, setOnlyOverdue] = useState<boolean>(false);
 
@@ -112,6 +114,7 @@ export function ResidentBillList() {
     !isAdminRw && !isAdminRt && rwFilter !== "all",
     !isAdminRt && rtFilter !== "all",
     kind !== "all",
+    monthFilter !== "all",
     year !== new Date().getFullYear(),
     onlyOverdue,
   ].filter(Boolean).length;
@@ -120,6 +123,7 @@ export function ResidentBillList() {
     setRwFilter("all");
     setRtFilter("all");
     setKind("all");
+    setMonthFilter("all");
     setYearDate(new Date(new Date().getFullYear(), 0, 1));
     setOnlyOverdue(false);
   };
@@ -186,6 +190,21 @@ export function ResidentBillList() {
       toast.error(e instanceof ApiError ? e.message : "Gagal mengekspor data Excel");
     } finally {
       setIsExportingExcel(false);
+    }
+  };
+
+  const handleExportRekon = async () => {
+    setIsExportingRekon(true);
+    try {
+      const params = new URLSearchParams();
+      params.set("year", year.toString());
+      if (monthFilter !== "all") params.set("month", monthFilter);
+      await downloadCSV(`/reconciliation/export.xlsx?${params.toString()}`, "rekon-penghuni.xlsx");
+      toast.success("Berhasil mengekspor data rekon");
+    } catch (e) {
+      toast.error(e instanceof ApiError ? e.message : "Gagal mengekspor data rekon");
+    } finally {
+      setIsExportingRekon(false);
     }
   };
 
@@ -366,6 +385,22 @@ export function ResidentBillList() {
                 </Select>
               </div>
 
+              {/* Bulan */}
+              <div>
+                <label className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wide mb-1.5 block">Bulan</label>
+                <Select value={monthFilter} onValueChange={(v) => { setMonthFilter(v); setPage(1); }}>
+                  <SelectTrigger className="w-full h-9 rounded-lg border-zinc-200 text-xs font-medium bg-zinc-50 text-zinc-800">
+                    <SelectValue placeholder="Semua Bulan" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Semua Bulan</SelectItem>
+                    {["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"].map((m, i) => (
+                      <SelectItem key={i} value={String(i + 1)}>{m}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               {/* Tahun */}
               <div>
                 <label className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wide mb-1.5 block">Tahun</label>
@@ -397,16 +432,28 @@ export function ResidentBillList() {
 
             {/* Export button */}
             {canExport && (
-              <Button
-                variant="secondary"
-                size="sm"
-                className="h-9 px-4 text-xs font-bold italic"
-                onClick={handleExportExcel}
-                disabled={isExportingExcel}
-              >
-                <Download size={13} className="mr-1" />
-                {isExportingExcel ? "..." : "Excel"}
-              </Button>
+              <>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="h-9 px-4 text-xs font-bold italic"
+                  onClick={handleExportRekon}
+                  disabled={isExportingRekon}
+                >
+                  <Download size={13} className="mr-1" />
+                  {isExportingRekon ? "..." : "Rekon"}
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="h-9 px-4 text-xs font-bold italic"
+                  onClick={handleExportExcel}
+                  disabled={isExportingExcel}
+                >
+                  <Download size={13} className="mr-1" />
+                  {isExportingExcel ? "..." : "Excel"}
+                </Button>
+              </>
             )}
           </div>
         }

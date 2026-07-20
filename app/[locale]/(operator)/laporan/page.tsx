@@ -7,7 +7,7 @@ export default function LaporanPage() {
     <>
       <PageHeader
         eyebrow="Admin · Transparansi kas"
-        title="Upload Laporan Keuangan"
+        title="Upload Laporan"
         subtitle="Upload laporan bulanan/tahunan agar penghuni bisa lihat"
       />
 

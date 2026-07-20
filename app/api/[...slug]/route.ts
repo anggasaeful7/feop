@@ -25,7 +25,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
 async function handleProxy(request: NextRequest, params: { slug: string[] }) {
   const cookieStore = await cookies();
   const token = cookieStore.get("ipl_access_token")?.value;
-  let apiBaseUrl = cookieStore.get("ipl_api_base_url")?.value;
+  let apiBaseUrl = env.operatorUrl || cookieStore.get("ipl_api_base_url")?.value;
 
   if (apiBaseUrl === "undefined" || apiBaseUrl === "null") {
     apiBaseUrl = undefined;
@@ -33,9 +33,11 @@ async function handleProxy(request: NextRequest, params: { slug: string[] }) {
 
   const slugPath = params.slug.join("/");
 
-  // Force auth requests (like login) to use the main env.apiUrl
+  // Force auth + user-level requests to use the main env.apiUrl
   const isAuthRoute = slugPath.startsWith("auth/");
-  const backendUrl = (apiBaseUrl && !isAuthRoute) ? apiBaseUrl : env.apiUrl;
+  const isUserRoute = slugPath.startsWith("users/");
+  const usePlatformUrl = isAuthRoute || isUserRoute;
+  const backendUrl = (apiBaseUrl && !usePlatformUrl) ? apiBaseUrl : env.apiUrl;
 
   // Attach /api/v1 which is abstracted from the frontend codebase
   const baseUrl = backendUrl.endsWith("/") ? backendUrl.slice(0, -1) : backendUrl;
