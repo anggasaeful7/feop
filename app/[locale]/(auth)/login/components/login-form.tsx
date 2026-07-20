@@ -257,16 +257,6 @@ export function LoginForm() {
       >
         {submitting ? "Signing in..." : "Sign In"}
       </button>
-
-      <p className="text-center text-sm text-zinc-600">
-        New to IPL Sistem?{" "}
-        <Link
-          href="/register"
-          className="font-semibold text-brand hover:underline"
-        >
-          Create an Account
-        </Link>
-      </p>
     </form>
   );
 }
