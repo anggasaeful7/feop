@@ -26,5 +26,5 @@ export const ROUTE_PERMISSIONS: RoutePermission[] = [
   { path: "/master-data/petugas", requiredRole: "admin_workspace" },
   { path: "/platform-billing", requiredResource: "platform_billing" },
   { path: "/notifikasi", requiredResource: "notifications" },
-  { path: "/pengaturan", requiredRole: "admin_workspace" },
+  { path: "/pengaturan" },
 ];

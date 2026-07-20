@@ -81,6 +81,7 @@ const NAV: NavItem[] = [
     Icon: Settings,
     children: [
       { href: "/notifikasi", label: "Notifikasi", requiredRole: "admin_workspace" },
+      { href: "/pengaturan", label: "Pengaturan" },
     ],
   },
 ];
