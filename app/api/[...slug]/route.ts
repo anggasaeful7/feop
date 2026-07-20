@@ -42,7 +42,6 @@ async function handleProxy(request: NextRequest, params: { slug: string[] }) {
   // Attach /api/v1 which is abstracted from the frontend codebase
   const baseUrl = backendUrl.endsWith("/") ? backendUrl.slice(0, -1) : backendUrl;
   const targetUrl = new URL(`${baseUrl}/api/v1/${slugPath}${request.nextUrl.search}`);
-  console.log("targetUrl", targetUrl);
 
   const headers = new Headers(request.headers);
   // Remove headers that might cause CORS or host issues with the target server

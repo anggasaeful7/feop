@@ -180,9 +180,11 @@ export function Sidebar({ className }: { className?: string }) {
         />
         <div className="leading-tight">
           <div className="text-sm font-semibold text-zinc-900">IPL Sistem</div>
-          <div className="text-xs text-zinc-500">
-            {user?.workspace_name || "Cluster Mawar"}
-          </div>
+          {user?.workspace_name && (
+            <div className="text-xs text-zinc-500">
+              {user?.workspace_name}
+            </div>
+          )}
           {(user?.rw || user?.rt) && (
             <div className="text-xs text-zinc-500">
               {user?.rw ? `RW ${user.rw}` : ""}
