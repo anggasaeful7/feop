@@ -130,7 +130,7 @@ export function PetugasFormDialog({
               <FormItem className="col-span-2 sm:col-span-1">
                 <FormLabel>Kontak / No. HP</FormLabel>
                 <FormControl>
-                  <Input placeholder="08123456789" {...field} className="rounded-xl italic bg-transparent" />
+                  <Input placeholder="08123456789" {...field} inputMode="numeric" onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^0-9+]/g, ""); field.onChange(e.currentTarget.value); }} className="rounded-xl italic bg-transparent" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
