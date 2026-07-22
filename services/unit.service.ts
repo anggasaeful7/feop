@@ -49,4 +49,15 @@ export const UnitService = {
       body: JSON.stringify(payload),
     });
   },
+
+  resetResidentUserPassword: async (
+    unitId: string,
+    userId: string,
+    payload: { new_password: string; password_confirmation: string }
+  ) => {
+    return api(`/master/units/${unitId}/resident-users/${userId}/change-password`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
 };

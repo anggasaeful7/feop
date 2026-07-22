@@ -109,6 +109,24 @@ export type PersonPayload = {
 export type UnitStatus = "occupied" | "vacant" | "maintenance";
 export type BillPayer = "owner" | "resident";
 
+export type UnitResidentUser = {
+  id: string;
+  workspace_id: string;
+  unit_id: string;
+  account_type: string;
+  unit_code: string;
+  unit_status: string;
+  unit_bill_payer: string;
+  owner_name: string | null;
+  resident_name: string | null;
+  username: string;
+  is_default_password: boolean;
+  is_active: boolean;
+  last_login_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Unit = {
   id: string;
   workspace_id: string;
@@ -134,6 +152,7 @@ export type Unit = {
     name: string;
     amount: number;
   }[];
+  users?: UnitResidentUser[];
   created_at: string;
   updated_at: string;
 };

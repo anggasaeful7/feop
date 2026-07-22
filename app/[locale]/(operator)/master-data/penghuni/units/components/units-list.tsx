@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Plus } from "lucide-react";
+import { KeyRound, Plus } from "lucide-react";
 import { Button, DataTable, DataTableRowActions } from "@/components/ui";
 import { ColumnDef } from "@tanstack/react-table";
 import {
@@ -11,6 +11,7 @@ import {
 import type { Unit } from "@/types/master-data";
 import { CSVTools } from "@/components/csv-import";
 import { UnitFormModal } from "./modals/unit-form-modal";
+import { ResetPasswordModal } from "./modals/reset-password-modal";
 import { useDataTableState } from "@/hooks/use-data-table-state";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { baseColumns } from "./columns";
@@ -58,6 +59,7 @@ export function UnitsList() {
 
   const [editing, setEditing] = useState<Unit | null>(null);
   const [creating, setCreating] = useState(false);
+  const [resetPasswordUnitId, setResetPasswordUnitId] = useState<string | null>(null);
 
   const deleteUnit = useDeleteUnit();
 
@@ -71,6 +73,17 @@ export function UnitsList() {
           const u = row.original;
           return (
             <DataTableRowActions
+              extraActions={ (
+                  <button
+                    onClick={() => setResetPasswordUnitId(u.id)}
+                    className="hover:text-zinc-700 transition"
+                    aria-label="Reset Password"
+                    title="Reset Password"
+                  >
+                    <KeyRound size={16} />
+                  </button>
+                ) 
+              }
               onEdit={canUpdate ? () => setEditing(u) : undefined}
               onDelete={canDelete ? () => deleteUnit.mutate(u.id) : undefined}
               isDeleting={deleteUnit.isPending && deleteUnit.variables === u.id}
@@ -154,6 +167,13 @@ export function UnitsList() {
           title={`Edit ${editing.code}`}
           initial={editing}
           onClose={() => setEditing(null)}
+        />
+      )}
+
+      {resetPasswordUnitId && (
+        <ResetPasswordModal
+          unitId={resetPasswordUnitId}
+          onClose={() => setResetPasswordUnitId(null)}
         />
       )}
     </>
