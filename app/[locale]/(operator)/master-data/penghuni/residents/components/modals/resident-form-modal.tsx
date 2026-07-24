@@ -110,7 +110,7 @@ export function ResidentFormModal({
               <FormItem className="col-span-2 sm:col-span-1">
                 <FormLabel>No. KTP</FormLabel>
                 <FormControl>
-                  <Input placeholder="3201xxxxxxxxx" {...field} value={field.value || ""} className="rounded-xl bg-transparent" />
+                  <Input placeholder="3201xxxxxxxxx" {...field} value={field.value || ""} inputMode="numeric" onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/\D/g, ""); field.onChange(e.currentTarget.value); }} className="rounded-xl bg-transparent" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -124,7 +124,7 @@ export function ResidentFormModal({
               <FormItem className="col-span-2 sm:col-span-1">
                 <FormLabel>Telepon</FormLabel>
                 <FormControl>
-                  <Input placeholder="+628xxxxxxxxxx" {...field} value={field.value || ""} className="rounded-xl bg-transparent" />
+                  <Input placeholder="+628xxxxxxxxxx" {...field} value={field.value || ""} inputMode="numeric" onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^0-9+]/g, ""); field.onChange(e.currentTarget.value); }} className="rounded-xl bg-transparent" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -155,7 +155,7 @@ export function ResidentFormModal({
                   <textarea
                     {...field}
                     value={field.value || ""}
-                    className="flex min-h-[80px] w-full rounded-xl border border-zinc-200 bg-transparent px-3 py-2 text-sm ring-offset-white placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex min-h-20 w-full rounded-xl border border-zinc-200 bg-transparent px-3 py-2 text-sm ring-offset-white placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   />
                 </FormControl>
                 <FormMessage />

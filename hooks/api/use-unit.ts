@@ -71,3 +71,26 @@ export function useDeleteUnit() {
     },
   });
 }
+
+export function useResetResidentUserPassword() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      unitId,
+      userId,
+      payload,
+    }: {
+      unitId: string;
+      userId: string;
+      payload: { new_password: string; password_confirmation: string };
+    }) => UnitService.resetResidentUserPassword(unitId, userId, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: unitQK.all });
+      toast.success("Password user berhasil direset");
+    },
+    onError: (error) => {
+      toast.error(error instanceof ApiError ? error.message : "Gagal mereset password");
+    },
+  });
+}

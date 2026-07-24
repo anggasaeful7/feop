@@ -171,7 +171,7 @@ export function EmergencyContactFormModal({
                 <FormItem>
                   <FormLabel>Nomor Telepon <span className="text-rose-500">*</span></FormLabel>
                   <FormControl>
-                    <Input placeholder="Contoh: 08123456789" {...field} />
+                    <Input placeholder="Contoh: 08123456789" {...field} inputMode="numeric" onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^0-9+]/g, ""); field.onChange(e.currentTarget.value); }} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -185,7 +185,7 @@ export function EmergencyContactFormModal({
                 <FormItem>
                   <FormLabel>WhatsApp</FormLabel>
                   <FormControl>
-                    <Input placeholder="Contoh: 08123456789" {...field} />
+                    <Input placeholder="Contoh: 08123456789" {...field} inputMode="numeric" onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^0-9+]/g, ""); field.onChange(e.currentTarget.value); }} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

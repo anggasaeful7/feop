@@ -5,7 +5,7 @@ export const officerSchema = z.object({
   division: z.enum(["cleaning", "security"], {
     message: "Pilih divisi yang valid",
   }),
-  contact: z.string().min(1, "Kontak wajib diisi"),
+  contact: z.string().min(1, "Kontak wajib diisi").regex(/^[0-9+]*$/, "Hanya angka dan + diperbolehkan"),
   email: z.string().min(1, "Email wajib diisi").email("Email tidak valid"),
   is_active: z.boolean(),
 });
