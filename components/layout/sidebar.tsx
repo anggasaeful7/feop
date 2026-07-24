@@ -80,7 +80,7 @@ const NAV: NavItem[] = [
     label: "Pengaturan & Lainnya",
     Icon: Settings,
     children: [
-      { href: "/notifikasi", label: "Notifikasi", requiredRole: "admin_workspace" },
+      // { href: "/notifikasi", label: "Notifikasi", requiredRole: "admin_workspace" },
       { href: "/pengaturan", label: "Pengaturan" },
     ],
   },
