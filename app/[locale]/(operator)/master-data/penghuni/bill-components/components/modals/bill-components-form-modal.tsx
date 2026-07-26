@@ -19,6 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import type { BillComponent } from "@/types/master-data";
 import { billComponentSchema, type BillComponentFormValues } from "@/lib/validations/bill-component";
 import { useCreateBillComponent, useUpdateBillComponent } from "@/hooks/api/use-bill-component";
+import { formatIDR, parseIDR } from "@/lib/utils";
 
 export function BillComponentsFormModal({
   title,
@@ -112,13 +113,13 @@ export function BillComponentsFormModal({
                 <FormLabel>Harga</FormLabel>
                 <FormControl>
                   <Input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     placeholder="Harga"
                     {...field}
-                    value={field.value === null ? "" : field.value}
+                    value={field.value === null || field.value === undefined ? "" : formatIDR(field.value)}
                     onChange={e => {
-                      const val = e.target.value;
-                      field.onChange(val === "" ? null : Number(val));
+                      field.onChange(parseIDR(e.target.value));
                     }}
                     className="rounded-xl italic bg-transparent"
                   />
