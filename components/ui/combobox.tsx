@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { useState, useRef, useCallback } from "react";
+import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,10 @@ export interface ComboboxProps {
   emptyText?: string;
   disabled?: boolean;
   className?: string;
+  onLoadMore?: () => void;
+  hasMore?: boolean;
+  isLoading?: boolean;
+  onSearchChange?: (value: string) => void;
 }
 
 export function Combobox({
@@ -44,13 +48,35 @@ export function Combobox({
   emptyText = "Tidak ditemukan.",
   disabled = false,
   className,
+  onLoadMore,
+  hasMore,
+  isLoading,
+  onSearchChange,
 }: ComboboxProps) {
   const [open, setOpen] = useState(false);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
-  // Temukan label dari value yang aktif
+  const hasInfiniteScroll = !!onLoadMore;
+
+  const sentinelRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      observerRef.current?.disconnect();
+      observerRef.current = null;
+      if (!node || !open || !hasInfiniteScroll || !hasMore || isLoading) return;
+      observerRef.current = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) onLoadMore?.();
+        },
+        { rootMargin: "200px" }
+      );
+      observerRef.current.observe(node);
+    },
+    [open, hasInfiniteScroll, hasMore, isLoading, onLoadMore]
+  );
+
   const selectedLabel = value
     ? options.find((opt) => opt.value === value)?.label
-    : options.find((opt) => opt.value === "")?.label; // fallback untuk opsi kosong jika value belum ada
+    : options.find((opt) => opt.value === "")?.label;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -71,9 +97,9 @@ export function Combobox({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0 rounded-xl border border-[#E4DDCB] bg-cream-50 text-foreground shadow-md" align="start">
-        <Command className="bg-transparent">
-          <CommandInput placeholder={searchPlaceholder} />
-          <CommandList>
+        <Command className="bg-transparent" shouldFilter={!onSearchChange}>
+          <CommandInput placeholder={searchPlaceholder} onValueChange={onSearchChange} />
+          <CommandList className="max-h-75">
             <CommandEmpty>{emptyText}</CommandEmpty>
             <CommandGroup>
               {options.map((option) => {
@@ -97,6 +123,16 @@ export function Combobox({
                   </CommandItem>
                 );
               })}
+              {hasInfiniteScroll && (
+                <div
+                  ref={sentinelRef}
+                  className="flex items-center justify-center pt-2 pb-4"
+                >
+                  {isLoading && (
+                    <Loader2 className="h-4 w-4 animate-spin text-zinc-400" />
+                  )}
+                </div>
+              )}
             </CommandGroup>
           </CommandList>
         </Command>
