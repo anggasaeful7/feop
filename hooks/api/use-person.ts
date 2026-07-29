@@ -1,6 +1,9 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState, useMemo } from "react";
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { PersonService } from "@/services/person.service";
 import type { PersonPayload, PersonQueryParams } from "@/types/master-data";
+import type { ComboboxOption } from "@/components/ui/combobox";
+import { useDebounce } from "@/hooks/use-debounce";
 import { toast } from "sonner";
 import { ApiError } from "@/lib/axios";
 
@@ -17,6 +20,50 @@ export function usePersons(params?: PersonQueryParams) {
     queryKey: personQK.list(params),
     queryFn: () => PersonService.getPersons(params),
   });
+}
+
+export function usePersonOptions(search?: string) {
+  return useInfiniteQuery({
+    queryKey: [...personQK.all, "infinite", search],
+    queryFn: ({ pageParam }) =>
+      PersonService.getPersons({ search: search || undefined, page: pageParam, per_page: 25 }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const { page, per_page, total } = lastPage;
+      return page * per_page < total ? page + 1 : undefined;
+    },
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    select: (data) => ({
+      ...data,
+      items: data.pages.flatMap((p) => p.items),
+    }),
+  });
+}
+
+export function usePersonComboboxOptions() {
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 300);
+  const query = usePersonOptions(debouncedSearch);
+  const items = useMemo<ComboboxOption[]>(() => {
+    const allItems = query.data?.items ?? [];
+    return [
+      { value: "", label: "— pilih —" },
+      ...allItems.map((p) => ({ value: p.id, label: p.full_name })),
+    ];
+  }, [query.data]);
+  return {
+    items,
+    isLoading: query.isFetchingNextPage,
+    isInitialLoading: query.isFetching && !query.isFetchingNextPage,
+    hasMore: !!query.hasNextPage,
+    loadMore: () => {
+      if (query.hasNextPage && !query.isFetchingNextPage) {
+        query.fetchNextPage();
+      }
+    },
+    onSearchChange: setSearch,
+  };
 }
 
 export function useCreatePerson() {
