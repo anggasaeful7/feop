@@ -71,6 +71,13 @@ const dateTimeFmt = new Intl.DateTimeFormat("id-ID", {
   minute: "2-digit",
 });
 
+export function formatProtobufTimestamp(ts: { seconds: number; nanos: number } | undefined | null) {
+  if (!ts) return "—";
+  const d = new Date(ts.seconds * 1000 + ts.nanos / 1000000);
+  if (Number.isNaN(d.getTime())) return "—";
+  return dateTimeFmt.format(d).replace(/\./g, ":");
+}
+
 export function formatDateTime(iso?: string) {
   if (!iso) return "—";
   const d = new Date(iso);

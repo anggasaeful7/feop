@@ -15,6 +15,7 @@ export * from "./financial-report";
 export * from "./general-facility";
 export * from "./punishment";
 export * from "./dashboard";
+export * from "./payout";
 
 export type APIError = {
   code: string;
