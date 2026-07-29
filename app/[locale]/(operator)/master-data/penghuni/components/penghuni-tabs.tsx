@@ -6,9 +6,9 @@ import { usePermissions } from "@/hooks/api/use-permissions";
 const TABS = [
   { label: "Data RW", href: "rws", requiredRole: "admin_workspace" },
   { label: "Data RT", href: "rts", requiredRole: "admin_workspace" },
-  { label: "Unit", href: "units" },
-  { label: "Warga", href: "residents" },
   { label: "Tipe Unit", href: "unit-types" },
+  { label: "Warga", href: "residents" },
+  { label: "Unit", href: "units" },
   { label: "Komponen Tagihan", href: "bill-components" },
   { label: "Tagihan Lainnya", href: "other-bills" },
   { label: "Assign Komponen", href: "assign-components" },

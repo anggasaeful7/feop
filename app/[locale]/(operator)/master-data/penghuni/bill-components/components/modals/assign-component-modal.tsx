@@ -222,9 +222,9 @@ export function AssignComponentModal({ onClose }: { onClose: () => void }) {
         </div>
       }
     >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2 h-[450px]">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2 h-112.5">
         {/* Left Table: Unit */}
-        <div className="flex flex-col h-full overflow-hidden [&_.overflow-x-auto]:max-h-[300px]">
+        <div className="flex flex-col h-full overflow-hidden [&_.overflow-x-auto]:max-h-75">
           <DataTable
             title="Unit"
             data={units}
@@ -245,7 +245,7 @@ export function AssignComponentModal({ onClose }: { onClose: () => void }) {
         </div>
 
         {/* Right Table: Komponen Tagihan */}
-        <div className="flex flex-col h-full overflow-hidden [&_.overflow-x-auto]:max-h-[300px]">
+        <div className="flex flex-col h-full overflow-hidden [&_.overflow-x-auto]:max-h-75">
           <DataTable
             title="Komponen Tagihan"
             data={components}

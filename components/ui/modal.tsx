@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button, type ButtonVariant } from "./button";
@@ -20,7 +20,15 @@ export function Modal({
   footer?: ReactNode;
   className?: string;
 }) {
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, [open]);
+
   if (!open) return null;
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/40 p-4"
