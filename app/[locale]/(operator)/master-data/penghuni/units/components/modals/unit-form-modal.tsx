@@ -27,7 +27,7 @@ import type { Unit } from "@/types/master-data";
 import { unitSchema, type UnitFormValues } from "@/lib/validations/unit";
 import { useCreateUnit, useUpdateUnit } from "@/hooks/api/use-unit";
 import { useUnitTypes } from "@/hooks/api/use-unit-type";
-import { usePersons } from "@/hooks/api/use-person";
+import { usePersonComboboxOptions } from "@/hooks/api/use-person";
 import { useAuthUser } from "@/hooks/use-auth";
 import { UNIT_STATUS_LABEL, BILL_PAYER_LABEL } from "@/lib/constants";
 import { useMyRts } from "@/hooks/api/use-rt";
@@ -47,18 +47,13 @@ export function UnitFormModal({
   const isAdminWorkspace = authUser?.role === "admin_workspace";
 
   const { data: unitTypesData } = useUnitTypes({ per_page: 200 });
-  const { data: personsData } = usePersons();
   const { data: rtsData } = useMyRts();
   const { data: rwsData } = useRws({ per_page: 500 });
+  const ownerOpts = usePersonComboboxOptions();
+  const residentOpts = usePersonComboboxOptions();
 
   const unitTypes = unitTypesData?.items || [];
-  const persons = personsData?.items || [];
   const rws = useMemo(() => rwsData?.items || [], [rwsData?.items]);
-
-  const personOptions = [
-    { value: "", label: "— pilih —" },
-    ...persons.map((p) => ({ value: p.id, label: p.full_name })),
-  ];
 
   const form = useForm<UnitFormValues>({
     resolver: zodResolver(unitSchema),
@@ -422,7 +417,7 @@ export function UnitFormModal({
               <FormItem className="col-span-2 sm:col-span-1 flex flex-col pt-2 justify-end">
                 <FormLabel>Pemilik</FormLabel>
                 <Combobox
-                  options={personOptions}
+                  options={ownerOpts.items}
                   value={field.value || ""}
                   onSelect={(val) => {
                     field.onChange(val);
@@ -434,6 +429,10 @@ export function UnitFormModal({
                   searchPlaceholder="Cari pemilik..."
                   disabled={status === "vacant"}
                   className="rounded-xl italic bg-transparent border-[#E4DDCB]"
+                  onLoadMore={ownerOpts.loadMore}
+                  hasMore={ownerOpts.hasMore}
+                  isLoading={ownerOpts.isLoading}
+                  onSearchChange={ownerOpts.onSearchChange}
                 />
                 <FormMessage />
               </FormItem>
@@ -447,13 +446,17 @@ export function UnitFormModal({
               <FormItem className="col-span-2 sm:col-span-1 flex flex-col pt-2 justify-end">
                 <FormLabel>Penghuni</FormLabel>
                 <Combobox
-                  options={personOptions}
+                  options={residentOpts.items}
                   value={field.value || ""}
                   onSelect={(val) => field.onChange(val)}
                   placeholder="— pilih penghuni —"
                   searchPlaceholder="Cari penghuni..."
                   disabled={status === "vacant" || ownerIsResident}
                   className="rounded-xl italic bg-transparent border-[#E4DDCB]"
+                  onLoadMore={residentOpts.loadMore}
+                  hasMore={residentOpts.hasMore}
+                  isLoading={residentOpts.isLoading}
+                  onSearchChange={residentOpts.onSearchChange}
                 />
                 <FormMessage />
               </FormItem>
