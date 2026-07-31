@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui";
 import { api, ApiError } from "@/lib/axios";
+import { formatIDR, parseIDR } from "@/lib/utils";
 import { Field, Modal, inputClass } from "@/components/ui/modal";
 import { localToISOWithOffset, isoToLocal } from "@/lib/format";
 import type { Paged } from "@/types";
@@ -193,12 +194,14 @@ export function BookingFormModal({
 
         <Field label="Biaya (Rp) — kosongkan untuk pakai tarif default">
           <input
-            type="number"
-            min={0}
-            step="1000"
+            type="text"
+            inputMode="numeric"
             className={inputClass}
-            value={form.price}
-            onChange={(e) => set("price", e.target.value)}
+            value={form.price === "" ? "" : formatIDR(Number(form.price))}
+            onChange={(e) => {
+              const raw = e.target.value.replace(/[^\d]/g, "");
+              set("price", raw === "" ? "" : raw);
+            }}
           />
         </Field>
         <Field label="URL Bukti Bayar (opsional)">

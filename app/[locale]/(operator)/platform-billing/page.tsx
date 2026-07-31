@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Badge, Button, Card } from "@/components/ui";
 import { api, ApiError } from "@/lib/axios";
 import { idr } from "@/lib/format";
+import { formatIDR, parseIDR } from "@/lib/utils";
 import { Field, inputClass } from "@/components/ui/modal";
 import type { WorkspaceFee, WorkspaceFeePayload } from "@/types/platform-billing";
 
@@ -152,12 +153,11 @@ export default function PlatformBillingPage() {
               hint={`Minimal ${idr(fee.min_platform_fee)}`}
             >
               <input
-                type="number"
-                min={fee.min_platform_fee}
-                step="500"
+                type="text"
+                inputMode="numeric"
                 className={inputClass}
-                value={feeInput}
-                onChange={(e) => setFeeInput(Number(e.target.value))}
+                value={formatIDR(feeInput)}
+                onChange={(e) => setFeeInput(parseIDR(e.target.value) ?? 0)}
               />
             </Field>
           </div>

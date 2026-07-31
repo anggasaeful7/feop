@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import type { UnitType } from "@/types/master-data";
 import { unitTypeSchema, type UnitTypeFormValues } from "@/lib/validations/unit-type";
 import { useCreateUnitType, useUpdateUnitType } from "@/hooks/api/use-unit-type";
+import { formatIDR, parseIDR } from "@/lib/utils";
 
 export function UnitTypeFormModal({
   title,
@@ -170,15 +171,13 @@ export function UnitTypeFormModal({
                 <FormLabel>Tarif Bulanan (Rp)</FormLabel>
                 <FormControl>
                   <Input
-                    type="number"
-                    min={0}
-                    step="1000"
+                    type="text"
+                    inputMode="numeric"
                     placeholder="Tarif Bulanan"
                     {...field}
-                    value={field.value === null ? "" : field.value}
+                    value={field.value === null || field.value === undefined ? "" : formatIDR(field.value)}
                     onChange={e => {
-                      const val = e.target.value;
-                      field.onChange(val === "" ? null : Number(val));
+                      field.onChange(parseIDR(e.target.value));
                     }}
                     className="rounded-xl italic bg-transparent"
                   />

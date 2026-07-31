@@ -24,6 +24,7 @@ import {
   useUpdateSpecificBilling,
 } from "@/hooks/api/use-specific-billing";
 import type { SpecificBilling, SpecificBillingPayload } from "@/types/specific-billing";
+import { formatIDR, parseIDR } from "@/lib/utils";
 
 export function SpecificBillingFormModal({
   title,
@@ -120,9 +121,11 @@ export function SpecificBillingFormModal({
                 <FormLabel>Nominal (Rp)</FormLabel>
                 <FormControl>
                   <Input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     {...field}
-                    onChange={(e) => field.onChange(e.target.value === "" ? 0 : Number(e.target.value))}
+                    value={field.value === null || field.value === undefined ? "" : formatIDR(field.value)}
+                    onChange={(e) => field.onChange(parseIDR(e.target.value) ?? 0)}
                     className="rounded-xl italic bg-transparent"
                   />
                 </FormControl>

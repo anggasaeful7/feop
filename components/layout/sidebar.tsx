@@ -13,6 +13,7 @@ import {
   ChevronDown,
   ChevronRight,
   Database,
+  Wallet,
   type LucideIcon,
 } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth";
@@ -47,6 +48,13 @@ const NAV: NavItem[] = [
       { href: "/penghuni", label: "Billing Penghuni", requiredResource: "resident_bills" },
       { href: "/fasilitas-penghuni", label: "Fasilitas Penghuni", requiredResource: "specific_billings" },
       { href: "/laporan", label: "Upload Laporan", requiredResource: "financial_reports" },
+    ],
+  },
+  {
+    label: "Keuangan",
+    Icon: Wallet,
+    children: [
+      { href: "/payout-logs", label: "Payout Logs", requiredRole: "admin_workspace" },
     ],
   },
   {

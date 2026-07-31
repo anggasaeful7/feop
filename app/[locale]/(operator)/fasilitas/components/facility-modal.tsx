@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui";
 import { ApiError } from "@/lib/axios";
+import { formatIDR, parseIDR } from "@/lib/utils";
 import { Field, Modal, inputClass } from "@/components/ui/modal";
 import type { FacilityPayload, PricingMode } from "@/types/facility";
 
@@ -104,12 +105,11 @@ export function FacilityFormModal({
           label={form.pricing_mode === "monthly" ? "Tarif Bulanan (Rp)" : "Tarif per Sesi (Rp)"}
         >
           <input
-            type="number"
-            min={0}
-            step="1000"
+            type="text"
+            inputMode="numeric"
             className={inputClass}
-            value={form.price}
-            onChange={(e) => set("price", Number(e.target.value))}
+            value={form.price ? formatIDR(form.price) : ""}
+            onChange={(e) => set("price", parseIDR(e.target.value) ?? 0)}
           />
         </Field>
         <div className="col-span-2">
