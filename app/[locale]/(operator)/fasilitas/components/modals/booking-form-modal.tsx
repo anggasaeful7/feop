@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui";
-import { api, ApiError } from "@/lib/axios";
-import { formatIDR, parseIDR } from "@/lib/utils";
+import { api } from "@/lib/axios";
+import { formatIDR } from "@/lib/utils";
 import { Field, Modal, inputClass } from "@/components/ui/modal";
 import { localToISOWithOffset, isoToLocal } from "@/lib/format";
 import type { Paged } from "@/types";
 import type { Unit } from "@/types/master-data";
 import type { BookingPayload, Facility } from "@/types/facility";
+import { useSaveBooking } from "@/hooks/api/use-facility";
 
 type FormState = {
   facility_id: string;
@@ -37,28 +38,26 @@ function payloadToForm(p: BookingPayload): FormState {
 export function BookingFormModal({
   title,
   initial,
+  id,
   facilities,
   onClose,
-  onSubmit,
 }: {
   title: string;
   initial: BookingPayload;
+  id?: string;
   facilities: Facility[];
   onClose: () => void;
-  onSubmit: (p: BookingPayload) => Promise<void>;
 }) {
   const [form, setForm] = useState<FormState>(payloadToForm(initial));
   const [units, setUnits] = useState<Unit[]>([]);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const save = useSaveBooking();
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const out = await api<Paged<Unit>>(
-          "/master/units?per_page=200",
-        );
+        const out = await api<Paged<Unit>>("/master/units?per_page=200");
         if (!cancelled) setUnits(out.items);
       } catch {
         // unit picker is optional; silently ignore failures
@@ -74,7 +73,6 @@ export function BookingFormModal({
 
   async function handleSubmit() {
     setSubmitting(true);
-    setError(null);
     try {
       const payload: BookingPayload = {
         facility_id: form.facility_id,
@@ -86,9 +84,10 @@ export function BookingFormModal({
         price: form.price.trim() === "" ? null : Number(form.price),
         proof_url: form.proof_url.trim() === "" ? null : form.proof_url.trim(),
       };
-      await onSubmit(payload);
-    } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Gagal menyimpan");
+      await save.mutateAsync({ id, payload });
+      onClose();
+    } catch {
+      // error surfaced via toast
     } finally {
       setSubmitting(false);
     }
@@ -132,10 +131,10 @@ export function BookingFormModal({
             className={inputClass}
             value={form.unit_id}
             onChange={(e) => {
-              const id = e.target.value;
-              set("unit_id", id);
-              if (form.requester_name === "" && id !== "") {
-                const u = units.find((x) => x.id === id);
+              const value = e.target.value;
+              set("unit_id", value);
+              if (form.requester_name === "" && value !== "") {
+                const u = units.find((x) => x.id === value);
                 if (u) {
                   const name =
                     u.resident_name ?? u.owner_name ?? `Unit ${u.code}`;
@@ -214,12 +213,6 @@ export function BookingFormModal({
           />
         </Field>
       </div>
-
-      {error && (
-        <div className="mt-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
-          {error}
-        </div>
-      )}
     </Modal>
   );
 }

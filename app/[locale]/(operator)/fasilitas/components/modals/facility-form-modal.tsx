@@ -3,38 +3,51 @@
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui";
-import { ApiError } from "@/lib/axios";
 import { formatIDR, parseIDR } from "@/lib/utils";
 import { Field, Modal, inputClass } from "@/components/ui/modal";
 import type { FacilityPayload, PricingMode } from "@/types/facility";
+import { useSaveFacility, useDeleteFacility } from "@/hooks/api/use-facility";
 
 export function FacilityFormModal({
   title,
   initial,
+  id,
   onClose,
-  onSubmit,
-  onDelete,
 }: {
   title: string;
   initial: FacilityPayload;
+  id?: string;
   onClose: () => void;
-  onSubmit: (p: FacilityPayload) => Promise<void>;
-  onDelete?: () => Promise<void>;
 }) {
   const [form, setForm] = useState<FacilityPayload>(initial);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const save = useSaveFacility();
+  const remove = useDeleteFacility();
 
   const set = <K extends keyof FacilityPayload>(k: K, v: FacilityPayload[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
 
   async function handleSubmit() {
     setSubmitting(true);
-    setError(null);
     try {
-      await onSubmit(form);
-    } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Gagal menyimpan");
+      await save.mutateAsync({ id, payload: form });
+      onClose();
+    } catch {
+      // error surfaced via toast
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!id) return;
+    if (!confirm(`Hapus fasilitas ${form.name}?`)) return;
+    setSubmitting(true);
+    try {
+      await remove.mutateAsync(id);
+      onClose();
+    } catch {
+      // error surfaced via toast
     } finally {
       setSubmitting(false);
     }
@@ -47,21 +60,8 @@ export function FacilityFormModal({
       onClose={onClose}
       footer={
         <>
-          {onDelete && (
-            <Button
-              variant="danger"
-              disabled={submitting}
-              onClick={async () => {
-                setSubmitting(true);
-                try {
-                  await onDelete();
-                } catch (e) {
-                  setError(e instanceof ApiError ? e.message : "Gagal hapus");
-                } finally {
-                  setSubmitting(false);
-                }
-              }}
-            >
+          {id && (
+            <Button variant="danger" disabled={submitting} onClick={handleDelete}>
               <Trash2 size={14} /> Hapus
             </Button>
           )}
@@ -137,11 +137,6 @@ export function FacilityFormModal({
           </label>
         </div>
       </div>
-      {error && (
-        <div className="mt-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
-          {error}
-        </div>
-      )}
     </Modal>
   );
 }
