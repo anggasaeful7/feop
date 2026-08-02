@@ -17,40 +17,73 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { baseColumns } from "./columns";
 import { usePermissions, hasPermission } from "@/hooks/api/use-permissions";
 
-import { useMyRts } from "@/hooks/api/use-rt";
+import { useRts } from "@/hooks/api/use-rt";
+import { useRws } from "@/hooks/api/use-rw";
+import { useAuthUser } from "@/hooks/use-auth";
 
 
 export function UnitsList() {
   const { data: permissions } = usePermissions();
-  const { data: rtsData } = useMyRts();
+  const user = useAuthUser();
+  const isAdminRw = user?.role === "admin_rw";
+  const isAdminRt = user?.role === "admin_rt";
   const canCreate = hasPermission(permissions, "units", "create");
   const canUpdate = hasPermission(permissions, "units", "update");
   const canDelete = hasPermission(permissions, "units", "delete");
 
-  const rtOptions = useMemo(() => {
-    const base = [{ value: "all", label: "Semua RT" }];
-    if (!rtsData) return base;
+  const [rwFilter, setRwFilter] = useState<string>("all");
+  const [rtFilter, setRtFilter] = useState<string>("all");
+
+  const { data: rwsData } = useRws({ per_page: 500 });
+  const rws = useMemo(() => rwsData?.items || [], [rwsData?.items]);
+
+  const selectedRwObj = useMemo(() => {
+    if (rwFilter === "all" || !rwsData?.items) return null;
+    return rwsData.items.find((item) => item.code === rwFilter) || null;
+  }, [rwsData, rwFilter]);
+
+  const { data: rtsData } = useRts({
+    rw_id: isAdminRw ? user?.rw_id : selectedRwObj?.id,
+    per_page: 500,
+  });
+  const rts = useMemo(() => rtsData?.items || [], [rtsData?.items]);
+
+  const rwOptions = useMemo(() => {
+    const base = [{ value: "all", label: "Semua RW" }];
     const seen = new Set<string>();
     const loaded: { value: string; label: string }[] = [];
-    rtsData.forEach((item) => {
-      if (!seen.has(item.code)) {
+    rws.forEach((item) => {
+      if (item.code && !seen.has(item.code)) {
         seen.add(item.code);
-        loaded.push({
-          value: item.code,
-          label: item.name,
-        });
+        loaded.push({ value: item.code, label: item.name || `RW ${item.code}` });
       }
     });
     return [...base, ...loaded];
-  }, [rtsData]);
+  }, [rws]);
+
+  const rtOptions = useMemo(() => {
+    const base = [{ value: "all", label: "Semua RT" }];
+    const seen = new Set<string>();
+    const loaded: { value: string; label: string }[] = [];
+    rts.forEach((item) => {
+      const val = typeof item === "string" ? item : (item?.code || item?.name || item?.id || "");
+      if (val && !seen.has(val)) {
+        seen.add(val);
+        loaded.push({ value: val, label: val.startsWith("RT") ? val : `RT ${val}` });
+      }
+    });
+    return [...base, ...loaded];
+  }, [rts]);
 
   const { search, setSearch, debouncedSearch, page, setPage, perPage } = useDataTableState();
 
-  const [rtFilter, setRtFilter] = useState<string>("all");
+  const effectiveRw = isAdminRt ? user?.rw : isAdminRw ? user?.rw : rwFilter === "all" ? undefined : rwFilter;
+  const effectiveRt = isAdminRt ? user?.rt : rtFilter === "all" ? undefined : rtFilter;
 
   const { data, error, isLoading, refetch } = useUnits({
     search: debouncedSearch,
-    rt: rtFilter === "all" ? undefined : rtFilter,
+    rw: effectiveRw,
+    rt: effectiveRt,
     page,
     per_page: perPage,
   });
@@ -117,26 +150,52 @@ export function UnitsList() {
         onPageChange={setPage}
         actions={
           <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
-            <div className="w-full sm:w-32">
-              <Select
-                value={rtFilter}
-                onValueChange={(val) => {
-                  setRtFilter(val);
-                  setPage(1);
-                }}
-              >
-                <SelectTrigger className="w-full h-8 rounded-full border-zinc-300 text-xs font-semibold px-4 py-1 bg-white text-zinc-700">
-                  <SelectValue placeholder="Semua RT" />
-                </SelectTrigger>
-                <SelectContent>
-                  {rtOptions.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {!isAdminRw && !isAdminRt && (
+              <div className="w-full sm:w-32">
+                <Select
+                  value={rwFilter}
+                  onValueChange={(val) => {
+                    setRwFilter(val);
+                    setRtFilter("all");
+                    setPage(1);
+                  }}
+                >
+                  <SelectTrigger className="w-full h-8 rounded-full border-zinc-300 text-xs font-semibold px-4 py-1 bg-white text-zinc-700">
+                    <SelectValue placeholder="Semua RW" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {rwOptions.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            {!isAdminRt && (
+              <div className="w-full sm:w-32">
+                <Select
+                  disabled={!isAdminRw && rwFilter === "all"}
+                  value={rtFilter}
+                  onValueChange={(val) => {
+                    setRtFilter(val);
+                    setPage(1);
+                  }}
+                >
+                  <SelectTrigger className="w-full h-8 rounded-full border-zinc-300 text-xs font-semibold px-4 py-1 bg-white text-zinc-700 disabled:opacity-40">
+                    <SelectValue placeholder="Semua RT" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {rtOptions.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             {canCreate && (
               <CSVTools
                 resourceLabel="Unit"
