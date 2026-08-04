@@ -42,11 +42,11 @@ export function useCreateSpecificBilling() {
   return useMutation({
     mutationFn: createSpecificBilling,
     onSuccess: () => {
-      toast.success("Berhasil menambahkan tagihan spesifik");
+      toast.success("Berhasil menambahkan tagihan lainnya");
       qc.invalidateQueries({ queryKey: specificBillingQK.lists() });
     },
     onError: (error) => {
-      toast.error(error.message || "Gagal menambahkan tagihan spesifik");
+      toast.error(error.message || "Gagal menambahkan tagihan lainnya");
     },
   });
 }
@@ -56,12 +56,12 @@ export function useUpdateSpecificBilling() {
   return useMutation({
     mutationFn: updateSpecificBilling,
     onSuccess: (_, variables) => {
-      toast.success("Berhasil memperbarui tagihan spesifik");
+      toast.success("Berhasil memperbarui tagihan lainnya");
       qc.invalidateQueries({ queryKey: specificBillingQK.detail(variables.id) });
       qc.invalidateQueries({ queryKey: specificBillingQK.lists() });
     },
     onError: (error) => {
-      toast.error(error.message || "Gagal memperbarui tagihan spesifik");
+      toast.error(error.message || "Gagal memperbarui tagihan lainnya");
     },
   });
 }
@@ -86,11 +86,11 @@ export function useDeleteSpecificBilling() {
   return useMutation({
     mutationFn: deleteSpecificBilling,
     onSuccess: () => {
-      toast.success("Berhasil menghapus tagihan spesifik");
+      toast.success("Berhasil menghapus tagihan lainnya");
       qc.invalidateQueries({ queryKey: specificBillingQK.lists() });
     },
     onError: (error) => {
-      toast.error(error.message || "Gagal menghapus tagihan spesifik");
+      toast.error(error.message || "Gagal menghapus tagihan lainnya");
     },
   });
 }

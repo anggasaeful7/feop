@@ -4,7 +4,6 @@ import Image from "next/image";
 import { Link, usePathname } from "@/i18n/routing";
 import { useState } from "react";
 import {
-  Building2,
   LayoutDashboard,
   LogOut,
   Mail,
@@ -14,6 +13,7 @@ import {
   ChevronRight,
   Database,
   Wallet,
+  CalendarCheck,
   type LucideIcon,
 } from "lucide-react";
 import { useAuthUser } from "@/hooks/use-auth";
@@ -68,10 +68,10 @@ const NAV: NavItem[] = [
     ],
   },
   {
-    label: "Fasilitas & Jadwal",
-    Icon: Building2,
+    label: "Jadwal",
+    Icon: CalendarCheck,
     children: [
-      { href: "/fasilitas", label: "Fasilitas Umum", requiredResource: "facility_bookings" },
+      // { href: "/fasilitas", label: "Fasilitas Umum", requiredResource: "facility_bookings" },
       { href: "/jadwal/keamanan", label: "Jadwal Keamanan", requiredResource: "schedules" },
       { href: "/jadwal/kebersihan", label: "Jadwal Kebersihan", requiredResource: "schedules" },
     ],

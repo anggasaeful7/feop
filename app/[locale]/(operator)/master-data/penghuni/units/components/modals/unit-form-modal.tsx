@@ -5,7 +5,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import DatePicker, { registerLocale } from "react-datepicker";
 import { id } from "date-fns/locale";
-import { Calendar } from "lucide-react";
+import { Calendar, Loader2 } from "lucide-react";
 
 registerLocale("id", id);
 
@@ -23,133 +23,116 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Combobox } from "@/components/ui/combobox";
 import { Checkbox } from "@/components/ui/checkbox";
 
-import type { Unit } from "@/types/master-data";
+import type { RT, RW, Unit, UnitPayload, UnitType } from "@/types/master-data";
 import { unitSchema, type UnitFormValues } from "@/lib/validations/unit";
-import { useCreateUnit, useUpdateUnit } from "@/hooks/api/use-unit";
+import { useCreateUnit, useUpdateUnit, useUnit } from "@/hooks/api/use-unit";
 import { useUnitTypes } from "@/hooks/api/use-unit-type";
 import { usePersonComboboxOptions } from "@/hooks/api/use-person";
-import { useAuthUser } from "@/hooks/use-auth";
 import { UNIT_STATUS_LABEL, BILL_PAYER_LABEL } from "@/lib/constants";
-import { useMyRts } from "@/hooks/api/use-rt";
+import { useRts } from "@/hooks/api/use-rt";
 import { useRws } from "@/hooks/api/use-rw";
 
-export function UnitFormModal({
+const EMPTY_DEFAULTS: UnitFormValues = {
+  unit_type_id: "",
+  code: "",
+  block: "",
+  floor: null,
+  status: "vacant",
+  bill_payer: null,
+  owner_id: "",
+  resident_id: "",
+  rw: "",
+  rw_id: "",
+  rt: "",
+  rt_id: "",
+  occupancy_month: null,
+  occupancy_year: null,
+  notes: "",
+};
+
+function ensureOption(
+  options: { value: string; label: string }[],
+  value: string | null | undefined,
+  fallbackLabel?: string | null
+): { value: string; label: string }[] {
+  if (!value || options.some((o) => o.value === value)) return options;
+  return [{ value, label: fallbackLabel || value }, ...options];
+}
+
+function resolveUnitDefaults(src: Unit, rws: RW[], rtsAll: RT[]): UnitFormValues {
+  const rw = src.rw_id
+    ? rws.find((r) => r.id === src.rw_id)
+    : rws.find((r) => r.code === src.rw);
+  const rt = src.rt_id
+    ? rtsAll.find((r) => r.id === src.rt_id)
+    : rtsAll.find((r) => r.code === src.rt);
+  return {
+    unit_type_id: src.unit_type_id || "",
+    code: src.code || "",
+    block: src.block || "",
+    floor: src.floor ?? null,
+    status: src.status || "vacant",
+    bill_payer: src.bill_payer || null,
+    owner_id: src.owner_id || "",
+    resident_id: src.resident_id || "",
+    rw: rw?.code || src.rw || "",
+    rw_id: rw?.id || src.rw_id || "",
+    rt: rt?.code || src.rt || "",
+    rt_id: rt?.id || src.rt_id || "",
+    occupancy_month: src.occupancy_month ?? null,
+    occupancy_year: src.occupancy_year ?? null,
+    notes: src.notes || "",
+  };
+}
+
+function UnitFormFields({
   title,
   initial,
   onClose,
+  unitTypes,
+  rws,
+  ownerOpts,
+  residentOpts,
+  defaults,
 }: {
   title: string;
   initial?: Unit | null;
   onClose: () => void;
+  unitTypes: UnitType[];
+  rws: RW[];
+  ownerOpts: ReturnType<typeof usePersonComboboxOptions>;
+  residentOpts: ReturnType<typeof usePersonComboboxOptions>;
+  defaults: UnitFormValues;
 }) {
   const isEditing = !!initial;
-  const authUser = useAuthUser();
-  const isAdminWorkspace = authUser?.role === "admin_workspace";
-
-  const { data: unitTypesData } = useUnitTypes({ per_page: 200 });
-  const { data: rtsData } = useMyRts();
-  const { data: rwsData } = useRws({ per_page: 500 });
-  const ownerOpts = usePersonComboboxOptions();
-  const residentOpts = usePersonComboboxOptions();
-
-  const unitTypes = unitTypesData?.items || [];
-  const rws = useMemo(() => rwsData?.items || [], [rwsData?.items]);
 
   const form = useForm<UnitFormValues>({
     resolver: zodResolver(unitSchema),
-    defaultValues: {
-      unit_type_id: initial?.unit_type_id || "",
-      code: initial?.code || "",
-      block: initial?.block || "",
-      floor: initial?.floor ?? null,
-      status: initial?.status || "vacant",
-      bill_payer: initial?.bill_payer || null,
-      owner_id: initial?.owner_id || "",
-      resident_id: initial?.resident_id || "",
-      rt: initial?.rt || "",
-      rw: initial?.rw || authUser?.rw || "",
-      occupancy_month: initial?.occupancy_month || null,
-      occupancy_year: initial?.occupancy_year || null,
-      notes: initial?.notes || "",
-    },
+    defaultValues: defaults,
   });
 
-  const selectedRwCode = useWatch({ control: form.control, name: "rw" });
+  const watched = useWatch({ control: form.control });
+  const status = watched.status;
+  const ownerId = watched.owner_id;
+  const residentId = watched.resident_id;
+  const currentMonth = watched.occupancy_month;
+  const currentYear = watched.occupancy_year;
 
-  const rts = useMemo(() => {
-    const data = rtsData || [];
-    const selectedRwObj = rws.find((r) => r.code === selectedRwCode);
-    const targetRwId = selectedRwObj?.id;
-
-    const seen = new Set<string>();
-    const res: typeof data = [];
-    data.forEach((r) => {
-      const val = typeof r === "string" ? r : r.code;
-      if (selectedRwCode && typeof r !== "string" && r.rw_id !== targetRwId) {
-        return;
-      }
-      if (val && !seen.has(val)) {
-        seen.add(val);
-        res.push(r);
-      }
-    });
-    return res;
-  }, [rtsData, selectedRwCode, rws]);
-
-  const createMut = useCreateUnit();
-  const updateMut = useUpdateUnit(initial?.id || "");
-
-  const isPending = createMut.isPending || updateMut.isPending;
-
-  function onSubmit(values: UnitFormValues) {
-    const payload = {
-      ...values,
-      block: values.block === "" ? null : values.block,
-      bill_payer: values.status === "vacant" ? null : (values.bill_payer || null),
-      owner_id: values.status === "vacant" || values.owner_id === "" ? null : values.owner_id,
-      resident_id: values.status === "vacant" || values.resident_id === "" ? null : values.resident_id,
-      rt: values.rt === "" ? null : values.rt,
-      rw: values.rw === "" ? null : values.rw,
-      occupancy_month: values.occupancy_month === null ? null : values.occupancy_month,
-      occupancy_year: values.occupancy_year === null ? null : values.occupancy_year,
-      notes: values.notes === "" ? null : values.notes,
-    };
-
-    if (isEditing) {
-      updateMut.mutate(payload, {
-        onSuccess: () => {
-          onClose();
-        },
-      });
-    } else {
-      createMut.mutate(payload, {
-        onSuccess: () => {
-          onClose();
-        },
-      });
-    }
-  }
-
-  const status = useWatch({ control: form.control, name: "status" });
-  const ownerId = useWatch({ control: form.control, name: "owner_id" });
-  const residentId = useWatch({ control: form.control, name: "resident_id" });
-  const currentMonth = useWatch({ control: form.control, name: "occupancy_month" });
-  const currentYear = useWatch({ control: form.control, name: "occupancy_year" });
+  const { data: rtsData } = useRts(
+    watched.rw_id ? { rw_id: watched.rw_id, per_page: 500 } : undefined,
+    !!watched.rw_id
+  );
+  const rts = useMemo(() => rtsData?.items || [], [rtsData]);
 
   useEffect(() => {
-    if (selectedRwCode) {
-      const currentRt = form.getValues("rt");
-      if (currentRt) {
-        const isValid = rts.some((r) => {
-          const val = typeof r === "string" ? r : r.code;
-          return val === currentRt;
-        });
-        if (!isValid) {
-          form.setValue("rt", "");
-        }
-      }
+    if (!rts.length) return;
+    const rt = form.getValues("rt");
+    if (rt && !rts.some((r) => r.code === rt)) {
+      form.setValue("rt", "");
+      form.setValue("rt_id", "");
     }
-  }, [selectedRwCode, rts, form]);
+  }, [rts, form]);
+
   const ownerIsResident = !!ownerId && ownerId === residentId;
 
   useEffect(() => {
@@ -160,19 +143,36 @@ export function UnitFormModal({
     }
   }, [status, form]);
 
-  useEffect(() => {
-    if (!initial && authUser?.rw) {
-      form.setValue("rw", authUser.rw);
-    }
-  }, [authUser, initial, form]);
-
   const toggleOwnerIsResident = (checked: boolean) => {
-    if (checked && ownerId) {
-      form.setValue("resident_id", ownerId, { shouldValidate: true });
-    } else {
-      form.setValue("resident_id", "", { shouldValidate: true });
-    }
+    form.setValue("resident_id", checked && ownerId ? ownerId : "", {
+      shouldValidate: true,
+    });
   };
+
+  const createMut = useCreateUnit();
+  const updateMut = useUpdateUnit(initial?.id || "");
+  const mutation = isEditing ? updateMut : createMut;
+  const isPending = mutation.isPending;
+
+  function onSubmit(values: UnitFormValues) {
+    const isVacant = values.status === "vacant";
+    const payload: UnitPayload = {
+      ...values,
+      block: values.block || null,
+      floor: values.floor ?? null,
+      bill_payer: isVacant ? null : values.bill_payer || null,
+      owner_id: isVacant || !values.owner_id ? null : values.owner_id,
+      resident_id: isVacant || !values.resident_id ? null : values.resident_id,
+      rt: values.rt || null,
+      rw: values.rw || null,
+      rt_id: values.rt_id || null,
+      rw_id: values.rw_id || null,
+      occupancy_month: values.occupancy_month ?? null,
+      occupancy_year: values.occupancy_year ?? null,
+      notes: values.notes || null,
+    };
+    mutation.mutate(payload, { onSuccess: onClose });
+  }
 
   return (
     <Modal
@@ -237,49 +237,38 @@ export function UnitFormModal({
             )}
           />
 
-          {isAdminWorkspace ? (
-            <FormField
-              control={form.control}
-              name="rw"
-              render={({ field }) => (
-                <FormItem className="col-span-2 sm:col-span-1">
-                  <FormLabel>RW</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value || undefined}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="rounded-xl italic bg-transparent border-[#E4DDCB]">
-                        <SelectValue placeholder="— pilih RW —" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {rws.map((r) => (
-                        <SelectItem key={r.id} value={r.code}>
-                          {r.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          ) : (
-            <FormField
-              control={form.control}
-              name="rw"
-              render={({ field }) => (
-                <FormItem className="col-span-2 sm:col-span-1">
-                  <FormLabel>RW</FormLabel>
+          <FormField
+            control={form.control}
+            name="rw"
+            render={({ field }) => (
+              <FormItem className="col-span-2 sm:col-span-1">
+                <FormLabel>RW</FormLabel>
+                <Select
+                  onValueChange={(val) => {
+                    field.onChange(val);
+                    form.setValue("rw_id", rws.find((r) => r.code === val)?.id || "", {
+                      shouldValidate: true,
+                    });
+                  }}
+                  value={field.value || undefined}
+                >
                   <FormControl>
-                    <Input readOnly placeholder="002" {...field} value={field.value || ""} className="rounded-xl italic bg-zinc-100/50 text-zinc-500 cursor-not-allowed border-[#E4DDCB]" />
+                    <SelectTrigger className="rounded-xl italic bg-transparent border-[#E4DDCB]">
+                      <SelectValue placeholder="— pilih RW —" />
+                    </SelectTrigger>
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
+                  <SelectContent>
+                    {rws.map((r) => (
+                      <SelectItem key={r.id} value={r.code}>
+                        {r.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <FormField
             control={form.control}
@@ -288,7 +277,12 @@ export function UnitFormModal({
               <FormItem className="col-span-2 sm:col-span-1">
                 <FormLabel>RT</FormLabel>
                 <Select
-                  onValueChange={field.onChange}
+                  onValueChange={(val) => {
+                    field.onChange(val);
+                    form.setValue("rt_id", rts.find((r) => r.code === val)?.id || "", {
+                      shouldValidate: true,
+                    });
+                  }}
                   value={field.value || undefined}
                 >
                   <FormControl>
@@ -297,16 +291,11 @@ export function UnitFormModal({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {rts.map((r) => {
-                      const id = typeof r === "string" ? r : r.id;
-                      const val = typeof r === "string" ? r : r.code;
-                      const label = typeof r === "string" ? `RT ${r}` : r.name;
-                      return (
-                        <SelectItem key={id} value={val}>
-                          {label}
-                        </SelectItem>
-                      );
-                    })}
+                    {rts.map((r) => (
+                      <SelectItem key={r.id} value={r.code}>
+                        {r.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -413,54 +402,68 @@ export function UnitFormModal({
           <FormField
             control={form.control}
             name="owner_id"
-            render={({ field }) => (
-              <FormItem className="col-span-2 sm:col-span-1 flex flex-col pt-2 justify-end">
-                <FormLabel>Pemilik</FormLabel>
-                <Combobox
-                  options={ownerOpts.items}
-                  value={field.value || ""}
-                  onSelect={(val) => {
-                    field.onChange(val);
-                    if (ownerIsResident) {
-                      form.setValue("resident_id", val, { shouldValidate: true });
-                    }
-                  }}
-                  placeholder="— pilih pemilik —"
-                  searchPlaceholder="Cari pemilik..."
-                  disabled={status === "vacant"}
-                  className="rounded-xl italic bg-transparent border-[#E4DDCB]"
-                  onLoadMore={ownerOpts.loadMore}
-                  hasMore={ownerOpts.hasMore}
-                  isLoading={ownerOpts.isLoading}
-                  onSearchChange={ownerOpts.onSearchChange}
-                />
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              const ownerOptions = ensureOption(
+                ownerOpts.items,
+                field.value,
+                initial?.owner_name
+              );
+              return (
+                <FormItem className="col-span-2 sm:col-span-1 flex flex-col pt-2 justify-end">
+                  <FormLabel>Pemilik</FormLabel>
+                  <Combobox
+                    options={ownerOptions}
+                    value={field.value || ""}
+                    onSelect={(val) => {
+                      field.onChange(val);
+                      if (ownerIsResident) {
+                        form.setValue("resident_id", val, { shouldValidate: true });
+                      }
+                    }}
+                    placeholder="— pilih pemilik —"
+                    searchPlaceholder="Cari pemilik..."
+                    disabled={status === "vacant"}
+                    className="rounded-xl italic bg-transparent border-[#E4DDCB]"
+                    onLoadMore={ownerOpts.loadMore}
+                    hasMore={ownerOpts.hasMore}
+                    isLoading={ownerOpts.isLoading}
+                    onSearchChange={ownerOpts.onSearchChange}
+                  />
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
 
           <FormField
             control={form.control}
             name="resident_id"
-            render={({ field }) => (
-              <FormItem className="col-span-2 sm:col-span-1 flex flex-col pt-2 justify-end">
-                <FormLabel>Penghuni</FormLabel>
-                <Combobox
-                  options={residentOpts.items}
-                  value={field.value || ""}
-                  onSelect={(val) => field.onChange(val)}
-                  placeholder="— pilih penghuni —"
-                  searchPlaceholder="Cari penghuni..."
-                  disabled={status === "vacant" || ownerIsResident}
-                  className="rounded-xl italic bg-transparent border-[#E4DDCB]"
-                  onLoadMore={residentOpts.loadMore}
-                  hasMore={residentOpts.hasMore}
-                  isLoading={residentOpts.isLoading}
-                  onSearchChange={residentOpts.onSearchChange}
-                />
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              const residentOptions = ensureOption(
+                residentOpts.items,
+                field.value,
+                initial?.resident_name
+              );
+              return (
+                <FormItem className="col-span-2 sm:col-span-1 flex flex-col pt-2 justify-end">
+                  <FormLabel>Penghuni</FormLabel>
+                  <Combobox
+                    options={residentOptions}
+                    value={field.value || ""}
+                    onSelect={(val) => field.onChange(val)}
+                    placeholder="— pilih penghuni —"
+                    searchPlaceholder="Cari penghuni..."
+                    disabled={status === "vacant" || ownerIsResident}
+                    className="rounded-xl italic bg-transparent border-[#E4DDCB]"
+                    onLoadMore={residentOpts.loadMore}
+                    hasMore={residentOpts.hasMore}
+                    isLoading={residentOpts.isLoading}
+                    onSearchChange={residentOpts.onSearchChange}
+                  />
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
 
           <div className="col-span-2 flex items-center gap-2 text-sm text-zinc-700">
@@ -538,5 +541,87 @@ export function UnitFormModal({
         </form>
       </Form>
     </Modal>
+  );
+}
+
+export function UnitFormModal({
+  title,
+  initial,
+  onClose,
+}: {
+  title: string;
+  initial?: Unit | null;
+  onClose: () => void;
+}) {
+  const isEditing = !!initial;
+
+  const { data: unitTypesData } = useUnitTypes({ per_page: 200 });
+  const { data: rwsData } = useRws({ per_page: 500 });
+  const ownerOpts = usePersonComboboxOptions();
+  const residentOpts = usePersonComboboxOptions();
+  const { data: detail, isFetching } = useUnit(initial?.id || "");
+
+  const src = isEditing ? detail : initial;
+  const { data: rtsData } = useRts(
+    src?.rw_id ? { rw_id: src.rw_id, per_page: 500 } : undefined,
+    !!src?.rw_id
+  );
+
+  const unitTypes = unitTypesData?.items || [];
+  const rws = useMemo(() => rwsData?.items || [], [rwsData]);
+  const rtsAll = useMemo(() => rtsData?.items || [], [rtsData]);
+
+  const defaults = useMemo(() => {
+    if (!src) return EMPTY_DEFAULTS;
+    if (isEditing && src.rw_id && !rws.length) return undefined;
+    if (isEditing && src.rw_id && src.rt_id && !rtsAll.length) return undefined;
+    return resolveUnitDefaults(src, rws, rtsAll);
+  }, [src, isEditing, rws, rtsAll]);
+
+  const loading = isFetching || defaults === undefined;
+
+  const titleNode = (
+    <div className="flex items-center justify-between w-full pr-8">
+      <span className="text-2xl font-bold italic">{title}</span>
+    </div>
+  );
+
+  if (loading) {
+    return (
+      <Modal
+        open
+        title={titleNode}
+        onClose={onClose}
+        footer={
+          <ModalFormFooter
+            isPending={false}
+            onClose={onClose}
+            onSubmit={() => {}}
+            submitLabel="✓ Simpan Unit"
+            submitDisabled
+          />
+        }
+      >
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-6 h-6 animate-spin text-zinc-400" />
+        </div>
+      </Modal>
+    );
+  }
+
+  const resolved = defaults ?? EMPTY_DEFAULTS;
+
+  return (
+    <UnitFormFields
+      key={`${resolved.code}-${resolved.rw}-${resolved.rt}`}
+      title={title}
+      initial={initial}
+      onClose={onClose}
+      unitTypes={unitTypes}
+      rws={rws}
+      ownerOpts={ownerOpts}
+      residentOpts={residentOpts}
+      defaults={resolved}
+    />
   );
 }

@@ -144,6 +144,8 @@ export type Unit = {
   resident_name?: string | null;
   rt?: string | null;
   rw?: string | null;
+  rt_id?: string | null;
+  rw_id?: string | null;
   occupancy_month?: number | null;
   occupancy_year?: number | null;
   notes?: string | null;
@@ -168,6 +170,8 @@ export type UnitPayload = {
   resident_id?: string | null;
   rt?: string | null;
   rw?: string | null;
+  rt_id?: string | null;
+  rw_id?: string | null;
   occupancy_month?: number | null;
   occupancy_year?: number | null;
   notes?: string | null;

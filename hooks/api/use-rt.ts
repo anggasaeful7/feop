@@ -12,10 +12,11 @@ export const rtQK = {
   detail: (id: string) => [...rtQK.details(), id] as const,
 };
 
-export function useRts(params?: RTQueryParams) {
+export function useRts(params?: RTQueryParams, enabled = true) {
   return useQuery({
     queryKey: rtQK.list(params || {}),
     queryFn: () => RtService.getRts(params),
+    enabled,
   });
 }
 
