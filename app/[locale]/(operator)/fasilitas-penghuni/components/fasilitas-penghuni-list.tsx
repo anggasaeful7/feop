@@ -54,7 +54,7 @@ export function FasilitasPenghuniList() {
 
   const selectedRwObj = useMemo(() => {
     if (rwFilter === "all" || !rwsData?.items) return null;
-    return rwsData.items.find((item) => item.code === rwFilter) || null;
+    return rwsData.items.find((item) => item.id === rwFilter || item.code === rwFilter) || null;
   }, [rwsData, rwFilter]);
 
   const { data: rtsData } = useRts({
@@ -68,9 +68,10 @@ export function FasilitasPenghuniList() {
     const seen = new Set<string>();
     const loaded: { value: string; label: string }[] = [];
     rws.forEach((item) => {
-      if (item.code && !seen.has(item.code)) {
-        seen.add(item.code);
-        loaded.push({ value: item.code, label: item.name || `RW ${item.code}` });
+      const val = item.id || item.code;
+      if (val && !seen.has(val)) {
+        seen.add(val);
+        loaded.push({ value: val, label: item.name || `RW ${item.code}` });
       }
     });
     return [...base, ...loaded];
@@ -81,17 +82,19 @@ export function FasilitasPenghuniList() {
     const seen = new Set<string>();
     const loaded: { value: string; label: string }[] = [];
     rts.forEach((item) => {
-      if (!seen.has(item.code)) {
-        seen.add(item.code);
-        loaded.push({ value: item.code, label: item.name });
+      const val = typeof item === "string" ? item : (item?.id || item?.code || "");
+      const lbl = typeof item === "string" ? item : (item?.name || (item?.code ? `RT ${item.code}` : ""));
+      if (val && !seen.has(val)) {
+        seen.add(val);
+        loaded.push({ value: val, label: lbl.startsWith("RT") ? lbl : `RT ${lbl}` });
       }
     });
     return [...base, ...loaded];
   }, [rts]);
 
   const overdue_months = onlyOverdue ? user?.punishment_months : undefined;
-  const effectiveRw = isAdminRt ? user?.rw : isAdminRw ? user?.rw : rwFilter === "all" ? undefined : rwFilter;
-  const effectiveRt = isAdminRt ? user?.rt : rtFilter === "all" ? undefined : rtFilter;
+  const effectiveRwId = isAdminRt ? user?.rw_id : isAdminRw ? user?.rw_id : rwFilter === "all" ? undefined : rwFilter;
+  const effectiveRtId = isAdminRt ? user?.rt_id : rtFilter === "all" ? undefined : rtFilter;
 
   const activeFilterCount = [
     !isAdminRw && !isAdminRt && rwFilter !== "all",
@@ -131,8 +134,8 @@ export function FasilitasPenghuniList() {
       if (urlUnit) exportParams.set("unit", urlUnit);
       if (urlName) exportParams.set("name", urlName);
       if (lateFilter !== "all") exportParams.set("is_late", lateFilter);
-      if (effectiveRw) exportParams.set("rw", effectiveRw);
-      if (effectiveRt) exportParams.set("rt", effectiveRt);
+      if (effectiveRwId) exportParams.set("rw_id", effectiveRwId);
+      if (effectiveRtId) exportParams.set("rt_id", effectiveRtId);
       if (overdue_months) exportParams.set("overdue_months", overdue_months.toString());
 
       await downloadCSV(`/resident-bills/export-overdue.pdf?${exportParams.toString()}`, "penghuni-menunggak.pdf");
@@ -152,8 +155,8 @@ export function FasilitasPenghuniList() {
     unit_id: urlUnitId,
     unit: urlUnit,
     name: urlName,
-    rw: effectiveRw,
-    rt: effectiveRt,
+    rw_id: effectiveRwId,
+    rt_id: effectiveRtId,
     is_late: lateFilter === "all" ? undefined : lateFilter,
     overdue_months,
   });

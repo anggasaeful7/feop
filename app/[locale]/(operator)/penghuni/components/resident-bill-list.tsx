@@ -69,7 +69,7 @@ export function ResidentBillList() {
 
   const selectedRwObj = useMemo(() => {
     if (rwFilter === "all" || !rwsData?.items) return null;
-    return rwsData.items.find((item) => item.code === rwFilter) || null;
+    return rwsData.items.find((item) => item.id === rwFilter || item.code === rwFilter) || null;
   }, [rwsData, rwFilter]);
 
   const { data: rtsData } = useRts({
@@ -83,9 +83,10 @@ export function ResidentBillList() {
     const seen = new Set<string>();
     const loaded: { value: string; label: string }[] = [];
     rws.forEach((item) => {
-      if (item.code && !seen.has(item.code)) {
-        seen.add(item.code);
-        loaded.push({ value: item.code, label: item.name || `RW ${item.code}` });
+      const val = item.id || item.code;
+      if (val && !seen.has(val)) {
+        seen.add(val);
+        loaded.push({ value: val, label: item.name || `RW ${item.code}` });
       }
     });
     return [...base, ...loaded];
@@ -96,18 +97,19 @@ export function ResidentBillList() {
     const seen = new Set<string>();
     const loaded: { value: string; label: string }[] = [];
     rts.forEach((item) => {
-      const val = typeof item === "string" ? item : (item?.code || item?.name || item?.id || "");
+      const val = typeof item === "string" ? item : (item?.id || item?.code || "");
+      const lbl = typeof item === "string" ? item : (item?.name || (item?.code ? `RT ${item.code}` : ""));
       if (val && !seen.has(val)) {
         seen.add(val);
-        loaded.push({ value: val, label: val.startsWith("RT") ? val : `RT ${val}` });
+        loaded.push({ value: val, label: lbl.startsWith("RT") ? lbl : `RT ${lbl}` });
       }
     });
     return [...base, ...loaded];
   }, [rts]);
 
   const overdue_months = onlyOverdue ? user?.punishment_months : undefined;
-  const effectiveRw = isAdminRt ? user?.rw : isAdminRw ? user?.rw : rwFilter === "all" ? undefined : rwFilter;
-  const effectiveRt = isAdminRt ? user?.rt : rtFilter === "all" ? undefined : rtFilter;
+  const effectiveRwId = isAdminRt ? user?.rw_id : isAdminRw ? user?.rw_id : rwFilter === "all" ? undefined : rwFilter;
+  const effectiveRtId = isAdminRt ? user?.rt_id : rtFilter === "all" ? undefined : rtFilter;
 
   // Count active secondary filters for the badge
   const activeFilterCount = [
@@ -174,8 +176,8 @@ export function ResidentBillList() {
       if (year) exportParams.set("year", year.toString());
       if (activeTab !== "all") exportParams.set("status", activeTab);
       if (kind !== "all") exportParams.set("kind", kind);
-      if (effectiveRw) exportParams.set("rw", effectiveRw);
-      if (effectiveRt) exportParams.set("rt", effectiveRt);
+      if (effectiveRwId) exportParams.set("rw_id", effectiveRwId);
+      if (effectiveRtId) exportParams.set("rt_id", effectiveRtId);
       if (debouncedSearch) exportParams.set("search", debouncedSearch);
       if (urlUnitId) exportParams.set("unit_id", urlUnitId);
       if (urlUnit) exportParams.set("unit", urlUnit);
@@ -212,8 +214,8 @@ export function ResidentBillList() {
     year,
     status: activeTab === "all" ? undefined : activeTab,
     kind: kind === "all" ? undefined : kind,
-    rw: effectiveRw,
-    rt: effectiveRt,
+    rw_id: effectiveRwId,
+    rt_id: effectiveRtId,
     search: debouncedSearch,
     page,
     per_page: perPage,
@@ -278,8 +280,8 @@ export function ResidentBillList() {
       <ResidentBillSummary
         year={year}
         kind={kind}
-        rwFilter={effectiveRw ?? "all"}
-        rtFilter={effectiveRt ?? "all"}
+        rwFilter={effectiveRwId ?? "all"}
+        rtFilter={effectiveRtId ?? "all"}
         search={debouncedSearch}
         unitId={urlUnitId}
         unit={urlUnit}

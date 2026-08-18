@@ -55,5 +55,7 @@ export type GetDashboardParams = {
   tahun?: number | string;
   rt?: string;
   rw?: string;
+  rt_id?: string;
+  rw_id?: string;
   overdue_months?: number | string;
 };

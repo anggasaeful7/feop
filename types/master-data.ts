@@ -183,6 +183,8 @@ export type UnitQueryParams = {
   status?: UnitStatus;
   rt?: string;
   rw?: string;
+  rt_id?: string;
+  rw_id?: string;
   page?: number;
   per_page?: number;
   exclude_vacant?: boolean;

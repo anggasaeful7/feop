@@ -78,7 +78,10 @@ export async function getResidentBillsByUnit(params?: ResidentBillByUnitQueryPar
   if (params?.unit_id) qs.set("unit_id", params.unit_id);
   if (params?.unit) qs.set("unit", params.unit);
   if (params?.name) qs.set("name", params.name);
+  if (params?.rw) qs.set("rw", params.rw);
   if (params?.rt) qs.set("rt", params.rt);
+  if (params?.rw_id) qs.set("rw_id", params.rw_id);
+  if (params?.rt_id) qs.set("rt_id", params.rt_id);
   if (params?.sort) qs.set("sort", params.sort);
   if (params?.is_late !== undefined) qs.set("is_late", params.is_late.toString());
 
@@ -95,7 +98,10 @@ export async function getResidentBillSummary(params?: Omit<ResidentBillByUnitQue
   if (params?.unit_id) qs.set("unit_id", params.unit_id);
   if (params?.unit) qs.set("unit", params.unit);
   if (params?.name) qs.set("name", params.name);
+  if (params?.rw) qs.set("rw", params.rw);
   if (params?.rt) qs.set("rt", params.rt);
+  if (params?.rw_id) qs.set("rw_id", params.rw_id);
+  if (params?.rt_id) qs.set("rt_id", params.rt_id);
   if (params?.is_late !== undefined) qs.set("is_late", params.is_late.toString());
 
   const query = qs.toString();

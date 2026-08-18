@@ -78,6 +78,8 @@ export type ResidentBillByUnitQueryParams = {
   is_late?: boolean | string;
   rw?: string;
   rt?: string;
+  rw_id?: string;
+  rt_id?: string;
   sort?: string;
   overdue_months?: number;
 };

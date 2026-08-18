@@ -53,7 +53,7 @@ export const GeneralFacilityService = {
     });
   },
 
-  getGeneralFacilitiesByUnit: async (params?: { page?: number; per_page?: number; search?: string }) => {
+  getGeneralFacilitiesByUnit: async (params?: Record<string, unknown>) => {
     const searchParams = new URLSearchParams();
     if (params) {
       Object.entries(params).forEach(([key, value]) => {

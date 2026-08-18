@@ -33,8 +33,8 @@ export function ResidentBillSummary({
   const { data: summaryData, isLoading: isLoadingSummary } = useResidentBillSummary({
     year,
     kind: kind === "all" ? undefined : kind,
-    rw: rwFilter === "all" ? undefined : rwFilter,
-    rt: rtFilter === "all" ? undefined : rtFilter,
+    rw_id: rwFilter === "all" ? undefined : rwFilter,
+    rt_id: rtFilter === "all" ? undefined : rtFilter,
     search: search || undefined,
     unit_id: unitId,
     unit,

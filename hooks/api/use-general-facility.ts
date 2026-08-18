@@ -22,6 +22,8 @@ export function useGeneralFacilitiesByUnit(params?: {
   is_late?: boolean | string;
   rw?: string;
   rt?: string;
+  rw_id?: string;
+  rt_id?: string;
   overdue_months?: number;
 }) {
   return useQuery({

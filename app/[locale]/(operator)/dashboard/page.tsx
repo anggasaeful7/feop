@@ -31,7 +31,7 @@ export default function DashboardPage() {
 
   const selectedRwObj = useMemo(() => {
     if (rwFilter === "all" || !rwsData?.items) return null;
-    return rwsData.items.find((item) => item.code === rwFilter) || null;
+    return rwsData.items.find((item) => item.id === rwFilter || item.code === rwFilter) || null;
   }, [rwsData, rwFilter]);
 
   const { data: rtsData } = useRts({
@@ -46,12 +46,12 @@ export default function DashboardPage() {
     const seen = new Set<string>();
     const loaded: { value: string; label: string }[] = [];
     rws.forEach((item) => {
-      const val = item.code;
+      const val = item.id || item.code;
       if (val && !seen.has(val)) {
         seen.add(val);
         loaded.push({
           value: val,
-          label: item.name || `RW ${val}`,
+          label: item.name || `RW ${item.code}`,
         });
       }
     });
@@ -63,12 +63,13 @@ export default function DashboardPage() {
     const seen = new Set<string>();
     const loaded: { value: string; label: string }[] = [];
     rts.forEach((item) => {
-      const val = typeof item === "string" ? item : (item?.code || item?.name || item?.id || "");
+      const val = typeof item === "string" ? item : (item?.id || item?.code || "");
+      const lbl = typeof item === "string" ? item : (item?.name || (item?.code ? `RT ${item.code}` : ""));
       if (val && !seen.has(val)) {
         seen.add(val);
         loaded.push({
           value: val,
-          label: val.startsWith("RT") ? val : `RT ${val}`,
+          label: lbl.startsWith("RT") ? lbl : `RT ${lbl}`,
         });
       }
     });
@@ -79,8 +80,8 @@ export default function DashboardPage() {
 
   // Fetch dashboard data
   const { data, isLoading } = useDashboard({
-    rw: (isAdminRw || isAdminRt) ? user?.rw : (rwFilter === "all" ? undefined : rwFilter),
-    rt: isAdminRt ? user?.rt : (rtFilter === "all" ? undefined : rtFilter),
+    rw_id: (isAdminRw || isAdminRt) ? user?.rw_id : (rwFilter === "all" ? undefined : rwFilter),
+    rt_id: isAdminRt ? user?.rt_id : (rtFilter === "all" ? undefined : rtFilter),
     month: dateFilter ? dateFilter.getMonth() + 1 : undefined,
     year: dateFilter ? dateFilter.getFullYear() : undefined,
     overdue_months,

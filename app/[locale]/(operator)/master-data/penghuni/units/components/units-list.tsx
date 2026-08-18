@@ -39,7 +39,7 @@ export function UnitsList() {
 
   const selectedRwObj = useMemo(() => {
     if (rwFilter === "all" || !rwsData?.items) return null;
-    return rwsData.items.find((item) => item.code === rwFilter) || null;
+    return rwsData.items.find((item) => item.id === rwFilter || item.code === rwFilter) || null;
   }, [rwsData, rwFilter]);
 
   const { data: rtsData } = useRts({
@@ -53,9 +53,10 @@ export function UnitsList() {
     const seen = new Set<string>();
     const loaded: { value: string; label: string }[] = [];
     rws.forEach((item) => {
-      if (item.code && !seen.has(item.code)) {
-        seen.add(item.code);
-        loaded.push({ value: item.code, label: item.name || `RW ${item.code}` });
+      const val = item.id || item.code;
+      if (val && !seen.has(val)) {
+        seen.add(val);
+        loaded.push({ value: val, label: item.name || `RW ${item.code}` });
       }
     });
     return [...base, ...loaded];
@@ -66,10 +67,11 @@ export function UnitsList() {
     const seen = new Set<string>();
     const loaded: { value: string; label: string }[] = [];
     rts.forEach((item) => {
-      const val = typeof item === "string" ? item : (item?.code || item?.name || item?.id || "");
+      const val = typeof item === "string" ? item : (item?.id || item?.code || "");
+      const lbl = typeof item === "string" ? item : (item?.name || (item?.code ? `RT ${item.code}` : ""));
       if (val && !seen.has(val)) {
         seen.add(val);
-        loaded.push({ value: val, label: val.startsWith("RT") ? val : `RT ${val}` });
+        loaded.push({ value: val, label: lbl.startsWith("RT") ? lbl : `RT ${lbl}` });
       }
     });
     return [...base, ...loaded];
@@ -77,13 +79,13 @@ export function UnitsList() {
 
   const { search, setSearch, debouncedSearch, page, setPage, perPage } = useDataTableState();
 
-  const effectiveRw = isAdminRt ? user?.rw : isAdminRw ? user?.rw : rwFilter === "all" ? undefined : rwFilter;
-  const effectiveRt = isAdminRt ? user?.rt : rtFilter === "all" ? undefined : rtFilter;
+  const effectiveRwId = isAdminRt ? user?.rw_id : isAdminRw ? user?.rw_id : rwFilter === "all" ? undefined : rwFilter;
+  const effectiveRtId = isAdminRt ? user?.rt_id : rtFilter === "all" ? undefined : rtFilter;
 
   const { data, error, isLoading, refetch } = useUnits({
     search: debouncedSearch,
-    rw: effectiveRw,
-    rt: effectiveRt,
+    rw_id: effectiveRwId,
+    rt_id: effectiveRtId,
     page,
     per_page: perPage,
   });
