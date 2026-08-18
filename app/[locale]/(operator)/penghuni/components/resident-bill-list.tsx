@@ -433,6 +433,8 @@ export function ResidentBillList() {
             </FilterBar>
 
             {/* Export button */}
+            {/* disabled={isExportingRekon} */}
+
             {canExport && (
               <>
                 <Button
@@ -440,7 +442,7 @@ export function ResidentBillList() {
                   size="sm"
                   className="h-9 px-4 text-xs font-bold italic"
                   onClick={handleExportRekon}
-                  disabled={isExportingRekon}
+                  disabled={true}
                 >
                   <Download size={13} className="mr-1" />
                   {isExportingRekon ? "..." : "Rekon"}
