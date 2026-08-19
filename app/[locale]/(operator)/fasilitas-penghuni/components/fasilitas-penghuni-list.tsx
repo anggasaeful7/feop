@@ -128,7 +128,7 @@ export function FasilitasPenghuniList() {
     setIsExportingPdf(true);
     try {
       const exportParams = new URLSearchParams();
-      exportParams.set("min_months", "3");
+      if (debouncedSearch) exportParams.set("search", debouncedSearch);
       if (urlYear) exportParams.set("year", urlYear);
       if (urlUnitId) exportParams.set("unit_id", urlUnitId);
       if (urlUnit) exportParams.set("unit", urlUnit);
